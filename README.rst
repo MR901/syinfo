@@ -5,6 +5,13 @@ sys_info
 A python package to get system and network information.
 
 
+How to install  
+--------------  
+
+.. code-block:: shell
+
+	(root_dir) $ pip install .
+
   
 How to use  
 ----------  
@@ -23,8 +30,8 @@ How to use
 	print(NetworkInfo.print(network_info))
 
 
+.. code-block:: shell
 
-.. note::
 	======================================== System Information ========================================
 	.
 	├── System Information
@@ -633,7 +640,8 @@ How to use
 	None
 
 
-.. note::
+.. code-block:: shell
+
 	└── Network Information
 	    ├── Hostname........ mohit-laptop
 	    ├── Mac Address..... 3c:e9:f7:5c:60:f7
@@ -894,14 +902,4 @@ How to use
 	            ├── is_in_european_union False
 	            ├── metro_code...... 0
 	            └── suspiciousFactors {'isProxy': False, 'isSpam': False, 'isSuspicious': False, 'isTorNode': False}
-
-
-## How to install
-
-```
-(root_dir) $ pip install . 
-```
-
-## Maintainer
-
 

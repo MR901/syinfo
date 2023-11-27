@@ -11,14 +11,17 @@ How to use
   
 .. code-block:: python
 
-  from sys_info.device_info import SysInfo
-  from sys_info.network_info import NetworkInfo
+	from sys_info.utils import Execute, HumanReadable
+	from sys_info.search_network import search_devices_on_network, get_vendor
+	from sys_info.device_info import SysInfo
+	from sys_info.network_info import NetworkInfo
 
-  device_info = SysInfo.get_all()
-  print(SysInfo.print(device_info))
+	device_info = SysInfo.get_all()
+	print(SysInfo.print(device_info))
 
-  network_info = NetworkInfo.get_all()
-  print(NetworkInfo.print(network_info))
+	network_info = NetworkInfo.get_all()
+	print(NetworkInfo.print(network_info))
+
 
 
 .. note::

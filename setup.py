@@ -1,5 +1,6 @@
 import os
 from setuptools import setup, find_packages
+from Cython.Build import cythonize
 
 # Avoids IDE errors, but actual version is read from version.py
 __version__ = None
@@ -12,7 +13,19 @@ with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 install_requires = [
-    # ipywidgets, tabulate, 'py-cpuinfo==5.0.0',
+    "tabulate",
+    "getmac",
+    "GPUtil",
+    "PyYAML",
+    "psutil",
+    "scapy"
+
+    # "tabulate==0.9.0",
+    # "getmac==0.9.4",
+    # "GPUtil==1.4.0",
+    # "PyYAML==6.0.1",
+    # "psutil==5.9.5",
+    # "scapy==2.5.0",
 ]
 
 setup(
@@ -37,6 +50,10 @@ setup(
     install_requires=install_requires,
 
     packages=find_packages(),
+    # ext_modules=cythonize("sys_info/*.pyx"),  #include_path=[...]), # ValueError: 'sys_info/*.pyx' doesn't match any files
+    # Check
+    # - https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html
+    # - https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#multiple-cython-files-in-a-package
 
     include_package_data=True,
 
@@ -55,4 +72,5 @@ setup(
         'Programming Language :: Python :: 3.11',
     ],
     python_requires='>=3.6',
+
 )

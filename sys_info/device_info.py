@@ -8,13 +8,12 @@ import re
 import sys
 import time
 import glob
-import psutil
 import platform
 import uuid
 from datetime import datetime
 
+import psutil
 import getmac
-# import pandas as pd
 from tabulate import tabulate
 import yaml
 import GPUtil

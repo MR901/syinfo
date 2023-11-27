@@ -895,6 +895,9 @@ How to use
 
 ## How to install
 
+```
+(root_dir) $ pip install . 
+```
 
 ## Maintainer
 

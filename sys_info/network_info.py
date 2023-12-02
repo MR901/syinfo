@@ -5,6 +5,7 @@ import platform
 import json
 import re
 import requests
+import contextlib
 
 import yaml
 import psutil
@@ -141,26 +142,27 @@ class NetworkInfo:
         """Get the signal strength of the connected wifi."""
         strength, quality = UNKNOWN, UNKNOWN
         try:
-            # signal = int(Execute.on_shell("iwconfig | grep level | awk '{print $4}'").replace("level=", ""))
-            strength = Execute.on_shell("iwconfig | grep -o 'Signal level=[0-9a-zA-Z -]*'").replace("Signal level=", "")
-            signal = int(strength.split()[0])
+            with contextlib.redirect_stdout(None):
+                # signal = int(Execute.on_shell("iwconfig | grep level | awk '{print $4}'").replace("level=", ""))
+                strength = Execute.on_shell("iwconfig | grep -o 'Signal level=[0-9a-zA-Z -]*'").replace("Signal level=", "")
+                signal = int(strength.split()[0])
 
-            if -30 <= signal:
-                quality = "[7/7] super strong"
-            elif (-30 > signal) and (-50 <= signal):
-                quality = "[6/7] excellent signal"
-            elif (-50 > signal) and (-67 <= signal):
-                quality = "[5/7] good signal"
-            elif (-67 > signal) and (-70 <= signal):
-                quality = "[4/7] reliable signal"
-            elif (-70 > signal) and (-80 <= signal):
-                quality = "[3/7] not strong signal"
-            elif (-80 > signal) and (-90 <= signal):
-                quality = "[2/7] unreliable signal"
-            elif signal < -90:
-                quality = "[1/7] super weak signal"
+                if -30 <= signal:
+                    quality = "[7/7] super strong"
+                elif (-30 > signal) and (-50 <= signal):
+                    quality = "[6/7] excellent signal"
+                elif (-50 > signal) and (-67 <= signal):
+                    quality = "[5/7] good signal"
+                elif (-67 > signal) and (-70 <= signal):
+                    quality = "[4/7] reliable signal"
+                elif (-70 > signal) and (-80 <= signal):
+                    quality = "[3/7] not strong signal"
+                elif (-80 > signal) and (-90 <= signal):
+                    quality = "[2/7] unreliable signal"
+                elif signal < -90:
+                    quality = "[1/7] super weak signal"
 
-            strength = f"{signal} DBm"
+                strength = f"{signal} DBm"
         finally:
             return strength, quality
 
@@ -315,7 +317,6 @@ class NetworkInfo:
                     network_di[interface_name]['nwtmask'] = address.netmask
                     network_di[interface_name]['broadcast_mac'] = address.broadcast
         interfaces_detailed = NetworkInfo.get_device_interfaces()
-
         isp, demographic = NetworkInfo.get_public_ip_info(public_ip)
         wifi_name, wifi_password = NetworkInfo.get_wifiname_and_password()
         wifi_strength, wifi_quality = NetworkInfo.calculate_current_wifi_signal_strength()

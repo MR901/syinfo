@@ -2,19 +2,6 @@
 
 echo ""
 echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
 echo -e "    █████████                        █████               ██████            "
 echo -e "   ███░░░░░███                      ░░███               ███░░███           "
 echo -e "  ░███    ░░░  █████ ████  █████     ░███  ████████    ░███ ░░░   ██████   "
@@ -26,19 +13,6 @@ echo -e "   ░░░░░░░░░    ░░░░░███ ░░░░
 echo -e "                ███ ░███                                                   "
 echo -e "               ░░██████                                                    "
 echo -e "                ░░░░░░                                                     "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
-echo -e "                                                                           "
 echo -e "                                                                           "
 echo ""
 echo ""
@@ -57,7 +31,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 echo " <-> version v$app_version <->"
                 echo " <-> https://github.com/MR901 <->"
 
-                sudo pip3 install getmac GPUtil psutil PyYAML scapy tabulate
+                sudo pip3 install Cython getmac GPUtil psutil PyYAML scapy tabulate
                 sudo python3 setup.py install
 
                 sudo touch $app_path

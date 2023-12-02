@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import argparse
 import textwrap
@@ -14,8 +15,8 @@ class SysInfo:
     @staticmethod
     def print(info, return_msg=False):
         """Print system information."""
-        _msg = SysInfo.print(device_info, True)
-        _msg += NetworkInfo.print(device_info, True)
+        _msg = DeviceInfo.print(info, True)
+        _msg += NetworkInfo.print(info, True)
         if return_msg:
             return _msg
         else:
@@ -24,7 +25,7 @@ class SysInfo:
     @staticmethod
     def get_all(search_period=10, search_device_vendor_too=True):
         """Aggregate all the information related to the device and network."""
-        device_info = SysInfo.get_all()
+        device_info = DeviceInfo.get_all()
         network_info = NetworkInfo.get_all(search_period, search_device_vendor_too)
         device_info['network_info'] = network_info['network_info']
         return device_info
@@ -38,26 +39,26 @@ def contact():
     print("\n-- Gmail: <mohitrajput901@gmail.com> \n-- GitHub: <https://github.com/MR901/>\n")
 
 
-def help():
-    """Help."""
-    if platform.system() == "Linux":
-        PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '\033[95m', '\033[96m', '\033[36m', '\033[94m', '\033[92m', '\033[93m', '\033[91m', '\033[1m', '\033[4m', '\033[0m'
-    else:
-        PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '', '', '', '', '', '', '', '', '', ''
+# def help():
+#     """Help."""
+#     if platform.system() == "Linux":
+#         PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '\033[95m', '\033[96m', '\033[36m', '\033[94m', '\033[92m', '\033[93m', '\033[91m', '\033[1m', '\033[4m', '\033[0m'
+#     else:
+#         PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '', '', '', '', '', '', '', '', '', ''
 
-    print(f"""
-sys_info v0.0.0
+#     print(f"""
+# sys_info v0.0.0
 
-{UNDER}{BOLD}Usage:{END}
-    {RED}>>> {YELLOW}import {CYAN}who_is_on_my_wifi{END} as wiom
+# {UNDER}{BOLD}Usage:{END}
+#     {RED}>>> {YELLOW}import {CYAN}who_is_on_my_wifi{END} as wiom
 
-    {RED}>>> {CYAN}wiom{END}.{GREEN}help(){END} {BOLD}{RED}    # show this help page{END}
-    {RED}>>> {CYAN}wiom{END}.{GREEN}contact(){END} {BOLD}{RED} # show contact{END}
-    {RED}>>> {CYAN}wiom{END}.{GREEN}license(){END} {BOLD}{RED} # show license{END}
+#     {RED}>>> {CYAN}wiom{END}.{GREEN}help(){END} {BOLD}{RED}    # show this help page{END}
+#     {RED}>>> {CYAN}wiom{END}.{GREEN}contact(){END} {BOLD}{RED} # show contact{END}
+#     {RED}>>> {CYAN}wiom{END}.{GREEN}license(){END} {BOLD}{RED} # show license{END}
 
-    {RED}>>> {CYAN}wiom{END}.{GREEN}who(n){END}  {BOLD}{RED}   # scan wifi (n : optional integer, means scanning time in seconds; default 10){END}
-    {RED}>>> {CYAN}wiom{END}.{GREEN}device(){END} {BOLD}{RED}  # see information about your device{END}
-    """)
+#     {RED}>>> {CYAN}wiom{END}.{GREEN}who(n){END}  {BOLD}{RED}   # scan wifi (n : optional integer, means scanning time in seconds; default 10){END}
+#     {RED}>>> {CYAN}wiom{END}.{GREEN}device(){END} {BOLD}{RED}  # see information about your device{END}
+#     """)
 
 
 def main():
@@ -101,19 +102,18 @@ def main():
     )
 
     parser.add_argument(
-        '-j', '--return-json', action="store_true", help='return output as json'
+        '-p', '--disable-print', action="store_true", help='disable printing of the information.'
     )
     parser.add_argument(
-        '-p', '--disable-print', action="store_false", help='disable printing of the information.'
+        '-j', '--return-json', action="store_true", help='return output as json'
     )
+
 
     # Get the args
     args = parser.parse_args()
 
     if args.contact:
         contact()
-    elif args.device:
-        device_()
     elif args.device:
         instance = DeviceInfo
         info = instance.get_all()
@@ -131,14 +131,17 @@ def main():
         )
     elif len(sys.argv) == 1:
         parser.print_help()
+        # help()
     else:
         parser.print_help()
+        # help()
 
+    print(args.disable_print, args.return_json)
     if args.disable_print is False:
         instance.print(info)
 
     if args.return_json:
-        return json.dumps(info)
+        print(json.dumps(info))
 
 
 if __name__ == "__main__":

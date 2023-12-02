@@ -338,7 +338,7 @@ class DeviceInfo:
                     'machine_id': sys_d2['Machine ID'],
                     'boot_id': sys_d2['Boot ID'],
                 },
-                'device': SysInfo._get_device_info(),
+                'device': DeviceInfo._get_device_info(),
                 'python_version': f'{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}',
             },
             'time': {
@@ -373,7 +373,7 @@ class DeviceInfo:
                         for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1))
                     }
                 },
-                'design': SysInfo._get_cpu_info()
+                'design': DeviceInfo._get_cpu_info()
             },
             'gpu_info': gpu_info,
             'memory_info': {
@@ -403,7 +403,7 @@ class DeviceInfo:
                         'total': get_size(swap.total)
                     }
                 },
-                'design': SysInfo._get_ram_info()
+                'design': DeviceInfo._get_ram_info()
             },
             'disk_info': {
                 'disks': disk_di['device'],

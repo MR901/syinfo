@@ -903,3 +903,12 @@ How to use
 	            ├── metro_code...... 0
 	            └── suspiciousFactors {'isProxy': False, 'isSpam': False, 'isSuspicious': False, 'isTorNode': False}
 
+
+
+
+Create Documentation
+--------------------  
+
+from pyfiglet import Figlet
+f = Figlet(font='slant')
+print(f.renderText('text to render'))

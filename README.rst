@@ -20,8 +20,9 @@ How to use
 
 	from sys_info.utils import Execute, HumanReadable
 	from sys_info.search_network import search_devices_on_network, get_vendor
-	from sys_info.device_info import SysInfo
+	from sys_info.device_info import DeviceInfo
 	from sys_info.network_info import NetworkInfo
+	from sys_info.main import SysInfo
 
 	device_info = SysInfo.get_all()
 	print(SysInfo.print(device_info))

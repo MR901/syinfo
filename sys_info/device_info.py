@@ -26,8 +26,8 @@ __version__ = "${VERSION}"
 __email__ = "mohitrajput901@gmail.com"
 
 
-class SysInfo:
-    """Get the System (hardware+software) related information."""
+class DeviceInfo:
+    """Get the Device (hardware+software) related information."""
 
     def _get_device_info():
         """Get device manufacture and device related inforation.
@@ -113,38 +113,38 @@ class SysInfo:
         return d
 
     @staticmethod
-    def print(info):
+    def print(info, return_msg=False):
         """Print system information."""
         _msg = "=" * 40 + " System Information " + "=" * 40
         _msg += '\n.'
-        _msg += '\n├── System Information'
-        _msg += '\n│   ├── {:.<20} {}'.format('Mac Address ', info['sys_info']['mac_address'])
-        _msg += '\n│   ├── {:.<20} {}'.format('System Type', info['sys_info']['chassis'])
-        _msg += '\n│   ├── {:.<20} {}'.format('Static Hostname ', info['sys_info']['static_hostname'])
-        _msg += '\n│   ├── {:.<20} {}'.format('Icon Name ', info['sys_info']['icon_name'])
+        _msg += '\n├── Device Information'
+        _msg += '\n│   ├── {:.<20} {}'.format('Mac Address ', info['dev_info']['mac_address'])
+        _msg += '\n│   ├── {:.<20} {}'.format('System Type', info['dev_info']['chassis'])
+        _msg += '\n│   ├── {:.<20} {}'.format('Static Hostname ', info['dev_info']['static_hostname'])
+        _msg += '\n│   ├── {:.<20} {}'.format('Icon Name ', info['dev_info']['icon_name'])
         _msg += '\n│   ├── Operating Software'
-        for category, val in info['sys_info']['operating_system'].items():
+        for category, val in info['dev_info']['operating_system'].items():
             _msg += '\n│   │   {}── {:.<20} {}'.format(
-                '└' if category == list(info['sys_info']['operating_system'].keys())[-1] else '├',
+                '└' if category == list(info['dev_info']['operating_system'].keys())[-1] else '├',
                 ' '.join(category.split('_')).capitalize(), val
             )
         _msg += '\n│   ├── Device Manufacturer'
-        for category, val in info['sys_info']['device'].items():
+        for category, val in info['dev_info']['device'].items():
             if isinstance(val, dict) is False:
                 _msg += '\n│   │   {}── {:.<16} {}'.format(
-                    '└' if category == list(info['sys_info']['device'].keys())[-1] else '├', category, val
+                    '└' if category == list(info['dev_info']['device'].keys())[-1] else '├', category, val
                 )
                 continue
             _msg += '\n│   │   {}── {}'.format(
-                '└' if category == list(info['sys_info']['device'].keys())[-1] else '├', category
+                '└' if category == list(info['dev_info']['device'].keys())[-1] else '├', category
             )
             for name, sub_val in val.items():
                 _msg += '\n│   │   {}   {}── {:.<16} {}'.format(
-                    ' ' if name == list(info['sys_info']['device'].keys())[-1] else '│',
-                    '└' if name == list(info['sys_info']['device'][category].keys())[-1] else '├',
+                    ' ' if name == list(info['dev_info']['device'].keys())[-1] else '│',
+                    '└' if name == list(info['dev_info']['device'][category].keys())[-1] else '├',
                     name, sub_val
                 )
-        _msg += '\n│   └── {:.<16} {}'.format('Py Version ', info['sys_info']['python_version'])
+        _msg += '\n│   └── {:.<16} {}'.format('Py Version ', info['dev_info']['python_version'])
         _msg += '\n├── Time'
         _msg += '\n│   ├── Current Time'
         _msg += '\n│   │   ├── {:.<16} {}'.format('Timestamp ', info['time']['current']['timestamp'])
@@ -231,14 +231,18 @@ class SysInfo:
 
         # Creating GPU Table
         _msg += "\n" + "=" * 40 + " GPU Details " + "=" * 40
-        print(_msg)
 
         if len(info['gpu_info']) != 0:
             rows = [[k] + [val for kk, val in item.items()] for k, item in info['gpu_info'].items() ]
             header = ['gpu'] + list(info['gpu_info'][list(info['gpu_info'].keys())[0]].keys())
-            print(tabulate(rows, headers=header))
+            _msg += tabulate(rows, headers=header)
         else:
-            print('No GPU Detected')
+            _msg += '\nNo GPU Detected\n'
+
+        if return_msg:
+            return _msg
+        else:
+            print(_msg)
 
     @staticmethod
     def get_all():
@@ -314,7 +318,7 @@ class SysInfo:
 
         # ----------------------------------< Dict Creation >---------------------------------- #
         info = {
-            'sys_info': {
+            'dev_info': {
                 'mac_address': getmac.get_mac_address(),  # mac address of the wifi card
                 # 'mac_address_2': f'{":".join(re.findall("..", "%012x" % uuid.getnode()))}', # https://stackoverflow.com/a/37775731
                 'chassis': sys_d2['Chassis'],

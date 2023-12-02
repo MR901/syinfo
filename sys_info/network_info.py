@@ -186,7 +186,7 @@ class NetworkInfo:
         return network_meta
 
     @staticmethod
-    def print(info):
+    def print(info, return_msg=False):
         """Print network information."""
         # _msg = "=" * 40 + " System Information " + "=" * 40
         # _msg += '\n.'
@@ -288,10 +288,13 @@ class NetworkInfo:
                         '└' if name == list(d['demographic'][category].keys())[-1] else '├',
                         name, sub_val
                     )
-        print(_msg)
+        if return_msg:
+            return _msg
+        else:
+            print(_msg)
 
     @staticmethod
-    def get_all():
+    def get_all(search_period=10, search_device_vendor_too=True):
         """Aggregate all the information related to the network."""
         public_ip = NetworkInfo.check_ipv(NetworkInfo.get_public_ip())
 
@@ -317,7 +320,9 @@ class NetworkInfo:
         wifi_name, wifi_password = NetworkInfo.get_wifiname_and_password()
         wifi_strength, wifi_quality = NetworkInfo.calculate_current_wifi_signal_strength()
         wifi_options = NetworkInfo.get_available_wifi_options()
-        devices_on_network = search_devices_on_network(time=10, seach_device_vendor_too=True)
+        devices_on_network = search_devices_on_network(
+            time=search_period, seach_device_vendor_too=search_device_vendor_too
+        )
 
         # ----------------------------------< Dict Creation >---------------------------------- #
         info = {

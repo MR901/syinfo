@@ -1,68 +1,56 @@
-from scapy.all import *
-from device import *
-from who import *
-
-import subprocess
+import os
+import json
 import argparse
 import textwrap
 import platform
-import inspect
-import socket
-import sys
-import os
 
-if platform.system() == "Windows": import wmi
+from sys_info.device_info import DeviceInfo
+from sys_info.network_info import NetworkInfo
 
-# contact links
+
+class SysInfo:
+    """Get the system (hardware+software+network) related information."""
+
+    @staticmethod
+    def print(info, return_msg=False):
+        """Print system information."""
+        _msg = SysInfo.print(device_info, True)
+        _msg += NetworkInfo.print(device_info, True)
+        if return_msg:
+            return _msg
+        else:
+            print(_msg)
+
+    @staticmethod
+    def get_all(search_period=10, search_device_vendor_too=True):
+        """Aggregate all the information related to the device and network."""
+        device_info = SysInfo.get_all()
+        network_info = NetworkInfo.get_all(search_period, search_device_vendor_too)
+        device_info['network_info'] = network_info['network_info']
+        return device_info
+
+
+# ---------------------------------------------------------------------------- #
+
 
 def contact():
-    print("\n-- Gmail: <tucnakomet@gmail.com> \n-- GitHub: <https://github.com/tucnakomet1/>\n")
+    """contact links."""
+    print("\n-- Gmail: <mohitrajput901@gmail.com> \n-- GitHub: <https://github.com/MR901/>\n")
 
-
-# license link
-
-def license():
-    print("""\nWho-Is-On-My-WiFi is under MIT open-source license...
-    -- See: <https://github.com/tucnakomet1/Python-Who-Is-On-My-WiFi/blob/master/LICENSE.txt>\n""")
-
-
-# run device
-def device_():
-    dev = device()
-	
-    dvc = f"""
-PC Name:            {dev[0]} \nPC Product-Name:    {dev[1]}
-MAC Address:        {dev[2]} \nIP Address (host):  {dev[3]}
-IP Address:         {dev[4]} \nPublic IP:          {dev[5]}
-PC HostName:        {dev[6]} \nWiFi Name:          {dev[7]}
-Gateway:            {dev[8]} \nDNS 1:              {dev[9]}
-DNS 2:              {dev[10]} \nPassword:           {dev[11]}
-Security:           {dev[12]} \nInterface:          {dev[13]}
-Frequency:          {dev[14]} \nSignal:             {dev[15]}
-Channel:            {dev[16]} \n\n
-Country:            {dev[17]} \nRegion:             {dev[18]}
-City:               {dev[19]} \nZip Code:           {dev[20]}
-Latitude:           {dev[21]} \nLongitude:          {dev[22]}
-Map:                {dev[23]} \nISP:                {dev[24]}
-	"""
-    print(dvc)
-
-########
-# help #
-########
 
 def help():
+    """Help."""
     if platform.system() == "Linux":
         PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '\033[95m', '\033[96m', '\033[36m', '\033[94m', '\033[92m', '\033[93m', '\033[91m', '\033[1m', '\033[4m', '\033[0m'
     else:
         PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '', '', '', '', '', '', '', '', '', ''
 
-    print(f""" 
-who-is-on-my-wifi 1.3.4
-    
+    print(f"""
+sys_info v0.0.0
+
 {UNDER}{BOLD}Usage:{END}
     {RED}>>> {YELLOW}import {CYAN}who_is_on_my_wifi{END} as wiom
-        
+
     {RED}>>> {CYAN}wiom{END}.{GREEN}help(){END} {BOLD}{RED}    # show this help page{END}
     {RED}>>> {CYAN}wiom{END}.{GREEN}contact(){END} {BOLD}{RED} # show contact{END}
     {RED}>>> {CYAN}wiom{END}.{GREEN}license(){END} {BOLD}{RED} # show license{END}
@@ -72,57 +60,86 @@ who-is-on-my-wifi 1.3.4
     """)
 
 
-# main function --> argparse
-
 def main():
+    """Main function --> argparse
 
-    """
     Return:
         json or print (default)
         device info
         network info
-
-
     """
+    wrapper = textwrap.TextWrapper(width=50)
+    description = wrapper.fill(text="Sys-Info")
 
-    wrapper = textwrap.TextWrapper(width=70)
-    string = wrapper.fill(text="Who-Is-On-My-WIFi")
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter, description=string,
-                                     epilog=textwrap.dedent("""GitHub: <https://github.com/tucnakomet1>\n"""))
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter, description=description,
+        epilog=textwrap.dedent("""GitHub: <https://github.com/MR901>\n""")
+    )
 
-    parser.add_argument('-v', '--version', action='version',
-                        version='who_is_on_my_wifi 1.3.5', help='show current version')
+    parser.add_argument(
+        '-c', '--contact', action='store_true', help='show contact'
+    )
+    parser.add_argument(
+        '-v', '--version', action='version', version='0.0.0', help='show current version'
+    )
+    parser.add_argument(
+        '-d', '--device', action="store_true", help='show information about your device.'
+    )
+    parser.add_argument(
+        '-n', '--network', action="store_true", help='show information about your network.'
+    )
+    parser.add_argument(
+        '-s', '--system', action="store_true", help='show combined information about your device and network.'
+    )
+    parser.add_argument(
+        "-t", "--time", type=int, metavar="", required=False, default=10,
+        help="int supplement for '-n' or '-s' command (scanning '-t' seconds)"
+    )
+    parser.add_argument(
+        '-o', '--disable-vendor-search', action="store_false",
+        help="supplement for '-n' or '-s' command to stop searching for vendor for the device (mac)"
+    )
 
-    parser.add_argument('-l', '--license', action='store_true',
-                        help='show Open Source License')
+    parser.add_argument(
+        '-j', '--return-json', action="store_true", help='return output as json'
+    )
+    parser.add_argument(
+        '-p', '--disable-print', action="store_false", help='disable printing of the information.'
+    )
 
-    parser.add_argument('-c', '--contact', action='store_true',
-                        help='show contact')
-
-    parser.add_argument('-d', '--device', action="store_true",
-                        help='show information about your device')
-
-    parser.add_argument('-w', '--who', action="store_true",
-                        required=False, help='show who is on your WiFi!')
-
-    parser.add_argument("-t", "--time", type=int,
-                        metavar="", required=False,
-                        default=10, help="int supplement for '-w' command (scanning '-t' seconds)")
-
+    # Get the args
     args = parser.parse_args()
 
-    if args.contact: contact()
-    elif args.license: license()
-    elif args.device: device_()
-    elif args.who:
-        WHO = who(args.time)
-        for j in range(0, len(WHO)):
-            print(f"\n{WHO[j][0]} {WHO[j][1]}\n{WHO[j][2]} {WHO[j][3]}\n{WHO[j][4]} {WHO[j][5]}\n")
-
-
+    if args.contact:
+        contact()
+    elif args.device:
+        device_()
+    elif args.device:
+        instance = DeviceInfo
+        info = instance.get_all()
+    elif args.network:
+        instance = NetworkInfo
+        info = instance.get_all(
+            search_period=args.time,
+            search_device_vendor_too=args.disable_vendor_search
+        )
+    elif args.system:
+        instance = SysInfo
+        info = instance.get_all(
+            search_period=args.time,
+            search_device_vendor_too=args.disable_vendor_search
+        )
     elif len(sys.argv) == 1:
         parser.print_help()
-    else: parser.print_help()
+    else:
+        parser.print_help()
+
+    if args.disable_print is False:
+        instance.print(info)
+
+    if args.return_json:
+        return json.dumps(info)
+
 
 if __name__ == "__main__":
     main()

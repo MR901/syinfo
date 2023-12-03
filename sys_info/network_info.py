@@ -190,10 +190,10 @@ class NetworkInfo:
     @staticmethod
     def print(info, return_msg=False):
         """Print network information."""
-        # _msg = "=" * 40 + " System Information " + "=" * 40
-        # _msg += '\n.'
+        _msg = "=" * 40 + " Network Information " + "=" * 40
+        _msg += '\n.'
         d = info['network_info']
-        _msg = '\n└── Network Information'
+        _msg += '\n└── Network Information'
         _msg += '\n    ├── {:.<16} {}'.format('Hostname', d['hostname'])
         _msg += '\n    ├── {:.<16} {}'.format('Mac Address', d['mac_address'])
         _msg += '\n    ├── {:.<16} {}'.format('Internet Available', d['internet_present'])
@@ -235,7 +235,7 @@ class NetworkInfo:
         # Wifi
         _msg += '\n    ├── Wifi Connection'
         for category, val in d['wifi'].items():
-            if isinstance(val,list) is False:
+            if isinstance(val, list) is False:
                 _msg += '\n    │   ├── {:.<16} {}'.format(' '.join(category.split('_')).capitalize(),  val)
             else:
                 _msg += '\n    │   └── {}'.format(' '.join(category.split('_')).capitalize())

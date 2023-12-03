@@ -74,28 +74,28 @@ setup(
         "Operating System :: POSIX",
         "Operating System :: Unix",
     ],
+    platforms=['any'],  #'any'
     python_requires='>=3.6',
 
-
-    scripts=[
-        "sys_info/constants.py",
-        "sys_info/device_info.py",
-        "sys_info/__init__.py",
-        "sys_info/network_info.py",
-        "sys_info/search_network.py",
-        "sys_info/sys_info.py",
-        "sys_info/utils.py",
-        "sys_info/_version.py",
-    ],
+    # scripts=[
+    #     "sys_info/constants.py",
+    #     "sys_info/device_info.py",
+    #     "sys_info/__init__.py",
+    #     "sys_info/__main__.py",
+    #     "sys_info/network_info.py",
+    #     "sys_info/search_network.py",
+    #     "sys_info/sys_info.py",
+    #     "sys_info/utils.py",
+    #     "sys_info/_version.py",
+    # ],
     py_modules=["sys_info"],
-    package_dir={"": "sys_info"},
-
-    platforms=['any'],  #'any'
+    # package_dir={"": "sys_info"},
 
     entry_points={
         'console_scripts': [
-            'wiom=who_is_on_my_wifi:main',
-            'who-is-on-my-wifi=who_is_on_my_wifi:main',
+            'sys_info=sys_info.__main__:main',
+            # 'wiom=who_is_on_my_wifi:main',
+            # 'who-is-on-my-wifi=who_is_on_my_wifi:main',
         ],
     },
 

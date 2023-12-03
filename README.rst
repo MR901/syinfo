@@ -10,9 +10,10 @@ How to install
 
 .. code-block:: shell
 
-	(root_dir) $ pip install .
 	(root_dir) $ sudo chmod +x install
 	(root_dir) $ sudo ./install
+	(root_dir) $ sudo ./cleanup.sh
+	(root_dir)(virtualenv) $ pip install .
 
   
 How to use  

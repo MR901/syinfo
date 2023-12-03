@@ -42,6 +42,8 @@ def get_vendor(mac_address):
 
 def search_devices_on_network(time=10, seach_device_vendor_too=True):
     """Search the network for the presence of other devices."""
+    debug = False
+
     # Check for the run environment
     plat = platform.system()
     if ((plat == "Linux") or (plat == "Darwin")) and (os.getuid() == 1000):
@@ -68,7 +70,7 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
         connected_devices[current_ip_on_network]['vendor'] = get_vendor(
             interface_mac_address)
 
-    print('Searching Network', end='', flush=True)
+    if debug: print('Searching Network', end='', flush=True)
     while start <= time:
         start += 1
         devided = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=gateway + "/24")
@@ -96,8 +98,8 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
 
             if seach_device_vendor_too:
                 connected_devices[network_ip]['device_vendor'] = get_vendor(mac)
-        print('.', end='', flush=True)
-    print(' complete.')
+        if debug: print('.', end='', flush=True)
+    if debug: print(' complete.')
 
     return connected_devices
 

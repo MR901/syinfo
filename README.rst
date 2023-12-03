@@ -22,7 +22,7 @@ How to use
 	from sys_info.search_network import search_devices_on_network, get_vendor
 	from sys_info.device_info import DeviceInfo
 	from sys_info.network_info import NetworkInfo
-	from sys_info.main import SysInfo
+	from sys_info.sys_info import SysInfo
 
 	device_info = SysInfo.get_all()
 	print(SysInfo.print(device_info))
@@ -922,4 +922,18 @@ f = Figlet(font=fon, direction='auto', justify='auto', width=100)
 # justified: 'auto'
 print('--------------------------------', i, fon)
 print(f.renderText('Sys Info'))
+
+
+
+
+
+
+
+
+
+
+
+sudo dpkg --list | grep who
+sudo dpkg -r who-is-on-my-wifi-v1.3.5
+
 

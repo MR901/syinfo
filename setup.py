@@ -55,22 +55,48 @@ setup(
     # - https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html
     # - https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#multiple-cython-files-in-a-package
 
-    include_package_data=True,
+    include_package_data=False,
 
     classifiers=[
-        'Development Status :: 1 - Alpha',
-        'Intended Audience :: Science/Research',
-        'Intended Audience :: Developers',
+        "Development Status :: 1 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
         # 'License :: OSI Approved :: Apache Software License',
-        'Topic :: Software Development :: Libraries',
-        'Topic :: Scientific/Engineering',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Scientific/Engineering",
+        "Environment :: Console",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
     ],
     python_requires='>=3.6',
+
+
+    scripts=[
+        "sys_info/constants.py",
+        "sys_info/device_info.py",
+        "sys_info/__init__.py",
+        "sys_info/network_info.py",
+        "sys_info/search_network.py",
+        "sys_info/sys_info.py",
+        "sys_info/utils.py",
+        "sys_info/_version.py",
+    ],
+    py_modules=["sys_info"],
+    package_dir={"": "sys_info"},
+
+    platforms=['any'],  #'any'
+
+    entry_points={
+        'console_scripts': [
+            'wiom=who_is_on_my_wifi:main',
+            'who-is-on-my-wifi=who_is_on_my_wifi:main',
+        ],
+    },
 
 )

@@ -13,19 +13,18 @@ with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 install_requires = [
-    "tabulate",
-    "getmac",
-    "GPUtil",
-    "PyYAML",
-    "psutil",
-    "scapy"
-
-    # "tabulate==0.9.0",
-    # "getmac==0.9.4",
-    # "GPUtil==1.4.0",
-    # "PyYAML==6.0.1",
-    # "psutil==5.9.5",
-    # "scapy==2.5.0",
+    # "tabulate",
+    # "getmac",
+    # "GPUtil",
+    # "PyYAML",
+    # "psutil",  # causing error
+    # "scapy"
+    "tabulate==0.9.0",
+    "getmac==0.9.4",
+    "GPUtil==1.4.0",
+    "PyYAML==6.0.1",
+    "psutil==5.9.5",
+    "scapy==2.5.0",
 ]
 
 setup(

@@ -85,7 +85,6 @@ def main():
         '-j', '--return-json', action="store_true", help='return output as json'
     )
 
-
     # Get the args
     args = parser.parse_args()
 

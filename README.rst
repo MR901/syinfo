@@ -11,6 +11,8 @@ How to install
 .. code-block:: shell
 
 	(root_dir) $ pip install .
+	(root_dir) $ sudo chmod +x install
+	(root_dir) $ sudo ./install
 
   
 How to use  

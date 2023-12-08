@@ -1,0 +1,80 @@
+#! /bin/bash
+
+echo ""
+echo -e "                                                                           "
+echo -e "    █████████                        █████               ██████            "
+echo -e "   ███░░░░░███                      ░░███               ███░░███           "
+echo -e "  ░███    ░░░  █████ ████  █████     ░███  ████████    ░███ ░░░   ██████   "
+echo -e "  ░░█████████ ░░███ ░███  ███░░      ░███ ░░███░░███  ███████    ███░░███  "
+echo -e "   ░░░░░░░░███ ░███ ░███ ░░█████     ░███  ░███ ░███ ░░░███░    ░███ ░███  "
+echo -e "   ███    ░███ ░███ ░███  ░░░░███    ░███  ░███ ░███   ░███     ░███ ░███  "
+echo -e "  ░░█████████  ░░███████  ██████     █████ ████ █████  █████    ░░██████   "
+echo -e "   ░░░░░░░░░    ░░░░░███ ░░░░░░     ░░░░░ ░░░░ ░░░░░  ░░░░░      ░░░░░░    "
+echo -e "                ███ ░███                                                   "
+echo -e "               ░░██████                                                    "
+echo -e "                ░░░░░░                                                     "
+echo -e "                                                                           "
+echo ""
+echo ""
+
+app_name="sys_info"
+app_display_name="System Information"
+app_version="0.0.0"
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        read -p "Are you sure you want to install "$app_name"? [Y/n]: " ask0
+        if [[ $ask0 == "Y" || $ask0 == "y" ]]; then
+                echo $pwd
+
+                # ROOT_DIR=$pwd
+                ROOT_DIR="/home/mohit/Documents/_Github/MR901/sys_info"
+                app_path="/usr/share/applications/$app_name.desktop"
+                
+                echo " <-> ROOT_DIR: $ROOT_DIR <->"
+                echo " <-> app_path: $app_path <->"
+                echo " <-> version v$app_version <->"
+                echo " <-> https://github.com/MR901 <->"
+
+                sudo pip3 install Cython getmac GPUtil psutil PyYAML scapy tabulate
+                sudo python3 setup.py install
+
+                sudo touch $app_path
+                sudo echo "[Desktop Entry]" > $app_path
+                sudo echo "Version=$app_version" >> $app_path
+                sudo echo "Type=Application" >> $app_path
+                sudo echo "Name=$app_display_name" >> $app_path
+                sudo echo "Comment=Get device and network information." >> $app_path
+                sudo echo "Exec=$ROOT_DIR/$app_name/main.py" >> $app_path
+                sudo echo "Path=$ROOT_DIR" >> $app_path
+                sudo echo "Icon=$ROOT_DIR/images/logo/logo.png" >> $app_path
+                sudo echo "Terminal=true" >> $app_path
+                sudo echo "StartupNotify=false" >> $app_path
+                sudo echo "Categories=Network;" >> $app_path
+
+                sudo chmod +x $app_path
+                
+                distro=$(which apt)
+                nett=$(which route)
+                if [ comm == "" ]; then
+                        echo -e "\nInstalling net-tools..."
+                        sudo apt-get install net-tools -y
+                fi
+
+                if [ $distro == "" ]; then
+                        if [ comm == "" ]; then
+                                echo "Your distribution is not Debian based."
+                                echo "Please install 'net-tools' otherwise app won't work."
+                        fi
+                        exit
+                fi
+
+                # sudo python3 setup.py install
+                # echo -e "\nYou should restart terminal for better result..."
+                # read -p "Do you want to exit terminal? [Y/n]: " ask
+                # echo ""
+                # if [[ $ask == "Y" || $ask == "y" ]]; then
+                #         kill -9 $PPID
+                # fi
+
+        fi
+fi

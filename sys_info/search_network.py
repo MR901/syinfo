@@ -19,11 +19,11 @@ __email__ = "mohitrajput901@gmail.com"
 
 def get_vendor(mac_address):
     """Search for the vendor based on the mac address."""
-    print('mac address:', mac_address, flush=True)
+    # print('mac address:', mac_address, flush=True)
     try:
         device = urllib.request.urlopen(f"http://api.macvendors.com/{mac_address}")
         device = device.read().decode("utf-8")
-        print('1', device, flush=True)
+        # print('1', device, flush=True)
 
     except:
         # urllib.error.HTTPError: HTTP Error 429: Too Many Requests
@@ -31,17 +31,19 @@ def get_vendor(mac_address):
             device = urllib.request.urlopen(f"https://api.maclookup.app/v2/macs/{mac_address}")
             device = (device.read().decode("utf-8")).split(",")
             device = (device[3]).replace('company":', "").replace('"', "")
-            print('2', device, flush=True)
+            # print('2', device, flush=True)
         except:
             device = UNKNOWN
     if len(device) == 0:
         device = UNKNOWN
-    print('3', device, flush=True)
+    # print('3', device, flush=True)
     return device
 
 
 def search_devices_on_network(time=10, seach_device_vendor_too=True):
     """Search the network for the presence of other devices."""
+    debug = False
+
     # Check for the run environment
     plat = platform.system()
     if ((plat == "Linux") or (plat == "Darwin")) and (os.getuid() == 1000):
@@ -68,7 +70,7 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
         connected_devices[current_ip_on_network]['vendor'] = get_vendor(
             interface_mac_address)
 
-    print('Searching ', end='', flush=True)
+    if debug: print('Searching Network', end='', flush=True)
     while start <= time:
         start += 1
         devided = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=gateway + "/24")
@@ -96,8 +98,8 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
 
             if seach_device_vendor_too:
                 connected_devices[network_ip]['device_vendor'] = get_vendor(mac)
-        print('.', end='', flush=True)
-    print(' complete.')
+        if debug: print('.', end='', flush=True)
+    if debug: print(' complete.')
 
     return connected_devices
 

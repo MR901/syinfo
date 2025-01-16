@@ -11,9 +11,9 @@ import yaml
 import psutil
 import getmac
 
-from sys_info.search_network import search_devices_on_network
-from sys_info.constants import UNKNOWN, NEED_SUDO
-from sys_info.utils import Execute, HumanReadable
+from syinfo.search_network import search_devices_on_network
+from syinfo.constants import UNKNOWN, NEED_SUDO
+from syinfo.utils import Execute, HumanReadable
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

@@ -8,8 +8,8 @@ import urllib.request
 import getmac
 from scapy.all import ARP, Ether, srp
 
-from sys_info.constants import UNKNOWN, NEED_SUDO
-from sys_info.utils import Execute
+from syinfo.constants import UNKNOWN, NEED_SUDO
+from syinfo.utils import Execute
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

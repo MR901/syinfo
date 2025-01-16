@@ -1,4 +1,4 @@
-"""Module containing utils for sys_info."""
+"""Module containing utils for syinfo."""
 
 import os
 import time
@@ -6,7 +6,7 @@ import platform
 import subprocess
 import urllib.request
 
-from sys_info.constants import UNKNOWN, NEED_SUDO
+from syinfo.constants import UNKNOWN, NEED_SUDO
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

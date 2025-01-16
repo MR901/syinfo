@@ -6,9 +6,9 @@ import argparse
 import textwrap
 import platform
 
-from sys_info.device_info import DeviceInfo
-from sys_info.network_info import NetworkInfo
-from sys_info.sys_info import SysInfo
+from syinfo.device_info import DeviceInfo
+from syinfo.network_info import NetworkInfo
+from syinfo.syinfo import SysInfo
 
 
 def contact():
@@ -24,7 +24,7 @@ def contact():
 #         PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDER, END = '', '', '', '', '', '', '', '', '', ''
 
 #     print(f"""
-# sys_info v0.0.0
+# syinfo v0.0.0
 
 # {UNDER}{BOLD}Usage:{END}
 #     {RED}>>> {YELLOW}import {CYAN}who_is_on_my_wifi{END} as wiom
@@ -52,7 +52,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter, description=description,
-        epilog=textwrap.dedent("""GitHub: https://github.com/MR901/sys_info\n""")
+        epilog=textwrap.dedent("""GitHub: https://github.com/MR901/syinfo\n""")
     )
 
     parser.add_argument(

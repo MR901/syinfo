@@ -18,7 +18,7 @@ from tabulate import tabulate
 import yaml
 import GPUtil
 
-from sys_info.utils import Execute, HumanReadable
+from syinfo.utils import Execute, HumanReadable
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

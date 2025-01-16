@@ -1,4 +1,4 @@
-"""Module containing utils for sys_info."""
+"""Module containing utils for syinfo."""
 
 import os
 import time
@@ -6,12 +6,37 @@ import platform
 import subprocess
 import urllib.request
 
-from sys_info.constants import UNKNOWN, NEED_SUDO
+from syinfo.constants import UNKNOWN, NEED_SUDO
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"
 __version__ = "${VERSION}"
 __email__ = "mohitrajput901@gmail.com"
+
+
+def create_highlighted_heading(
+    msg, line_symbol="━", total_length=100, prefix_suffix="#",
+    center_highlighter=(" ◄◂◀ ", " ▶▸► ")
+):
+    """Create a center aligned message with highlighters."""
+    msg = f" {msg} "
+    msg_len = len(msg)
+    msg = "\033[1m" + msg + "\033[0m"
+    start, end = (
+        (f"{prefix_suffix} ", f" {prefix_suffix}")
+        if len(prefix_suffix) > 0 else
+        ("", "")
+    )
+    lt_sep_cnt = (
+        int(total_length / 2) - len(center_highlighter[0]) - len(start) -
+        (int(msg_len / 2) if msg_len % 2 == 0 else int((msg_len + 1) / 2))
+    )
+    rt_sep_cnt = (
+        int(total_length / 2) - len(center_highlighter[1]) - len(end) -
+        (int(msg_len / 2) if msg_len % 2 == 0 else int((msg_len - 1) / 2))
+    )
+    _msg = f"{start}{line_symbol*lt_sep_cnt}{center_highlighter[0]}{msg}{center_highlighter[1]}{line_symbol*rt_sep_cnt}{end}"
+    return _msg
 
 
 class HumanReadable:
@@ -25,20 +50,20 @@ class HumanReadable:
             "32 MB", "32MB", "32mB", "100 kB", "123 B", "123"
         """
         multipliers = {
-            'kb': 1024,
-            'mb': 1024 * 1024,
-            'gb': 1024 * 1024 * 1024,
-            'tb': 1024 * 1024 * 1024 * 1024
-            # 'pb': 1024*1024*1024*1024*1024
-            # 'eb': 1024*1024*1024*1024*1024*1024
-            # 'zb': 1024*1024*1024*1024*1024*1024*1024
+            "kb": 1024,
+            "mb": 1024 * 1024,
+            "gb": 1024 * 1024 * 1024,
+            "tb": 1024 * 1024 * 1024 * 1024
+            # "pb": 1024*1024*1024*1024*1024
+            # "eb": 1024*1024*1024*1024*1024*1024
+            # "zb": 1024*1024*1024*1024*1024*1024*1024
         }
         size = str(size)
         for suffix in multipliers:
             if size.lower().endswith(suffix):
                 return int(size[0:-len(suffix)]) * multipliers[suffix]
         else:
-            if size.lower().endswith('b'):
+            if size.lower().endswith("b"):
                 return int(size[0:-1])
 
         try:
@@ -47,16 +72,16 @@ class HumanReadable:
             raise Exception("Malformed input!")
 
     @staticmethod
-    def bytes_to_size(num_bytes, suffix='B'):
+    def bytes_to_size(num_bytes, suffix="B"):
         """Convert the bytes to a easy readable format.
 
-        for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        for unit in ["","Ki","Mi","Gi","Ti","Pi","Ei","Zi"]:
         """
-        for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
             if abs(num_bytes) < 1024.0:
                 return "%3.1f %s%s" % (num_bytes, unit, suffix)
             num_bytes /= 1024.0
-        return "%.1f %s%s" % (num_bytes, 'Yi', suffix)
+        return "%.1f %s%s" % (num_bytes, "Yi", suffix)
 
     @staticmethod
     def time_spend(time_in_sec):
@@ -77,13 +102,13 @@ class HumanReadable:
         msec = round((time_in_sec % 1) * 1000, 2)
 
         if day != 0:
-            return f'{day} day, {hour} hr, {minutes} min, {seconds} sec, {msec} ms'
+            return f"{day} day, {hour} hr, {minutes} min, {seconds} sec, {msec} ms"
         elif hour != 0:
-            return f'{hour} hr, {minutes} min, {seconds} sec, {msec} ms'
+            return f"{hour} hr, {minutes} min, {seconds} sec, {msec} ms"
         elif minutes != 0:
-            return f'{minutes} min, {seconds} sec, {msec} ms'
+            return f"{minutes} min, {seconds} sec, {msec} ms"
         else:
-            return f'{seconds} sec, {msec} ms'
+            return f"{seconds} sec, {msec} ms"
 
 
 class Execute:
@@ -119,10 +144,10 @@ class Execute:
         finally:
             if (
                 (platform.system() in ["Linux", "Darwin"]) and
-                ('sudo ' in cmd.lower()) and
+                ("sudo " in cmd.lower()) and
                 (os.getuid() == 1000)  # runtime is non-sudo
             ):
-                print(f"Please run the code in sudo for better result with '{cmd}'")
+                print(f"Please run the code in sudo for better result with `{cmd}`")
                 return NEED_SUDO
             return result
 
@@ -134,7 +159,7 @@ class Execute:
             out = urllib.request.urlopen(url)
             response = out.read().decode("utf-8")
             if line_no is not None:
-                response = response.split('\n')
+                response = response.split("\n")
                 if len(response) != 0:
                     result = response[line_no].strip()
             else:

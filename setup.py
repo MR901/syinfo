@@ -20,6 +20,7 @@ install_requires = [
     "PyYAML==6.0.1",
     "psutil==5.9.5",
     "scapy==2.5.0",
+    "py-cpuinfo==9.0.0"  # check which version will be good <todo>
 ]
 
 setup(

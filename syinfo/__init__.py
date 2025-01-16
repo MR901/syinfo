@@ -3,9 +3,9 @@
 from ._version import __version__
 from .device_info import DeviceInfo
 from .network_info import NetworkInfo
-from .syinfo import SysInfo, print_brief_sys_info
-from .utils import Execute, HumanReadable
-from .search_network import search_devices_on_network, get_vendor
+from .sys_info import SysInfo, print_brief_sys_info
+# from .utils import Execute, HumanReadable
+# from .search_network import search_devices_on_network, get_vendor
 
 __all__ = [
     "__version__",

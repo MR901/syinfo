@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, find_packages
-from Cython.Build import cythonize
+# from Cython.Build import cythonize
 
 # Avoids IDE errors, but actual version is read from version.py
 __version__ = None
@@ -87,8 +87,8 @@ setup(
 
     entry_points={
         "console_scripts": [
-            "syinfo=sys_info.__main__:main",
-            "syinfo=sys_info:main",
+            "syinfo=syinfo.__main__:main",
+            # "syinfo=sys_info:main",
         ],
     },
 

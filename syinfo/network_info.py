@@ -27,7 +27,7 @@ class NetworkInfo:
     @staticmethod
     def is_internet_present(timeout=5):
         """Check if the internet connection is available or not."""
-        url = 'http://google.com/'
+        url = "http://google.com/"
         try:
             request = requests.get(url, timeout=timeout)
             return True
@@ -73,32 +73,32 @@ class NetworkInfo:
         url = f"https://ip-api.io/json/{public_ip}"
         response = Execute.api(url, line_no=None)
         info = json.loads(response)
-        isp = info['organisation']
+        isp = info["organisation"]
         demographic = {
-            'country': info['country_name'],
-            'city': info['city'],
-            'region': info['region_name'],
-            'latitude': info['latitude'],
-            'longitude': info['longitude'],
-            'zip_code': info['zip_code'],
-            'maps': "https://www.google.com/maps/search/?api=1&query={},{}".format(
-                info['latitude'], info['longitude']
+            "country": info["country_name"],
+            "city": info["city"],
+            "region": info["region_name"],
+            "latitude": info["latitude"],
+            "longitude": info["longitude"],
+            "zip_code": info["zip_code"],
+            "maps": "https://www.google.com/maps/search/?api=1&query={},{}".format(
+                info["latitude"], info["longitude"]
             ),  # https://stackoverflow.com/a/52943975
             # maps = f"https://www.google.com/maps/@{lat},{lon},14z"
-            'meta': {
-                'country_code': info['country_code'],
-                'region_code': info['region_code'],
-                'countryCapital': info['countryCapital'],
-                'time_zone': info['time_zone'],
-                'callingCode': info['callingCode'],
-                'currency': info['currency'],
-                'currencySymbol': info['currencySymbol'],
-                'emojiFlag': info['emojiFlag'],
-                'flagUrl': info['flagUrl'],
-                'public_ip': info['ip'],
-                'is_in_european_union': info['is_in_european_union'],
-                'metro_code': info['metro_code'],
-                'suspiciousFactors': info['suspiciousFactors'],
+            "meta": {
+                "country_code": info["country_code"],
+                "region_code": info["region_code"],
+                "countryCapital": info["countryCapital"],
+                "time_zone": info["time_zone"],
+                "callingCode": info["callingCode"],
+                "currency": info["currency"],
+                "currencySymbol": info["currencySymbol"],
+                "emojiFlag": info["emojiFlag"],
+                "flagUrl": info["flagUrl"],
+                "public_ip": info["ip"],
+                "is_in_european_union": info["is_in_european_union"],
+                "metro_code": info["metro_code"],
+                "suspiciousFactors": info["suspiciousFactors"],
             }
         }
         return isp, demographic
@@ -111,7 +111,7 @@ class NetworkInfo:
         if len(password) != 0:
             return wifi_name, password
 
-        new_wifi_name = '{} {}'.format(
+        new_wifi_name = "{} {}".format(
             Execute.on_shell("nmcli -s -g 802-11-wireless-security.psk | grep 'connected to' | awk '{print $4}'"),
             Execute.on_shell("nmcli -s -g 802-11-wireless-security.psk | grep 'connected to' | awk '{print $5}'")
         )
@@ -124,17 +124,17 @@ class NetworkInfo:
     @staticmethod
     def get_available_wifi_options():
         """List the available options for the wifi."""
-        cmd = '''
+        cmd = """
         nmcli -f ssid,mode,chan,rate,signal,bars,security,in-use,bssid -t device wifi \
           | sed 's/\\\:/-/g' \
           | jq -sR 'split("\n") | map(split(":")) | map({"network": .[0], "mode": .[1], "channel": .[2], "rate": .[3], "signal": .[4], "bars": .[5], "security": .[6], "in-use": .[7], "mac": .[8]})'
-        '''
+        """
         wifi_options = json.loads(Execute.on_shell(cmd, None))
         wifi_options = [d for d in wifi_options if d["network"]]
         for d in wifi_options:
             d["in-use"] = False if d["in-use"].strip() == 0 else True
             d["mac"] = d["mac"].replace("-", ":")
-            d['signal'] = int(d['signal'])
+            d["signal"] = int(d["signal"])
         return wifi_options
 
     @staticmethod
@@ -173,7 +173,7 @@ class NetworkInfo:
             d = yaml.load(txt, Loader=yaml.FullLoader)
             di = {}
             for k, val in d.items():
-                category, kk = k.split('.')
+                category, kk = k.split(".")
                 category, kk = category.lower(), kk.lower()
                 if category not in di:
                     di[category] = {}
@@ -182,112 +182,112 @@ class NetworkInfo:
 
         network_meta = [
             _convert_to_dict(e)
-            for e in Execute.on_shell("nmcli device show", None).split('\n\n')
+            for e in Execute.on_shell("nmcli device show", None).split("\n\n")
         ]
-        # network_meta = {e['general']['device']:e for e in network_meta}
+        # network_meta = {e["general"]["device"]:e for e in network_meta}
         return network_meta
 
     @staticmethod
     def print(info, return_msg=False):
         """Print network information."""
         _msg = "=" * 40 + " Network Information " + "=" * 40
-        _msg += '\n.'
-        d = info['network_info']
-        _msg += '\n└── Network Information'
-        _msg += '\n    ├── {:.<16} {}'.format('Hostname', d['hostname'])
-        _msg += '\n    ├── {:.<16} {}'.format('Mac Address', d['mac_address'])
-        _msg += '\n    ├── {:.<16} {}'.format('Internet Available', d['internet_present'])
-        _msg += '\n    ├── Data transfer since boot'
-        _msg += '\n    │   ├── Sent'
-        _msg += '\n    │   │   ├── {:.<16} {}'.format('Data (Bytes) ', d['transfer_stats']['sent']['in_bytes'])
-        _msg += '\n    │   │   └── {:.<16} {}'.format('Data ', d['transfer_stats']['sent']['readable'])
-        _msg += '\n    │   └── Received'
-        _msg += '\n    │       ├── {:.<16} {}'.format('Data (Bytes) ', d['transfer_stats']['received']['in_bytes'])
-        _msg += '\n    │       └── {:.<16} {}'.format('Data ', d['transfer_stats']['received']['readable'])
-        _msg += '\n    ├── Physical & Virtual Interfaces'
-        _msg += '\n    │   ├── Brief'
-        for category, val in d['interfaces']['brief'].items():
-            _msg += '\n    │   │   {}── {}'.format(
-                '└' if category == list(d['interfaces']['brief'].keys())[-1] else '├', category
+        _msg += "\n."
+        d = info["network_info"]
+        _msg += "\n└── Network Information"
+        _msg += "\n    ├── {:.<16} {}".format("Hostname", d["hostname"])
+        _msg += "\n    ├── {:.<16} {}".format("Mac Address", d["mac_address"])
+        _msg += "\n    ├── {:.<16} {}".format("Internet Available", d["internet_present"])
+        _msg += "\n    ├── Data transfer since boot"
+        _msg += "\n    │   ├── Sent"
+        _msg += "\n    │   │   ├── {:.<16} {}".format("Data (Bytes) ", d["transfer_stats"]["sent"]["in_bytes"])
+        _msg += "\n    │   │   └── {:.<16} {}".format("Data ", d["transfer_stats"]["sent"]["readable"])
+        _msg += "\n    │   └── Received"
+        _msg += "\n    │       ├── {:.<16} {}".format("Data (Bytes) ", d["transfer_stats"]["received"]["in_bytes"])
+        _msg += "\n    │       └── {:.<16} {}".format("Data ", d["transfer_stats"]["received"]["readable"])
+        _msg += "\n    ├── Physical & Virtual Interfaces"
+        _msg += "\n    │   ├── Brief"
+        for category, val in d["interfaces"]["brief"].items():
+            _msg += "\n    │   │   {}── {}".format(
+                "└" if category == list(d["interfaces"]["brief"].keys())[-1] else "├", category
             )
             for name, sub_val in val.items():
-                _msg += '\n    │   │   {}   {}── {:.<16} {}'.format(
-                    ' ' if category == list(d['interfaces']['brief'].keys())[-1] else '│',
-                    '└' if name == list(d['interfaces']['brief'][category].keys())[-1] else '├',
+                _msg += "\n    │   │   {}   {}── {:.<16} {}".format(
+                    " " if category == list(d["interfaces"]["brief"].keys())[-1] else "│",
+                    "└" if name == list(d["interfaces"]["brief"][category].keys())[-1] else "├",
                     name, sub_val
                 )
-        _msg += '\n    │   └── Detailed'
-        for i, di in enumerate(d['interfaces']['detailed']):
-            _msg += '\n    │       {}──{: >3} ──┐'.format(
-                '└' if (i + 1) == len(d['interfaces']['detailed']) else '├', i)
+        _msg += "\n    │   └── Detailed"
+        for i, di in enumerate(d["interfaces"]["detailed"]):
+            _msg += "\n    │       {}──{: >3} ──┐".format(
+                "└" if (i + 1) == len(d["interfaces"]["detailed"]) else "├", i)
             for category, val in di.items():
-                _msg += '\n    │       {}        {}── {}'.format(
-                    ' ' if (i + 1) == len(d['interfaces']['detailed']) else '│',
-                    '└' if category == list(di.keys())[-1] else '├', category
+                _msg += "\n    │       {}        {}── {}".format(
+                    " " if (i + 1) == len(d["interfaces"]["detailed"]) else "│",
+                    "└" if category == list(di.keys())[-1] else "├", category
                 )
                 for name, sub_val in val.items():
-                    _msg += '\n    │       {}        {}   {}── {:.<16} {}'.format(
-                        ' ' if (i + 1) == len(d['interfaces']['detailed']) else '│',
-                        ' ' if category == list(di.keys())[-1] else '│',
-                        '└' if name == list(di[category].keys())[-1] else '├',
+                    _msg += "\n    │       {}        {}   {}── {:.<16} {}".format(
+                        " " if (i + 1) == len(d["interfaces"]["detailed"]) else "│",
+                        " " if category == list(di.keys())[-1] else "│",
+                        "└" if name == list(di[category].keys())[-1] else "├",
                         name, sub_val
                     )
         # Wifi
-        _msg += '\n    ├── Wifi Connection'
-        for category, val in d['wifi'].items():
+        _msg += "\n    ├── Wifi Connection"
+        for category, val in d["wifi"].items():
             if isinstance(val, list) is False:
-                _msg += '\n    │   ├── {:.<16} {}'.format(' '.join(category.split('_')).capitalize(),  val)
+                _msg += "\n    │   ├── {:.<16} {}".format(" ".join(category.split("_")).capitalize(),  val)
             else:
-                _msg += '\n    │   └── {}'.format(' '.join(category.split('_')).capitalize())
-                for i, di in enumerate(d['wifi']['options']):
-                    _msg += '\n    │       {}──{: >3} ──┐'.format('└' if (i+1) == len(d['wifi']['options']) else '├', i)
+                _msg += "\n    │   └── {}".format(" ".join(category.split("_")).capitalize())
+                for i, di in enumerate(d["wifi"]["options"]):
+                    _msg += "\n    │       {}──{: >3} ──┐".format("└" if (i+1) == len(d["wifi"]["options"]) else "├", i)
                     for category, val in di.items():
-                        _msg += '\n    │       {}        {}── {:.<16} {}'.format(
-                            ' ' if (i + 1) == len(d['wifi']['options']) else '│',
-                            '└' if category == list(di.keys())[-1] else '├',
-                            ' '.join(category.split('_')).capitalize(), val
+                        _msg += "\n    │       {}        {}── {:.<16} {}".format(
+                            " " if (i + 1) == len(d["wifi"]["options"]) else "│",
+                            "└" if category == list(di.keys())[-1] else "├",
+                            " ".join(category.split("_")).capitalize(), val
                         )
         # Devices on the network
-        _msg += '\n    ├── Devices Available on Network'
-        if isinstance(d['devices_on_network'], dict) is False:
-            _msg += '\n    │   └── {:.>32} * {:.<32}'.format(d['devices_on_network'], d['devices_on_network'])
+        _msg += "\n    ├── Devices Available on Network"
+        if isinstance(d["devices_on_network"], dict) is False:
+            _msg += "\n    │   └── {:.>32} * {:.<32}".format(d["devices_on_network"], d["devices_on_network"])
         else:
-            for category, val in d['devices_on_network'].items():
-                _msg += '\n    │   {}── {}'.format(
-                    '└' if category == list(d['devices_on_network'].keys())[-1] else '├', category
+            for category, val in d["devices_on_network"].items():
+                _msg += "\n    │   {}── {}".format(
+                    "└" if category == list(d["devices_on_network"].keys())[-1] else "├", category
                 )
                 for name, sub_val in val.items():
-                    _msg += '\n    │   {}   {}── {:.<16} {}'.format(
-                        # ' ' if (i+1) == len(d['devices_on_network']) else '│',
-                        ' ' if category == list(d['devices_on_network'].keys())[-1] else '│',
-                        '└' if name == list(d['devices_on_network'][category].keys())[-1] else '├',
+                    _msg += "\n    │   {}   {}── {:.<16} {}".format(
+                        # " " if (i+1) == len(d["devices_on_network"]) else "│",
+                        " " if category == list(d["devices_on_network"].keys())[-1] else "│",
+                        "└" if name == list(d["devices_on_network"][category].keys())[-1] else "├",
                         name, sub_val
                     )
         # Current Addresses
-        _msg += '\n    ├── Current Addresses'
-        for category, val in d['current_addresses'].items():
-            _msg += '\n    │   {}── {:.<16} {}'.format(
-                '└' if category == list(d['current_addresses'].keys())[-1] else '├',
-                ' '.join(category.split('_')).capitalize(), val
+        _msg += "\n    ├── Current Addresses"
+        for category, val in d["current_addresses"].items():
+            _msg += "\n    │   {}── {:.<16} {}".format(
+                "└" if category == list(d["current_addresses"].keys())[-1] else "├",
+                " ".join(category.split("_")).capitalize(), val
             )
         # Demographic
-        _msg += '\n    └── Demographic Information'
-        for category, val in d['demographic'].items():
+        _msg += "\n    └── Demographic Information"
+        for category, val in d["demographic"].items():
             if (isinstance(val, dict) is False):
-                _msg += '\n        {}── {:.<16} {}'.format(
-                    '└' if category == list(d['demographic'].keys())[-1] else '├',
-                    ' '.join(category.split('_')).capitalize(), val
+                _msg += "\n        {}── {:.<16} {}".format(
+                    "└" if category == list(d["demographic"].keys())[-1] else "├",
+                    " ".join(category.split("_")).capitalize(), val
                 )
             else:
-                _msg += '\n        {}── {}'.format(
-                    '└' if category == list(d['demographic'].keys())[-1] else '├',
-                    ' '.join(category.split('_')).capitalize()
+                _msg += "\n        {}── {}".format(
+                    "└" if category == list(d["demographic"].keys())[-1] else "├",
+                    " ".join(category.split("_")).capitalize()
                 )
                 for name, sub_val in val.items():
-                    _msg += '\n        {}   {}── {:.<16} {}'.format(
-                        # ' ' if (i+1) == len(d['devices_on_network']) else '│',
-                        ' ' if category == list(d['demographic'].keys())[-1] else '│',
-                        '└' if name == list(d['demographic'][category].keys())[-1] else '├',
+                    _msg += "\n        {}   {}── {:.<16} {}".format(
+                        # " " if (i+1) == len(d["devices_on_network"]) else "│",
+                        " " if category == list(d["demographic"].keys())[-1] else "│",
+                        "└" if name == list(d["demographic"][category].keys())[-1] else "├",
                         name, sub_val
                     )
         if return_msg:
@@ -308,14 +308,14 @@ class NetworkInfo:
         for interface_name, interface_addresses in if_addrs.items():
             network_di[interface_name] = {}
             for address in interface_addresses:
-                if address.family.name == 'AF_INET':
-                    network_di[interface_name]['ip_address'] = address.address
-                    network_di[interface_name]['nwtmask'] = address.netmask
-                    network_di[interface_name]['broadcast_ip'] = address.broadcast
-                elif address.family.name == 'AF_PACKET':
-                    network_di[interface_name]['mac_address'] = address.address
-                    network_di[interface_name]['nwtmask'] = address.netmask
-                    network_di[interface_name]['broadcast_mac'] = address.broadcast
+                if address.family.name == "AF_INET":
+                    network_di[interface_name]["ip_address"] = address.address
+                    network_di[interface_name]["nwtmask"] = address.netmask
+                    network_di[interface_name]["broadcast_ip"] = address.broadcast
+                elif address.family.name == "AF_PACKET":
+                    network_di[interface_name]["mac_address"] = address.address
+                    network_di[interface_name]["nwtmask"] = address.netmask
+                    network_di[interface_name]["broadcast_mac"] = address.broadcast
         interfaces_detailed = NetworkInfo.get_device_interfaces()
         isp, demographic = NetworkInfo.get_public_ip_info(public_ip)
         wifi_name, wifi_password = NetworkInfo.get_wifiname_and_password()
@@ -327,46 +327,46 @@ class NetworkInfo:
 
         # ----------------------------------< Dict Creation >---------------------------------- #
         info = {
-            'network_info': {
-                'hostname': Execute.on_shell("hostname"),
-                'mac_address': getmac.get_mac_address(),
-                'internet_present': NetworkInfo.is_internet_present(),
-                'transfer_stats': {
-                    'sent': {
-                        'in_bytes': net_io.bytes_sent,
-                        'readable': HumanReadable.bytes_to_size(net_io.bytes_sent)
+            "network_info": {
+                "hostname": Execute.on_shell("hostname"),
+                "mac_address": getmac.get_mac_address(),
+                "internet_present": NetworkInfo.is_internet_present(),
+                "transfer_stats": {
+                    "sent": {
+                        "in_bytes": net_io.bytes_sent,
+                        "readable": HumanReadable.bytes_to_size(net_io.bytes_sent)
                     },
-                    'received': {
-                        'in_bytes': net_io.bytes_recv,
-                        'readable': HumanReadable.bytes_to_size(net_io.bytes_recv)
+                    "received": {
+                        "in_bytes": net_io.bytes_recv,
+                        "readable": HumanReadable.bytes_to_size(net_io.bytes_recv)
                     }
                 },
-                'interfaces': {
-                    'brief': network_di,
-                    'detailed': interfaces_detailed
+                "interfaces": {
+                    "brief": network_di,
+                    "detailed": interfaces_detailed
                 },
-                'wifi': {
-                    'wifi_name': wifi_name,
-                    'password': wifi_password,
-                    'security': Execute.on_shell("sudo wpa_cli status | grep 'key_mgmt'").replace("key_mgmt=", ""), ### SUDO ACCESS NEEDED
-                    'interface': Execute.on_shell("route | grep default | awk '{print $8}'"),
-                    'frequency': Execute.on_shell("iwgetid -f | grep -o 'Frequency:[0-9a-zA-Z .]*'").replace("Frequency:", ""),
-                    'channel': Execute.on_shell("iwgetid -c | awk '{print $2}'").replace("Channel:", ""),
-                    'signal_strength': wifi_strength,
-                    'signal_quality': wifi_quality,
-                    'options': wifi_options
+                "wifi": {
+                    "wifi_name": wifi_name,
+                    "password": wifi_password,
+                    "security": Execute.on_shell("sudo wpa_cli status | grep 'key_mgmt'").replace("key_mgmt=", ""), ### SUDO ACCESS NEEDED
+                    "interface": Execute.on_shell("route | grep default | awk '{print $8}'"),
+                    "frequency": Execute.on_shell("iwgetid -f | grep -o 'Frequency:[0-9a-zA-Z .]*'").replace("Frequency:", ""),
+                    "channel": Execute.on_shell("iwgetid -c | awk '{print $2}'").replace("Channel:", ""),
+                    "signal_strength": wifi_strength,
+                    "signal_quality": wifi_quality,
+                    "options": wifi_options
                 },
-                'devices_on_network': devices_on_network,
-                'current_addresses': {
-                    'isp': isp,
-                    'public_ip': public_ip,
-                    'ip_address_host': Execute.on_shell("hostname -i"),
-                    'ip_address': Execute.on_shell("hostname -I"),
-                    'gateway': Execute.on_shell("ip route | grep default | awk '{print $3}'"),
-                    'dns_1': Execute.on_shell("nmcli dev show | grep DNS | awk '{print $2}'", 0),
-                    'dns_2': Execute.on_shell("nmcli dev show | grep DNS | awk '{print $2}'", 1),
+                "devices_on_network": devices_on_network,
+                "current_addresses": {
+                    "isp": isp,
+                    "public_ip": public_ip,
+                    "ip_address_host": Execute.on_shell("hostname -i"),
+                    "ip_address": Execute.on_shell("hostname -I"),
+                    "gateway": Execute.on_shell("ip route | grep default | awk '{print $3}'"),
+                    "dns_1": Execute.on_shell("nmcli dev show | grep DNS | awk '{print $2}'", 0),
+                    "dns_2": Execute.on_shell("nmcli dev show | grep DNS | awk '{print $2}'", 1),
                 },
-                'demographic': demographic,
+                "demographic": demographic,
             }
         }
 

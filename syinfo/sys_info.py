@@ -1,8 +1,10 @@
 # !pip install py-cpuinfo
 import cpuinfo
 import multiprocessing
+import os
 import platform
 import psutil
+import sys
 
 from syinfo.device_info import DeviceInfo
 from syinfo.network_info import NetworkInfo

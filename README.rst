@@ -13,8 +13,8 @@ How to install
 
 	(root_dir) $ sudo chmod +x install
 	(root_dir) $ sudo ./install
-	(root_dir) $ sudo ./cleanup.sh
 	(root_dir)(virtualenv) $ pip install .
+	(root_dir) $ sudo ./cleanup.sh
 
   
 How to use  
@@ -26,7 +26,7 @@ How to use
 	from syinfo.search_network import search_devices_on_network, get_vendor
 	from syinfo.device_info import DeviceInfo
 	from syinfo.network_info import NetworkInfo
-	from syinfo.syinfo import SysInfo
+	from syinfo.sys_info import SysInfo
 
 	device_info = SysInfo.get_all()
 	print(SysInfo.print(device_info))

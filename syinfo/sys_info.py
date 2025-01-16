@@ -17,6 +17,7 @@ class SysInfo:
     def print(info, return_msg=False):
         """Print system information."""
         _msg = DeviceInfo.print(info, True)
+        _msg += "\n\n"
         _msg += NetworkInfo.print(info, True)
         if return_msg:
             return _msg

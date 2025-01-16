@@ -13,7 +13,7 @@ import getmac
 
 from syinfo.search_network import search_devices_on_network
 from syinfo.constants import UNKNOWN, NEED_SUDO
-from syinfo.utils import Execute, HumanReadable
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"
@@ -190,7 +190,10 @@ class NetworkInfo:
     @staticmethod
     def print(info, return_msg=False):
         """Print network information."""
-        _msg = "=" * 40 + " Network Information " + "=" * 40
+        _msg = create_highlighted_heading(
+            "Network Information", line_symbol="━", total_length=100,
+            prefix_suffix="", center_highlighter=(" ", " "),
+        )
         _msg += "\n."
         d = info["network_info"]
         _msg += "\n└── Network Information"

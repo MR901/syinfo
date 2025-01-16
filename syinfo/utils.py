@@ -14,6 +14,31 @@ __version__ = "${VERSION}"
 __email__ = "mohitrajput901@gmail.com"
 
 
+def create_highlighted_heading(
+    msg, line_symbol="━", total_length=100, prefix_suffix="#",
+    center_highlighter=(" ◄◂◀ ", " ▶▸► ")
+):
+    """Create a center aligned message with highlighters."""
+    msg = f" {msg} "
+    msg_len = len(msg)
+    msg = "\033[1m" + msg + "\033[0m"
+    start, end = (
+        (f"{prefix_suffix} ", f" {prefix_suffix}")
+        if len(prefix_suffix) > 0 else
+        ("", "")
+    )
+    lt_sep_cnt = (
+        int(total_length / 2) - len(center_highlighter[0]) - len(start) -
+        (int(msg_len / 2) if msg_len % 2 == 0 else int((msg_len + 1) / 2))
+    )
+    rt_sep_cnt = (
+        int(total_length / 2) - len(center_highlighter[1]) - len(end) -
+        (int(msg_len / 2) if msg_len % 2 == 0 else int((msg_len - 1) / 2))
+    )
+    _msg = f"{start}{line_symbol*lt_sep_cnt}{center_highlighter[0]}{msg}{center_highlighter[1]}{line_symbol*rt_sep_cnt}{end}"
+    return _msg
+
+
 class HumanReadable:
     """Convery some information to the format that is easy to interpret."""
 

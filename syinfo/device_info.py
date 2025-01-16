@@ -18,7 +18,7 @@ from tabulate import tabulate
 import yaml
 import GPUtil
 
-from syinfo.utils import Execute, HumanReadable
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"
@@ -115,7 +115,10 @@ class DeviceInfo:
     @staticmethod
     def print(info, return_msg=False):
         """Print system information."""
-        _msg = "=" * 40 + " System Information " + "=" * 40
+        _msg = create_highlighted_heading(
+            "System Information", line_symbol="━", total_length=100,
+            prefix_suffix="", center_highlighter=(" ", " "),
+        )
         _msg += "\n."
         _msg += "\n├── Device Information"
         _msg += "\n│   ├── {:.<20} {}".format("Mac Address ", info["dev_info"]["mac_address"])
@@ -230,7 +233,10 @@ class DeviceInfo:
         ])
 
         # Creating GPU Table
-        _msg += "\n" + "=" * 40 + " GPU Details " + "=" * 40
+        _msg += "\n" + create_highlighted_heading(
+            "GPU Details", line_symbol="━", total_length=100,
+            prefix_suffix="", center_highlighter=(" ", " "),
+        ) + "\n"
 
         if len(info["gpu_info"]) != 0:
             rows = [[k] + [val for kk, val in item.items()] for k, item in info["gpu_info"].items() ]

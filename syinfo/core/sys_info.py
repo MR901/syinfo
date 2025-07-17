@@ -57,7 +57,7 @@ def print_brief_sys_info():
     _msg += "\n┃          {0:26s}  {1:70s}┃".format("\033[1mRAM\033[0m", "")
     _msg += "\n┃                  {0:26s}: {1:62s}┃".format("\033[1mTotal\033[0m", total_phy_mem)
     _msg += "\n┃                  {0:26s}: {1:62s}┃".format("\033[1mAvailable\033[0m", total_phy_avail)
-    _msg += "\n┃          {0:26s}  {1:70s}┃".format("\033[1mWap Memory\033[0m", "")
+    _msg += "\n┃          {0:26s}  {1:70s}┃".format("\033[1mSwap Memory\033[0m", "")
     _msg += "\n┃                  {0:26s}: {1:62s}┃".format("\033[1mTotal\033[0m", total_swp_mem)
     _msg += "\n┃                  {0:26s}: {1:62s}┃".format("\033[1mFree\033[0m", total_swp_free)
     _msg += f"\n■{'━'*100:100s}■"

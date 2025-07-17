@@ -3,15 +3,6 @@ Command Line Interface
 
 SyInfo provides a comprehensive command-line interface with both legacy and new subcommand structures.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   legacy_commands
-   subcommands
-   options
-   examples
-
 Overview
 --------
 
@@ -118,13 +109,9 @@ Examples
 
 .. code-block:: bash
 
-   # Start monitoring with 30-second interval
-   syinfo monitor --start --interval 30
-   
-   # Start monitoring for 1 hour
-   syinfo monitor --start --interval 60 --duration 3600
-   
-   # Check monitoring status
+   # Start monitoring with 30second interval
+   syinfo monitor --start --interval30# Start monitoring for 1 hour
+   syinfo monitor --start --interval 60duration 3600# Check monitoring status
    syinfo monitor --status
    
    # Collect one-time snapshot
@@ -199,76 +186,54 @@ Advanced Usage
    syinfo info --device --format csv
    
    # Verbose output
-   syinfo monitor --start --verbose
+   syinfo info --system --verbose
 
-**Filtering and Options**
+**Monitoring with Custom Settings**
 
 .. code-block:: bash
 
-   # Monitor specific processes
-   syinfo monitor --start --process-filter "python|node"
+   # Start monitoring with custom interval
+   syinfo monitor --start --interval 30--output-dir ./monitoring_data
    
-   # Monitor specific metrics
+   # Monitor specific metrics only
    syinfo monitor --start --metrics cpu,memory,disk
    
-   # Custom output directory
-   syinfo monitor --start --output-dir /opt/monitoring
-
-**Integration with Scripts**
-
-.. code-block:: bash
-
-   # Check if monitoring is running
-   if syinfo monitor --status --quiet; then
-       echo "Monitoring is active"
-   else
-       echo "Starting monitoring..."
-       syinfo monitor --start
-   fi
-   
-   # Collect data and analyze
-   syinfo monitor --collect --output current_data.csv
-   syinfo analyze --trends --data-file current_data.csv
-
-Error Handling
+   # Start monitoring with alerts
+   syinfo monitor --start --alerts --threshold 80dling
 -------------
 
-**Common Error Codes**
-
-* `0` - Success
-* `1` - General error
-* `2` - Configuration error
-* `3` - Permission error
-* `4` - Dependency error
-
-**Error Messages**
+**Common Error Scenarios**
 
 .. code-block:: bash
 
-   # Check for errors
-   syinfo monitor --start 2>&1 | grep -i error
+   # Permission denied
+   sudo syinfo info --system
    
-   # Verbose error output
-   syinfo monitor --start --verbose 2>&1
+   # Configuration file not found
+   syinfo monitor --start --config /path/to/config.yaml
+   
+   # Invalid format
+   syinfo info --device --format invalid_format
+   
+   # Output directory doesnt exist
+   syinfo monitor --start --output-dir /path/to/output
 
-**Troubleshooting**
+**Debugging**
 
 .. code-block:: bash
 
-   # Check version and dependencies
-   syinfo --version
-   python -c "import syinfo; print(syinfo.MONITORING_AVAILABLE)"
+   # Enable debug mode
+   syinfo info --device --debug
    
-   # Test basic functionality
-   syinfo info --device
+   # Show detailed error messages
+   syinfo monitor --start --verbose --debug
    
    # Check configuration
-   syinfo setup --create-config --dry-run
+   syinfo setup --validate-config
 
 Next Steps
----------
+----------
 
-* **Legacy Commands**: :doc:`legacy_commands`
-* **Subcommands**: :doc:`subcommands`
-* **Options**: :doc:`options`
-* **Examples**: :doc:`examples` 
+* :doc:`../user_guide/getting_started` - Get started with SyInfo
+* :doc:`../api/index` - Learn about the API
+* :doc:`../installation` - Installation guide 

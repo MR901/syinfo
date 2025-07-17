@@ -14,13 +14,11 @@ SyInfo is a comprehensive Python library and command-line tool for system inform
    :maxdepth: 2
    :caption: Contents:
 
+   installation
    user_guide/index
    api/index
    cli/index
    developer/index
-   installation
-   examples/index
-   changelog
 
 Quick Start
 ----------
@@ -29,13 +27,21 @@ Quick Start
 
 .. code-block:: bash
 
+   # Complete installation (recommended)
+   git clone https://github.com/MR901/syinfo.git
+   cd syinfo
+   sudo chmod +x install
+   sudo ./install
+   pip install .
+   
+   # Basic installation
    pip install syinfo
 
 **Basic Usage**
 
 .. code-block:: python
 
-   from syinfo import DeviceInfo, NetworkInfo, SysInfo
+   from syinfo.core import DeviceInfo, NetworkInfo, SysInfo
    
    # Get device information
    device_info = DeviceInfo.get_all()
@@ -50,20 +56,24 @@ Quick Start
 
 .. code-block:: bash
 
-   # Legacy commands (backward compatible)
-   syinfo -d                    # Device info
-   syinfo -n                    # Network info
-   syinfo -s                    # System info
+   # Get hardware information
+   python -m syinfo info device
    
-   # New subcommand structure
-   syinfo info --device         # Device info
-   syinfo monitor --start       # Start monitoring
-   syinfo analyze --trends      # Analyze data trends
+   # Get network information
+   python -m syinfo info network
+   
+   # Get complete system information
+   python -m syinfo info system
+   
+   # Start monitoring
+   python -m syinfo monitor start
 
 Key Features
 -----------
 
-* **System Information**: Comprehensive device, network, and system information
+* **Hardware Information**: Detailed CPU, memory, disk, GPU, and device manufacturer information
+* **Network Information**: Network interfaces, WiFi details, connected devices, and network statistics
+* **Software Information**: Operating system details, kernel information, and software configuration
 * **Real-time Monitoring**: CPU, memory, disk, network, and process monitoring
 * **Data Analysis**: Trend analysis and anomaly detection
 * **Visualization**: Charts and dashboards for system metrics
@@ -95,10 +105,10 @@ System Requirements
 ------------------
 
 * **Python**: 3.7 or higher
-* **Operating System**: Linux, macOS, Windows
+* **Operating System**: Linux (primary), macOS, Windows
 * **Dependencies**: 
-  - Core: No additional dependencies
-  - Monitoring: psutil, matplotlib, pandas, pyyaml
+  - Core: psutil, pyyaml
+  - Full: Cython, getmac, GPUtil, scapy, tabulate, requests
 
 Getting Help
 -----------

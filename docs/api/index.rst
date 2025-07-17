@@ -3,15 +3,6 @@ API Reference
 
 This section provides comprehensive API documentation for SyInfo.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   core
-   monitoring
-   analysis
-   cli_commands
-
 Overview
 --------
 
@@ -67,7 +58,7 @@ The core API provides system information gathering capabilities.
    SysInfo.print(system_info)
 
 Monitoring API
--------------
+--------------
 
 The monitoring API provides real-time system monitoring capabilities.
 
@@ -89,7 +80,7 @@ The monitoring API provides real-time system monitoring capabilities.
    api.stop_monitoring()
 
 Analysis API
------------
+------------
 
 The analysis API provides data analysis and trend detection.
 
@@ -108,7 +99,7 @@ The analysis API provides data analysis and trend detection.
    anomalies = api.detect_anomalies("data.csv")
 
 CLI Commands
------------
+------------
 
 The CLI provides command-line access to all features.
 
@@ -129,7 +120,7 @@ The CLI provides command-line access to all features.
    syinfo analyze --trends      # Analyze trends
 
 Quick Reference
---------------
+---------------
 
 **Core Classes**
 
@@ -242,10 +233,19 @@ Examples
    config.set("monitoring.interval", 30)
    config.save()
 
-Next Steps
----------
+**CLI Integration**
 
-* **Core API**: :doc:`core`
-* **Monitoring API**: :doc:`monitoring`
-* **Analysis API**: :doc:`analysis`
-* **CLI Commands**: :doc:`cli_commands` 
+.. code-block:: python
+
+   from syinfo.cli import SyInfoCLI
+   
+   cli = SyInfoCLI()
+   
+   # Run CLI commands programmatically
+   result = cli.run(['info', 'device'])
+   print(result)
+
+Next Steps
+----------
+
+* :doc:`../user_guide/getting_started`

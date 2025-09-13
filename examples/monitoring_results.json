@@ -1,0 +1,79 @@
+{
+  "total_points": 4,
+  "data_points": [
+    {
+      "timestamp": "2025-09-14T03:01:50.807654",
+      "cpu_percent": 8.3,
+      "memory_percent": 69.5,
+      "disk_percent": 82.9,
+      "network_io": {
+        "bytes_sent": 3331460570,
+        "bytes_recv": 4491191936,
+        "packets_sent": 3657812,
+        "packets_recv": 5550118,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0
+      }
+    },
+    {
+      "timestamp": "2025-09-14T03:01:52.808939",
+      "cpu_percent": 8.2,
+      "memory_percent": 69.5,
+      "disk_percent": 82.9,
+      "network_io": {
+        "bytes_sent": 3331471099,
+        "bytes_recv": 4491201875,
+        "packets_sent": 3657875,
+        "packets_recv": 5550181,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0
+      }
+    },
+    {
+      "timestamp": "2025-09-14T03:01:54.810437",
+      "cpu_percent": 9.5,
+      "memory_percent": 69.5,
+      "disk_percent": 82.9,
+      "network_io": {
+        "bytes_sent": 3331498783,
+        "bytes_recv": 4491223853,
+        "packets_sent": 3657940,
+        "packets_recv": 5550256,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0
+      }
+    },
+    {
+      "timestamp": "2025-09-14T03:01:56.811556",
+      "cpu_percent": 7.8,
+      "memory_percent": 69.5,
+      "disk_percent": 82.9,
+      "network_io": {
+        "bytes_sent": 3331507540,
+        "bytes_recv": 4491232746,
+        "packets_sent": 3658002,
+        "packets_recv": 5550319,
+        "errin": 0,
+        "errout": 0,
+        "dropin": 0,
+        "dropout": 0
+      }
+    }
+  ],
+  "summary": {
+    "duration_seconds": 8,
+    "cpu_avg": 8.45,
+    "cpu_max": 9.5,
+    "memory_avg": 69.5,
+    "memory_peak": 69.5,
+    "disk_avg": 82.9,
+    "start_time": "2025-09-14T03:01:50.807654",
+    "end_time": "2025-09-14T03:01:56.811556"
+  }
+}

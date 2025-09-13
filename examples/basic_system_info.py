@@ -2,8 +2,8 @@
 """
 Basic System Information Example
 
-This example demonstrates how to use SyInfo's core system information features
-to get basic details about the system, devices, and network.
+This example demonstrates how to use SyInfo's core classes to
+gather basic system information.
 """
 
 import sys
@@ -13,88 +13,117 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from syinfo.core import device_info, network_info, sys_info
+import syinfo
+from syinfo.core import device_info, sys_info
 
 
 def main():
-    """Demonstrate basic system information collection."""
+    """Demonstrate basic system information gathering."""
     print("=" * 60)
     print("SyInfo - Basic System Information Example")
     print("=" * 60)
 
-    # 1. System Information
-    print("\n1. System Information:")
+    # 1. Using High-Level API
+    print("\n1. High-Level API Usage:")
     print("-" * 30)
 
-    sys_info_obj = sys_info.SysInfo()
+    try:
+        # Get basic system info using the main API
+        basic_info = syinfo.get_system_info()
+        print(f"System: {basic_info.get('system_name', 'Unknown')}")
+        print(f"Hostname: {basic_info.get('hostname', 'Unknown')}")
+        print(f"CPU Model: {basic_info.get('cpu_model', 'Unknown')}")
+        print(f"CPU Cores: {basic_info.get('cpu_cores', 'Unknown')}")
+        print(f"Total Memory: {basic_info.get('total_memory', 'Unknown')}")
+        print(f"Memory Usage: {basic_info.get('memory_usage_percent', 'Unknown')}%")
+        print(f"Python Version: {basic_info.get('python_version', 'Unknown')}")
+        
+    except Exception as e:
+        print(f"Error getting system info: {e}")
 
-    # Get basic system info
-    basic_info = sys_info_obj.get_basic_info()
-    print(f"OS: {basic_info['os']}")
-    print(f"Kernel: {basic_info['kernel']}")
-    print(f"Architecture: {basic_info['architecture']}")
-    print(f"Hostname: {basic_info['hostname']}")
-    print(f"Uptime: {basic_info['uptime']}")
-
-    # Get detailed system info
-    detailed_info = sys_info_obj.get_detailed_info()
-    print(f"\nCPU Cores: {detailed_info['cpu']['cores']}")
-    print(f"Total Memory: {detailed_info['memory']['total']}")
-    print(f"Available Memory: {detailed_info['memory']['available']}")
-
-    # 2. Device Information
-    print("\n2. Device Information:")
+    # 2. Using Core Classes
+    print("\n2. Core Classes Usage:")
     print("-" * 30)
 
-    device_info_obj = device_info.DeviceInfo()
+    try:
+        # Get comprehensive device information
+        device_info_obj = device_info.DeviceInfo()
+        complete_info = device_info_obj.get_all()
+        
+        # Extract and display key information
+        dev_info = complete_info.get('dev_info', {})
+        print(f"Mac Address: {dev_info.get('mac_address', 'Unknown')}")
+        print(f"System Type: {dev_info.get('chassis', 'Unknown')}")
+        print(f"Hostname: {dev_info.get('static_hostname', 'Unknown')}")
+        
+        # CPU information
+        cpu_info = complete_info.get('cpu_info', {})
+        cores = cpu_info.get('cores', {})
+        print(f"Physical Cores: {cores.get('physical', 'Unknown')}")
+        print(f"Total Cores: {cores.get('total', 'Unknown')}")
+        
+        # Memory information
+        memory_info = complete_info.get('memory_info', {})
+        virtual_mem = memory_info.get('virtual', {})
+        print(f"Memory Usage: {virtual_mem.get('percent', 'Unknown')}%")
+        print(f"Total Memory: {virtual_mem.get('readable', {}).get('total', 'Unknown')}")
+        print(f"Available Memory: {virtual_mem.get('readable', {}).get('available', 'Unknown')}")
+        
+    except Exception as e:
+        print(f"Error getting device info: {e}")
 
-    # Get CPU information
-    cpu_info = device_info_obj.get_cpu_info()
-    print(f"CPU Model: {cpu_info['model']}")
-    print(f"CPU Cores: {cpu_info['cores']}")
-    print(f"CPU Speed: {cpu_info['speed']}")
-
-    # Get memory information
-    memory_info = device_info_obj.get_memory_info()
-    print(f"Total RAM: {memory_info['total']}")
-    print(f"Available RAM: {memory_info['available']}")
-    print(f"Memory Usage: {memory_info['percent']}%")
-
-    # Get disk information
-    disk_info = device_info_obj.get_disk_info()
-    print(f"Disk Usage: {disk_info['usage']}%")
-    print(f"Disk Space: {disk_info['free']} free of {disk_info['total']}")
-
-    # 3. Network Information
-    print("\n3. Network Information:")
+    # 3. System Information Display
+    print("\n3. Formatted System Display:")
     print("-" * 30)
 
-    network_info_obj = network_info.NetworkInfo()
+    try:
+        # Use the built-in system tree display
+        print("Complete system information tree:")
+        syinfo.print_system_tree()
+        
+    except Exception as e:
+        print(f"Error displaying system tree: {e}")
 
-    # Get network interfaces
-    interfaces = network_info_obj.get_network_interfaces()
-    for interface, info in interfaces.items():
-        if info["addresses"]:
-            print(f"Interface: {interface}")
-            print(f"  IP Address: {info['addresses'].get('inet', 'N/A')}")
-            print(f"  MAC Address: {info['addresses'].get('ether', 'N/A')}")
-            print(f"  Status: {info['status']}")
-
-    # Get network statistics
-    net_stats = network_info_obj.get_network_stats()
-    print("\nNetwork Statistics:")
-    print(f"  Bytes Sent: {net_stats['bytes_sent']}")
-    print(f"  Bytes Received: {net_stats['bytes_recv']}")
-    print(f"  Packets Sent: {net_stats['packets_sent']}")
-    print(f"  Packets Received: {net_stats['packets_recv']}")
-
-    # 4. Print brief system info (legacy function)
-    print("\n4. Brief System Info (Legacy):")
+    # 4. Hardware-Focused Information
+    print("\n4. Hardware Information:")
     print("-" * 30)
-    sys_info.print_brief_sys_info()
+
+    try:
+        hardware_info = syinfo.get_hardware_info()
+        
+        # CPU details
+        cpu = hardware_info.get('cpu', {})
+        print(f"CPU Model: {cpu.get('model', 'Unknown')}")
+        print(f"CPU Frequency: {cpu.get('frequency', 'Unknown')} MHz")
+        print(f"CPU Usage: {cpu.get('usage_percent', 'Unknown')}%")
+        
+        # Memory details  
+        memory = hardware_info.get('memory', {})
+        print(f"Memory Total: {memory.get('total', 'Unknown')}")
+        print(f"Memory Used: {memory.get('used', 'Unknown')}")
+        print(f"Memory Available: {memory.get('available', 'Unknown')}")
+        
+        # GPU information (if available)
+        gpu = hardware_info.get('gpu', {})
+        if gpu:
+            print(f"GPU: {gpu.get('name', 'Unknown')}")
+            print(f"GPU Memory: {gpu.get('memory_total', 'Unknown')}")
+        
+    except Exception as e:
+        print(f"Error getting hardware info: {e}")
+
+    # 5. Brief Information
+    print("\n5. Brief System Summary:")
+    print("-" * 30)
+
+    try:
+        syinfo.print_brief_info()
+        
+    except Exception as e:
+        print(f"Error displaying brief info: {e}")
 
     print("\n" + "=" * 60)
-    print("Example completed successfully!")
+    print("Basic system information example completed!")
     print("=" * 60)
 
 

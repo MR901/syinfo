@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-API Examples
+SyInfo API Examples
 
-This example demonstrates how to use SyInfo's API features
-for programmatic access to system information and monitoring data.
+This example demonstrates how to use SyInfo's Python API for
+gathering system information, network discovery, and monitoring.
 """
 
+import json
 import sys
 import time
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from syinfo.api import analysis_api, info_api, monitoring_api
+import syinfo
 
 
 def info_api_example():
@@ -27,95 +28,104 @@ def info_api_example():
     print("\n1. System Information API:")
     print("-" * 30)
 
-    # Get basic system info
     try:
-        system_info = info_api.get_system_info()
-        print("System Information:")
-        print(f"  OS: {system_info['os']}")
-        print(f"  Kernel: {system_info['kernel']}")
-        print(f"  Architecture: {system_info['architecture']}")
-        print(f"  Hostname: {system_info['hostname']}")
-        print(f"  Uptime: {system_info['uptime']}")
+        # Get basic system info
+        basic_info = syinfo.get_system_info()
+        print(f"System: {basic_info.get('system_name', 'Unknown')}")
+        print(f"CPU Model: {basic_info.get('cpu_model', 'Unknown')}")
+        print(f"Total Memory: {basic_info.get('total_memory', 'Unknown')}")
+        print(f"Python Version: {basic_info.get('python_version', 'Unknown')}")
+        
     except Exception as e:
         print(f"Error getting system info: {e}")
 
-    # Get detailed system info
+    # 2. Complete Information API
+    print("\n2. Complete Information API:")
+    print("-" * 30)
+    
     try:
-        detailed_info = info_api.get_detailed_system_info()
-        print("\nDetailed System Information:")
-        print(f"  CPU Cores: {detailed_info['cpu']['cores']}")
-        print(f"  CPU Model: {detailed_info['cpu']['model']}")
-        print(f"  Total Memory: {detailed_info['memory']['total']}")
-        print(f"  Available Memory: {detailed_info['memory']['available']}")
-        print(f"  Disk Total: {detailed_info['disk']['total']}")
-        print(f"  Disk Free: {detailed_info['disk']['free']}")
+        complete_info = syinfo.get_complete_info(include_network=False)
+        
+        # Display CPU information
+        cpu_info = complete_info.get('cpu_info', {})
+        print(f"CPU Cores: {cpu_info.get('cores', {}).get('physical', 'Unknown')}")
+        print(f"CPU Usage: {cpu_info.get('percentage_used', {}).get('total', 'Unknown')}%")
+        
+        # Display memory information
+        memory_info = complete_info.get('memory_info', {})
+        virtual_mem = memory_info.get('virtual', {})
+        print(f"Memory Usage: {virtual_mem.get('percent', 'Unknown')}%")
+        print(f"Available Memory: {virtual_mem.get('readable', {}).get('available', 'Unknown')}")
+        
     except Exception as e:
-        print(f"Error getting detailed system info: {e}")
+        print(f"Error getting complete info: {e}")
 
-    # 2. Device Information API
-    print("\n2. Device Information API:")
+    # 3. Hardware Information API
+    print("\n3. Hardware Information API:")
+    print("-" * 30)
+    
+    try:
+        hardware_info = syinfo.get_hardware_info()
+        
+        # Display hardware details
+        cpu = hardware_info.get('cpu', {})
+        memory = hardware_info.get('memory', {})
+        
+        print(f"CPU Model: {cpu.get('model', 'Unknown')}")
+        print(f"Physical Cores: {cpu.get('cores_physical', 'Unknown')}")
+        print(f"Logical Cores: {cpu.get('cores_logical', 'Unknown')}")
+        print(f"Memory Total: {memory.get('total', 'Unknown')}")
+        print(f"Memory Available: {memory.get('available', 'Unknown')}")
+        
+    except Exception as e:
+        print(f"Error getting hardware info: {e}")
+
+
+def network_api_example():
+    """Demonstrate Network API usage."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Network API Example")
+    print("=" * 60)
+
+    # 1. Network Information API
+    print("\n1. Network Information API:")
     print("-" * 30)
 
-    # Get CPU information
     try:
-        cpu_info = info_api.get_cpu_info()
-        print("CPU Information:")
-        print(f"  Model: {cpu_info['model']}")
-        print(f"  Cores: {cpu_info['cores']}")
-        print(f"  Speed: {cpu_info['speed']}")
-        print(f"  Usage: {cpu_info['usage']}%")
+        network_info = syinfo.get_network_info(scan_devices=False)
+        
+        print(f"Hostname: {network_info.get('hostname', 'Unknown')}")
+        print(f"MAC Address: {network_info.get('mac_address', 'Unknown')}")
+        print(f"Internet Present: {network_info.get('internet_present', 'Unknown')}")
+        
+        # Display current addresses
+        current_addr = network_info.get('current_addresses', {})
+        print(f"Public IP: {current_addr.get('public_ip', 'Unknown')}")
+        print(f"Local IP: {current_addr.get('ip_address', 'Unknown')}")
+        print(f"Gateway: {current_addr.get('gateway', 'Unknown')}")
+        
     except Exception as e:
-        print(f"Error getting CPU info: {e}")
+        print(f"Error getting network info: {e}")
 
-    # Get memory information
-    try:
-        memory_info = info_api.get_memory_info()
-        print("\nMemory Information:")
-        print(f"  Total: {memory_info['total']}")
-        print(f"  Available: {memory_info['available']}")
-        print(f"  Used: {memory_info['used']}")
-        print(f"  Usage: {memory_info['percent']}%")
-    except Exception as e:
-        print(f"Error getting memory info: {e}")
-
-    # Get disk information
-    try:
-        disk_info = info_api.get_disk_info()
-        print("\nDisk Information:")
-        print(f"  Total: {disk_info['total']}")
-        print(f"  Used: {disk_info['used']}")
-        print(f"  Free: {disk_info['free']}")
-        print(f"  Usage: {disk_info['percent']}%")
-    except Exception as e:
-        print(f"Error getting disk info: {e}")
-
-    # 3. Network Information API
-    print("\n3. Network Information API:")
+    # 2. Network Device Discovery API
+    print("\n2. Network Device Discovery API:")
     print("-" * 30)
 
-    # Get network interfaces
     try:
-        interfaces = info_api.get_network_interfaces()
-        print("Network Interfaces:")
-        for interface, info in interfaces.items():
-            if info["addresses"]:
-                print(f"  {interface}:")
-                print(f"    IP: {info['addresses'].get('inet', 'N/A')}")
-                print(f"    MAC: {info['addresses'].get('ether', 'N/A')}")
-                print(f"    Status: {info['status']}")
+        print("Discovering devices on network (this may take a few seconds)...")
+        devices = syinfo.discover_network_devices(timeout=8)
+        
+        if devices and len(devices) > 0:
+            print(f"Found {len(devices)} devices:")
+            for i, device in enumerate(devices[:5], 1):  # Show first 5 devices
+                print(f"  {i}. {device.get('ip', 'Unknown IP')} - {device.get('hostname', 'Unknown Host')}")
+                if device.get('vendor'):
+                    print(f"     Vendor: {device['vendor']}")
+        else:
+            print("No devices found or discovery requires sudo privileges")
+            
     except Exception as e:
-        print(f"Error getting network interfaces: {e}")
-
-    # Get network statistics
-    try:
-        net_stats = info_api.get_network_stats()
-        print("\nNetwork Statistics:")
-        print(f"  Bytes Sent: {net_stats['bytes_sent']}")
-        print(f"  Bytes Received: {net_stats['bytes_recv']}")
-        print(f"  Packets Sent: {net_stats['packets_sent']}")
-        print(f"  Packets Received: {net_stats['packets_recv']}")
-    except Exception as e:
-        print(f"Error getting network stats: {e}")
+        print(f"Error discovering network devices: {e}")
 
 
 def monitoring_api_example():
@@ -124,132 +134,227 @@ def monitoring_api_example():
     print("SyInfo - Monitoring API Example")
     print("=" * 60)
 
-    # 1. System Monitoring API
-    print("\n1. System Monitoring API:")
+    # 1. Simple Monitor Creation
+    print("\n1. Simple Monitor Creation:")
     print("-" * 30)
 
-    # Get current system metrics
     try:
-        system_metrics = monitoring_api.get_system_metrics()
-        print("Current System Metrics:")
-        print(f"  CPU Usage: {system_metrics['cpu']['percent']}%")
-        print(f"  Memory Usage: {system_metrics['memory']['percent']}%")
-        print(f"  Disk Usage: {system_metrics['disk']['percent']}%")
-        print(
-            f"  Network I/O: {system_metrics['network']['bytes_sent']} sent, {system_metrics['network']['bytes_recv']} received",
-        )
+        # Create monitor with 2-second intervals
+        monitor = syinfo.create_simple_monitor(interval=2)
+        print("✅ Monitor created successfully")
+        print(f"Monitor interval: {monitor.interval} seconds")
+        
     except Exception as e:
-        print(f"Error getting system metrics: {e}")
+        print(f"Error creating monitor: {e}")
+        return
 
-    # 2. Process Monitoring API
-    print("\n2. Process Monitoring API:")
+    # 2. Start Monitoring
+    print("\n2. Start Monitoring:")
     print("-" * 30)
 
-    # Get top processes
     try:
-        top_processes = monitoring_api.get_top_processes(top_n=5, sort_by="memory")
-        print("Top 5 Processes by Memory Usage:")
-        for i, proc in enumerate(top_processes, 1):
-            print(f"  {i}. {proc['name']} (PID: {proc['pid']})")
-            print(
-                f"     Memory: {proc['memory_percent']:.1f}% | CPU: {proc['cpu_percent']:.1f}%",
-            )
+        print("Starting monitoring for 8 seconds...")
+        monitor.start(duration=8)
+        print("✅ Monitoring started")
+        
+        # Wait for monitoring to complete
+        time.sleep(9)
+        
+        # Get results
+        if monitor.is_running:
+            results = monitor.stop()
+        else:
+            # Monitoring completed automatically
+            results = {
+                "total_points": len(monitor.data_points),
+                "data_points": monitor.data_points,
+                "summary": monitor._calculate_summary() if monitor.data_points else {}
+            }
+        
+        print("✅ Monitoring completed")
+        
     except Exception as e:
-        print(f"Error getting top processes: {e}")
+        print(f"Error during monitoring: {e}")
+        return
 
-    # 3. Data Collection API
-    print("\n3. Data Collection API:")
+    # 3. Analyze Results
+    print("\n3. Monitor Results Analysis:")
     print("-" * 30)
 
-    # Start data collection
     try:
-        collection_id = monitoring_api.start_data_collection(
-            output_dir="./api_collection", interval=5, duration=10,
-        )
-        print(f"Started data collection with ID: {collection_id}")
-
-        # Wait for collection to complete
-        time.sleep(2)
-
-        # Get collection status
-        status = monitoring_api.get_collection_status(collection_id)
-        print(f"Collection Status: {status['status']}")
-
-        # Stop collection
-        monitoring_api.stop_data_collection(collection_id)
-        print("Data collection stopped")
-
+        print(f"Data Points Collected: {results.get('total_points', 0)}")
+        
+        summary = results.get('summary', {})
+        if summary:
+            print(f"Duration: {summary.get('duration_seconds', 0)} seconds")
+            print(f"CPU Average: {summary.get('cpu_avg', 0):.1f}%")
+            print(f"CPU Maximum: {summary.get('cpu_max', 0):.1f}%")
+            print(f"Memory Average: {summary.get('memory_avg', 0):.1f}%")
+            print(f"Memory Peak: {summary.get('memory_peak', 0):.1f}%")
+            print(f"Disk Usage: {summary.get('disk_avg', 0):.1f}%")
+        
+        # Analyze individual data points
+        data_points = results.get('data_points', [])
+        if data_points:
+            print(f"\nFirst Data Point:")
+            first = data_points[0]
+            print(f"  Timestamp: {first.get('timestamp', 'Unknown')}")
+            print(f"  CPU: {first.get('cpu_percent', 0):.1f}%")
+            print(f"  Memory: {first.get('memory_percent', 0):.1f}%")
+            
+            if len(data_points) > 1:
+                print(f"\nLast Data Point:")
+                last = data_points[-1]
+                print(f"  Timestamp: {last.get('timestamp', 'Unknown')}")
+                print(f"  CPU: {last.get('cpu_percent', 0):.1f}%")
+                print(f"  Memory: {last.get('memory_percent', 0):.1f}%")
+        
     except Exception as e:
-        print(f"Error with data collection: {e}")
+        print(f"Error analyzing results: {e}")
 
 
-def analysis_api_example():
-    """Demonstrate Analysis API usage."""
+def data_export_example():
+    """Demonstrate Data Export functionality."""
     print("\n" + "=" * 60)
-    print("SyInfo - Analysis API Example")
+    print("SyInfo - Data Export Example")
     print("=" * 60)
 
-    # 1. Performance Analysis API
-    print("\n1. Performance Analysis API:")
+    # 1. JSON Export
+    print("\n1. JSON Export:")
     print("-" * 30)
 
-    # Analyze system performance
     try:
-        performance = analysis_api.analyze_system_performance()
-        print("System Performance Analysis:")
-        print(f"  Overall Score: {performance['score']}/100")
-        print(f"  CPU Performance: {performance['cpu']['status']}")
-        print(f"  Memory Performance: {performance['memory']['status']}")
-        print(f"  Disk Performance: {performance['disk']['status']}")
-        print(f"  Network Performance: {performance['network']['status']}")
+        json_data = syinfo.export_system_info("json")
+        
+        # Parse JSON to verify it's valid
+        parsed_data = json.loads(json_data)
+        print("✅ JSON export successful")
+        print(f"JSON data size: {len(json_data)} characters")
+        print("JSON structure keys:", list(parsed_data.keys())[:5])
+        
+        # Save to file
+        with open("system_info_export.json", "w") as f:
+            f.write(json_data)
+        print("✅ JSON data saved to system_info_export.json")
+        
     except Exception as e:
-        print(f"Error analyzing performance: {e}")
+        print(f"Error with JSON export: {e}")
 
-    # 2. Health Check API
-    print("\n2. Health Check API:")
+    # 2. YAML Export
+    print("\n2. YAML Export:")
     print("-" * 30)
 
-    # Get system health
     try:
-        health = analysis_api.get_system_health()
-        print("System Health Check:")
-        print(f"  Overall Health: {health['overall_health']}")
-        print(f"  Health Score: {health['score']}/100")
-
-        if health["issues"]:
-            print("  Issues Found:")
-            for issue in health["issues"]:
-                print(f"    - {issue['type']}: {issue['message']}")
-        else:
-            print("  No issues found")
-
+        yaml_data = syinfo.export_system_info("yaml", output_file="system_info_export.yaml")
+        print("✅ YAML export successful")
+        print(f"YAML data size: {len(yaml_data)} characters")
+        print("✅ YAML data saved to system_info_export.yaml")
+        
     except Exception as e:
-        print(f"Error getting system health: {e}")
+        print(f"Error with YAML export: {e}")
 
-    # 3. Trend Analysis API
-    print("\n3. Trend Analysis API:")
+
+def feature_detection_example():
+    """Demonstrate Feature Detection functionality."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Feature Detection Example")
+    print("=" * 60)
+
+    # 1. Available Features
+    print("\n1. Available Features:")
     print("-" * 30)
 
-    # Analyze trends (if data is available)
     try:
-        trends = analysis_api.analyze_trends(hours=1)
-        print("System Trends (Last Hour):")
-        print(f"  CPU Trend: {trends['cpu']['trend']}")
-        print(f"  Memory Trend: {trends['memory']['trend']}")
-        print(f"  Disk Trend: {trends['disk']['trend']}")
+        features = syinfo.get_available_features()
+        print("Available features:")
+        for feature, available in features.items():
+            status = "✅" if available else "❌"
+            print(f"  {status} {feature}: {available}")
+            
     except Exception as e:
-        print(f"Error analyzing trends: {e}")
+        print(f"Error getting available features: {e}")
+
+    # 2. Feature Status
+    print("\n2. Feature Status Display:")
+    print("-" * 30)
+
+    try:
+        syinfo.print_feature_status()
+        
+    except Exception as e:
+        print(f"Error printing feature status: {e}")
+
+
+def display_examples():
+    """Demonstrate Display functionality."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Display Examples")
+    print("=" * 60)
+
+    # 1. System Tree Display
+    print("\n1. System Tree Display:")
+    print("-" * 30)
+
+    try:
+        print("Displaying system information tree...")
+        syinfo.print_system_tree()
+        
+    except Exception as e:
+        print(f"Error displaying system tree: {e}")
+
+    # 2. Brief Information
+    print("\n2. Brief Information Display:")
+    print("-" * 30)
+
+    try:
+        syinfo.print_brief_info()
+        
+    except Exception as e:
+        print(f"Error displaying brief info: {e}")
 
 
 def main():
     """Run all API examples."""
-    info_api_example()
-    monitoring_api_example()
-    analysis_api_example()
-
-    print("\n" + "=" * 60)
-    print("API examples completed!")
-    print("=" * 60)
+    print("SyInfo Python API Examples")
+    print("=" * 26)
+    print("This script demonstrates the complete SyInfo Python API")
+    print("including system information, network operations, monitoring,")
+    print("and data export capabilities.\n")
+    
+    try:
+        # Core information APIs
+        info_api_example()
+        
+        # Network operations
+        network_api_example()
+        
+        # System monitoring
+        monitoring_api_example()
+        
+        # Data export
+        data_export_example()
+        
+        # Feature detection
+        feature_detection_example()
+        
+        # Display functionality
+        display_examples()
+        
+        print("\n" + "=" * 60)
+        print("All API examples completed successfully!")
+        print("Check the generated files:")
+        print("  - system_info_export.json")
+        print("  - system_info_export.yaml")
+        print("=" * 60)
+        
+    except KeyboardInterrupt:
+        print("\nAPI examples interrupted by user.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nUnexpected error running API examples: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -89,7 +89,7 @@ def process_data(
 Use the custom exception hierarchy:
 
 ```python
-from syinfo.core.exceptions import (
+from syinfo.exceptions import (
     DataCollectionError,
     SystemAccessError,
     ValidationError

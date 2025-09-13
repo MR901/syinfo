@@ -425,51 +425,63 @@ class DeviceInfo:
                 _msg += f"\n│       {prefix}       ├── {'Total':<15} {space['total']}"
                 _msg += f"\n│       {prefix}       └── {'Percent':<15} {space['percent']} %"
         
-        # GPU Information (as table, robust columns)
-        _msg += "\n" + create_highlighted_heading(
-            "GPU Details", line_symbol="━", total_length=100,
-            prefix_suffix="", center_highlighter=(" ", " "),
-        ) + "\n"
-
+        # GPU Information (integrated into tree structure)
+        _msg += "\n├── GPU Information"
+        
         gpu_map: Dict[str, Any] = info.get("gpu_info", {}) or {}
         if gpu_map:
-            preferred = [
-                "name", "driver", "total_memory", "used_memory", "free_memory",
-                "temperature", "load_pct", "uuid", "id",
-            ]
-            present_keys = set()
-            for data in gpu_map.values():
-                if isinstance(data, dict):
-                    present_keys.update(data.keys())
-            ordered_keys = [k for k in preferred if k in present_keys] + sorted(present_keys - set(preferred))
-
-            def fmt(key: str, value: Any) -> str:
+            gpu_keys = list(gpu_map.keys())
+            
+            # Field display mapping for better readability
+            field_labels = {
+                "name": "Name",
+                "driver": "Driver",
+                "total_memory": "Total Memory", 
+                "used_memory": "Used Memory",
+                "free_memory": "Free Memory",
+                "temperature": "Temperature",
+                "load_pct": "Load",
+                "uuid": "UUID",
+                "id": "ID"
+            }
+            
+            def format_gpu_value(key: str, value: Any) -> str:
+                """Format GPU values with appropriate units and formatting."""
                 try:
-                    if value is UNKNOWN:
+                    if value is UNKNOWN or value is None:
                         return str(UNKNOWN)
                     if key.endswith("_memory") and isinstance(value, (int, float)):
                         return HumanReadable.bytes_to_size(int(value))
                     if key == "load_pct" and isinstance(value, (int, float)):
-                        return f"{float(value):.1f} %"
+                        return f"{float(value):.1f}%"
                     if key == "temperature" and isinstance(value, (int, float)):
-                        return f"{float(value):.0f} °C"
+                        return f"{float(value):.0f}°C"
                     return str(value)
                 except Exception:
                     return str(value)
-
-            rows = []
-            for gpu_name, gpu_data in gpu_map.items():
-                row = [gpu_name]
-                if isinstance(gpu_data, dict):
-                    row.extend([fmt(k, gpu_data.get(k, UNKNOWN)) for k in ordered_keys])
+            
+            for i, (gpu_name, gpu_data) in enumerate(gpu_map.items()):
+                is_last_gpu = (i == len(gpu_keys) - 1)
+                gpu_connector = "└" if is_last_gpu else "├"
+                gpu_prefix = " " if is_last_gpu else "│"
+                
+                _msg += f"\n│   {gpu_connector}── {gpu_name}"
+                
+                if isinstance(gpu_data, dict) and gpu_data:
+                    # Get all available fields for this GPU
+                    available_fields = list(gpu_data.keys())
+                    
+                    for j, field in enumerate(available_fields):
+                        is_last_field = (j == len(available_fields) - 1)
+                        field_connector = "└" if is_last_field else "├"
+                        field_label = field_labels.get(field, field.title().replace('_', ' '))
+                        field_value = format_gpu_value(field, gpu_data[field])
+                        
+                        _msg += f"\n│   {gpu_prefix}   {field_connector}── {field_label:<16} {field_value}"
                 else:
-                    row.extend([str(gpu_data) if not ordered_keys else "N/A" for _ in ordered_keys])
-                rows.append(row)
-
-            headers = ["gpu"] + ordered_keys
-            _msg += tabulate(rows, headers=headers)
+                    _msg += f"\n│   {gpu_prefix}   └── Status            No detailed information available"
         else:
-            _msg += "\nNo GPU Detected\n"
+            _msg += "\n│   └── Status              No GPU detected"
         
         if return_msg:
             return _msg

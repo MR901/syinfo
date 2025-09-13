@@ -1,35 +1,38 @@
 # SyInfo - Simple System Information Library
+# SyInfo - Simple System Information Library
+<p align="center">
+  <img src="docs/images/logo.png" alt="SyInfo logo - textual art" width="420" />
+</p>
 
 [![PyPI version](https://badge.fury.io/py/syinfo.svg)](https://badge.fury.io/py/syinfo)
 [![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, and real-time system monitoring.
 
 ## Key Features
 
-### 🖥️ Device Information
+### Device Information
 - **CPU Details**: Model, cores, frequency, usage statistics
 - **Memory Analysis**: RAM, swap, detailed memory mapping
 - **Storage Info**: Disk usage, I/O statistics, filesystem details
 - **GPU Detection**: NVIDIA, AMD, Intel graphics cards
 - **Device Identification**: Manufacturer, model, serial numbers
 
-### 🌐 Network Capabilities  
+### Network Capabilities  
 - **Interface Detection**: All network adapters with detailed info
 - **Connectivity Analysis**: Public/private IP, DNS, gateways
 - **Device Discovery**: Scan and identify devices on local network
 - **Network I/O Statistics**: Real-time and historical data
 - **WiFi Information**: SSID, signal strength, encryption
 
-### 📊 System Monitoring (New!)
+### System Monitoring (New!)
 - **Real-time Monitoring**: CPU, memory, disk, and network tracking
 - **Customizable Intervals**: 1 second to hours, configurable duration
 - **JSON Export**: Perfect for scripting and automation with jq
 - **Performance Analytics**: Averages, peaks, and trend analysis
 - **Non-blocking**: Background monitoring with graceful interruption
 
-### 💻 Powerful CLI Interface
+### Powerful CLI Interface
 - **Flag-based Commands**: Easy scripting (`syinfo -npj -t 10 | jq '.summary'`)
 - **JSON Output**: Native jq compatibility for data processing
 - **Monitoring Support**: Real-time system performance tracking

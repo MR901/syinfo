@@ -36,6 +36,11 @@ Quickstart
 CLI - Flag-Based Commands
 -------------------------
 
+.. mermaid:: images/diagrams/cli-workflow.mmd
+   :alt: CLI Workflow
+
+The CLI uses a simple flag-based interface:
+
 Device Information:
 
 .. code-block:: bash
@@ -85,6 +90,11 @@ Flag       Long Flag           Description
 
 Monitoring Examples
 -------------------
+
+.. mermaid:: images/diagrams/monitoring-workflow.mmd
+   :alt: Monitoring Workflow
+
+System monitoring workflow:
 
 Basic Monitoring:
 
@@ -144,11 +154,11 @@ Python API
 Screenshots (optional)
 ----------------------
 
-.. image:: images/python_print_device.png
+.. image:: images/example_python_print_device.png
    :alt: Device print example
    :width: 600
 
-.. image:: images/print_network.png
+.. image:: images/example_print_network.png
    :alt: Network print example
    :width: 600
 

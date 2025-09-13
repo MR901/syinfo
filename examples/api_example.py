@@ -141,7 +141,7 @@ def monitoring_api_example():
     try:
         # Create monitor with 2-second intervals
         monitor = syinfo.create_simple_monitor(interval=2)
-        print("✅ Monitor created successfully")
+        print("Monitor created successfully")
         print(f"Monitor interval: {monitor.interval} seconds")
         
     except Exception as e:
@@ -155,7 +155,7 @@ def monitoring_api_example():
     try:
         print("Starting monitoring for 8 seconds...")
         monitor.start(duration=8)
-        print("✅ Monitoring started")
+        print("Monitoring started")
         
         # Wait for monitoring to complete
         time.sleep(9)
@@ -171,7 +171,7 @@ def monitoring_api_example():
                 "summary": monitor._calculate_summary() if monitor.data_points else {}
             }
         
-        print("✅ Monitoring completed")
+        print("Monitoring completed")
         
     except Exception as e:
         print(f"Error during monitoring: {e}")
@@ -228,14 +228,14 @@ def data_export_example():
         
         # Parse JSON to verify it's valid
         parsed_data = json.loads(json_data)
-        print("✅ JSON export successful")
+        print("JSON export successful")
         print(f"JSON data size: {len(json_data)} characters")
         print("JSON structure keys:", list(parsed_data.keys())[:5])
         
         # Save to file
         with open("system_info_export.json", "w") as f:
             f.write(json_data)
-        print("✅ JSON data saved to system_info_export.json")
+        print("JSON data saved to system_info_export.json")
         
     except Exception as e:
         print(f"Error with JSON export: {e}")
@@ -246,9 +246,9 @@ def data_export_example():
 
     try:
         yaml_data = syinfo.export_system_info("yaml", output_file="system_info_export.yaml")
-        print("✅ YAML export successful")
+        print("YAML export successful")
         print(f"YAML data size: {len(yaml_data)} characters")
-        print("✅ YAML data saved to system_info_export.yaml")
+        print("YAML data saved to system_info_export.yaml")
         
     except Exception as e:
         print(f"Error with YAML export: {e}")
@@ -268,7 +268,7 @@ def feature_detection_example():
         features = syinfo.get_available_features()
         print("Available features:")
         for feature, available in features.items():
-            status = "✅" if available else "❌"
+            status = "[AVAILABLE]" if available else "[NOT AVAILABLE]"
             print(f"  {status} {feature}: {available}")
             
     except Exception as e:

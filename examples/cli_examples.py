@@ -6,7 +6,6 @@ Comprehensive examples for using the SyInfo command line interface.
 This file demonstrates all CLI capabilities including basic info gathering,
 network operations, system monitoring, data export, and integration with other tools.
 
-Author: SyInfo Team
 License: MIT
 """
 

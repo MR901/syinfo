@@ -13,6 +13,7 @@ copyright = f'{current_year}, {author}'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.mermaid',
 ]
 
 templates_path = ['_templates']

@@ -54,6 +54,23 @@ Contents
    api
    publishing
 
+Architecture
+------------
+
+.. mermaid:: images/diagrams/package-architecture.mmd
+
+The simplified architecture focuses on core functionality without over-engineering.
+
+System Components
+-----------------
+
+.. mermaid:: images/diagrams/system-components.mmd
+
+Data Flow
+---------
+
+.. mermaid:: images/diagrams/data-flow.mmd
+
 Images
 ------
 

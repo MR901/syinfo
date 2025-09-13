@@ -1,0 +1,133 @@
+graph LR
+    %% SyInfo System Components Overview
+    
+    subgraph "User Interfaces"
+        CLI["`**Command Line**
+        syinfo -d -n -s -m
+        Flag-based interface`"]
+        
+        API["`**Python API**
+        import syinfo
+        Programmatic access`"]
+    end
+    
+    subgraph "Core Information Gathering"
+        DEVICE["`**Device Info**
+        🖥️ Hardware Detection
+        • CPU model & cores
+        • Memory capacity
+        • GPU identification
+        • System metadata`"]
+        
+        NETWORK["`**Network Info**
+        🌐 Network Analysis  
+        • Interface scanning
+        • IP configuration
+        • Device discovery
+        • WiFi details`"]
+        
+        SYSTEM["`**Combined Info**
+        🔧 Unified View
+        • Device + Network
+        • Correlation
+        • Filtered output`"]
+    end
+    
+    subgraph "Real-time Monitoring"
+        MONITOR["`**Performance Monitor**
+        📊 Live Tracking
+        • CPU usage over time
+        • Memory consumption
+        • Disk I/O activity
+        • Network throughput`"]
+        
+        ANALYSIS["`**Data Analysis**
+        📈 Insights
+        • Averages & peaks
+        • Trend detection
+        • Performance metrics`"]
+    end
+    
+    subgraph "Output Formats"
+        TREE["`**Tree Display**
+        📋 Hierarchical
+        Visual system layout`"]
+        
+        JSON["`**JSON Export**
+        🔗 Machine-readable
+        API integration`"]
+        
+        YAML["`**YAML Export**
+        ⚙️ Config-friendly
+        Human & machine`"]
+        
+        SUMMARY["`**Monitor Summary**
+        📊 Performance Report
+        Statistics & trends`"]
+    end
+    
+    subgraph "Data Sources"
+        PSUTIL["`**psutil**
+        System metrics`"]
+        
+        PROCFS["`**/proc /sys**
+        Linux internals`"]
+        
+        SCAPY["`**scapy**
+        Network scanning`"]
+        
+        GPU_APIS["`**GPU APIs**
+        Hardware detection`"]
+    end
+    
+    %% Interface Connections
+    CLI --> DEVICE
+    CLI --> NETWORK  
+    CLI --> SYSTEM
+    CLI --> MONITOR
+    
+    API --> DEVICE
+    API --> NETWORK
+    API --> SYSTEM
+    API --> MONITOR
+    
+    %% Core Component Relationships
+    SYSTEM --> DEVICE
+    SYSTEM --> NETWORK
+    MONITOR --> ANALYSIS
+    
+    %% Output Connections
+    DEVICE --> TREE
+    NETWORK --> TREE
+    SYSTEM --> TREE
+    
+    DEVICE --> JSON
+    NETWORK --> JSON
+    SYSTEM --> JSON
+    MONITOR --> JSON
+    
+    DEVICE --> YAML
+    NETWORK --> YAML
+    SYSTEM --> YAML
+    
+    ANALYSIS --> SUMMARY
+    
+    %% Data Source Connections
+    PSUTIL --> DEVICE
+    PSUTIL --> MONITOR
+    PROCFS --> DEVICE
+    SCAPY --> NETWORK
+    GPU_APIS --> DEVICE
+    
+    %% Styling
+    classDef interface fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef core fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef monitoring fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef output fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef datasource fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class CLI,API interface
+    class DEVICE,NETWORK,SYSTEM core
+    class MONITOR,ANALYSIS monitoring
+    class TREE,JSON,YAML,SUMMARY output
+    class PSUTIL,PROCFS,SCAPY,GPU_APIS datasource

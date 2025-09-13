@@ -5,7 +5,6 @@ SyInfo Monitoring Examples
 This example demonstrates how to use SyInfo's monitoring capabilities
 both programmatically and through the CLI interface.
 
-Author: SyInfo Team
 License: MIT
 """
 
@@ -75,7 +74,7 @@ def advanced_monitoring_example():
                 'memory_percent': data_point.get('memory_percent', 0)
             }
             high_cpu_events.append(event)
-            print(f"  ⚠️  High CPU detected: {cpu_usage:.1f}% at {data_point['timestamp']}")
+            print(f"  WARNING: High CPU detected: {cpu_usage:.1f}% at {data_point['timestamp']}")
     
     print("Starting advanced monitoring with real-time CPU detection...")
     monitor = syinfo.create_simple_monitor(interval=1)
@@ -153,7 +152,7 @@ def data_analysis_example():
         for dp in data_points
     )
     
-    print(f"\n📊 Analysis Results:")
+    print(f"\nAnalysis Results:")
     print(f"- CPU Trend: {cpu_trend}")
     print(f"- Memory Stable: {'Yes' if memory_stable else 'No'}")
     print(f"- Network Activity: {'Yes' if network_active else 'No'}")
@@ -191,7 +190,7 @@ def export_monitoring_data_example():
     json_file = "monitoring_results.json"
     with open(json_file, 'w') as f:
         json.dump(results, f, indent=2, default=str)
-    print(f"✅ Exported monitoring data to {json_file}")
+    print(f"Exported monitoring data to {json_file}")
     
     # Create CSV-like summary
     csv_file = "monitoring_summary.csv"
@@ -199,7 +198,7 @@ def export_monitoring_data_example():
         f.write("timestamp,cpu_percent,memory_percent,disk_percent\n")
         for dp in results.get('data_points', []):
             f.write(f"{dp.get('timestamp', '')},{dp.get('cpu_percent', 0)},{dp.get('memory_percent', 0)},{dp.get('disk_percent', 0)}\n")
-    print(f"✅ Exported CSV summary to {csv_file}")
+    print(f"Exported CSV summary to {csv_file}")
     
     # Create human-readable report
     report_file = "monitoring_report.txt"
@@ -216,7 +215,7 @@ def export_monitoring_data_example():
         f.write(f"Memory Peak: {summary.get('memory_peak', 0):.1f}%\n")
         f.write(f"Disk Usage: {summary.get('disk_avg', 0):.1f}%\n")
     
-    print(f"✅ Exported human-readable report to {report_file}")
+    print(f"Exported human-readable report to {report_file}")
     
     return results
 
@@ -237,11 +236,11 @@ def cli_monitoring_examples():
             text=True,
             timeout=15
         )
-        print("   ✅ Basic monitoring completed")
+        print("   Basic monitoring completed")
     except subprocess.TimeoutExpired:
-        print("   ⚠️  Monitoring timed out (expected)")
+        print("   Monitoring timed out (expected)")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"   Error: {e}")
     
     print("\n2. JSON CLI monitoring:")
     try:
@@ -256,17 +255,17 @@ def cli_monitoring_examples():
             json_line = lines[-1]  # Last line should be JSON
             try:
                 data = json.loads(json_line)
-                print(f"   ✅ JSON monitoring completed")
+                print(f"   JSON monitoring completed")
                 print(f"   - Data points: {data.get('total_points', 0)}")
                 print(f"   - CPU average: {data.get('summary', {}).get('cpu_avg', 0):.1f}%")
             except json.JSONDecodeError:
-                print("   ⚠️  JSON parsing failed")
+                print("   JSON parsing failed")
         else:
-            print(f"   ❌ Command failed with code {result.returncode}")
+            print(f"   Command failed with code {result.returncode}")
     except subprocess.TimeoutExpired:
-        print("   ⚠️  JSON monitoring timed out")
+        print("   JSON monitoring timed out")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"   Error: {e}")
 
 
 def main():

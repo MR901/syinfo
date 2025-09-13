@@ -7,8 +7,8 @@ import urllib.request
 import getmac
 from scapy.all import ARP, Ether, srp
 
-from syinfo.constants import UNKNOWN, NEED_SUDO
-from syinfo.utils import Execute
+from syinfo.constants import NEED_SUDO, UNKNOWN
+from syinfo.core.utils import Execute
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"
@@ -25,7 +25,9 @@ def get_vendor(mac_address):
     except:
         # urllib.error.HTTPError: HTTP Error 429: Too Many Requests
         try:
-            device = urllib.request.urlopen(f"https://api.maclookup.app/v2/macs/{mac_address}")
+            device = urllib.request.urlopen(
+                f"https://api.maclookup.app/v2/macs/{mac_address}",
+            )
             device = (device.read().decode("utf-8")).split(",")
             device = (device[3]).replace('company":', "").replace('"', "")
         except:
@@ -42,7 +44,7 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
     # Check for the run environment
     plat = platform.system()
     if ((plat == "Linux") or (plat == "Darwin")) and (os.getuid() == 1000):
-        print("\033[1m\033[31mPlease run search_devices_on_network() with sudo access!\033[0m")
+        # Return NEED_SUDO without printing - caller will handle message display
         return NEED_SUDO
 
     # get needed infomation
@@ -63,26 +65,26 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
     }
     if seach_device_vendor_too:
         connected_devices[current_ip_on_network]["vendor"] = get_vendor(
-            interface_mac_address)
+            interface_mac_address,
+        )
 
     if debug:
         print("Searching Network", end="", flush=True)
     while start <= time:
         start += 1
         devided = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=gateway + "/24")
-        packets = srp(devided, timeout=0.5, verbose=False)[0]  # "0.5" because of double attempts per second
+        packets = srp(devided, timeout=0.5, verbose=False)[
+            0
+        ]  # "0.5" because of double attempts per second
 
         for result in packets:
             network_ip = result[1].psrc
             mac = result[1].hwsrc
 
-            if (
-                (network_ip in connected_devices)
-                and (
-                    (seach_device_vendor_too is False)
-                    or ("device_vendor" not in connected_devices[network_ip])
-                    or (connected_devices[network_ip]["device_vendor"] != UNKNOWN)
-                )
+            if (network_ip in connected_devices) and (
+                (seach_device_vendor_too is False)
+                or ("device_vendor" not in connected_devices[network_ip])
+                or (connected_devices[network_ip]["device_vendor"] != UNKNOWN)
             ):
                 continue
 
@@ -100,6 +102,7 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
         print(" complete.")
 
     return connected_devices
+
 
 if __name__ == "__main__":
     connected_devices = search_devices_on_network(time=10, seach_device_vendor_too=True)

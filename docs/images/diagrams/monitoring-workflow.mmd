@@ -1,0 +1,71 @@
+sequenceDiagram
+    %% SyInfo Monitoring Workflow
+    
+    participant User
+    participant CLI as CLI Interface
+    participant Monitor as SimpleMonitor
+    participant System as System APIs
+    participant Thread as Monitor Thread
+    participant Output as Output Handler
+    
+    Note over User,Output: System Monitoring Workflow
+    
+    User->>CLI: syinfo -m -t 60 -i 5
+    Note right of User: Monitor for 60s, 5s intervals
+    
+    CLI->>Monitor: create_simple_monitor(interval=5)
+    Monitor-->>CLI: monitor instance
+    
+    CLI->>Monitor: start(duration=60)
+    Monitor->>Thread: spawn monitoring thread
+    Note right of Thread: Background monitoring
+    
+    CLI->>CLI: sleep(61) # Wait for completion
+    
+    loop Every 5 seconds (for 60 seconds)
+        Thread->>System: collect CPU usage
+        System-->>Thread: cpu_percent: 15.2%
+        
+        Thread->>System: collect memory usage  
+        System-->>Thread: memory_percent: 68.5%
+        
+        Thread->>System: collect disk usage
+        System-->>Thread: disk_percent: 82.3%
+        
+        Thread->>System: collect network I/O
+        System-->>Thread: bytes_sent/recv, packets
+        
+        Thread->>Thread: store data point
+        Note right of Thread: {timestamp, cpu, memory, disk, network}
+        
+        Thread->>Thread: wait 5 seconds
+    end
+    
+    Note over Thread: 60 seconds elapsed, stop monitoring
+    Thread->>Thread: calculate summary stats
+    Note right of Thread: averages, peaks, duration
+    
+    CLI->>Monitor: check if running
+    Monitor-->>CLI: is_running: false
+    
+    CLI->>Monitor: get collected data
+    Monitor-->>CLI: {total_points, data_points, summary}
+    
+    alt JSON Output (-j flag)
+        CLI->>Output: format as JSON
+        Output-->>User: {"total_points": 12, "data_points": [...], "summary": {...}}
+    else Standard Output
+        CLI->>Output: format summary table
+        Output-->>User: Performance Summary Display
+        Note left of User: CPU Avg: 15.2%, Peak: 25.1%<br/>Memory Avg: 68.5%, Peak: 70.2%
+    end
+    
+    Note over User,Output: Monitoring Complete
+    
+    %% Styling
+    participant User
+    participant CLI as CLI Interface  
+    participant Monitor as SimpleMonitor
+    participant System as System APIs
+    participant Thread as Monitor Thread
+    participant Output as Output Handler

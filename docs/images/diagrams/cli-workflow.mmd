@@ -1,0 +1,117 @@
+graph TD
+    %% SyInfo CLI Workflow - Flag-based Interface
+    
+    START["`**syinfo command**
+    User runs CLI`"]
+    
+    PARSE["`**Argument Parser**
+    Parse flags and options`"]
+    
+    subgraph "Flag Detection"
+        DEVICE_FLAG{"`**-d flag?**
+        Device info`"}
+        NETWORK_FLAG{"`**-n flag?**
+        Network info`"}
+        SYSTEM_FLAG{"`**-s flag?**
+        System info`"}
+        MONITOR_FLAG{"`**-m flag?**
+        Monitoring`"}
+    end
+    
+    subgraph "Data Collection"
+        GET_DEVICE["`**DeviceInfo.get_all()**
+        Collect hardware info`"]
+        
+        GET_NETWORK["`**NetworkInfo.get_all()**
+        Scan network devices`"]
+        
+        GET_SYSTEM["`**SysInfo.get_all()**
+        Combined device+network`"]
+        
+        START_MONITOR["`**SimpleMonitor**
+        Start monitoring process`"]
+    end
+    
+    subgraph "Output Options"
+        PRINT_FLAG{"`**-p flag?**
+        Disable print`"}
+        JSON_FLAG{"`**-j flag?**
+        JSON output`"}
+    end
+    
+    subgraph "Output Generation"
+        TREE_OUTPUT["`**Tree Display**
+        Formatted system tree`"]
+        
+        JSON_OUTPUT["`**JSON Output**
+        Machine-readable data`"]
+        
+        SILENT["`**Silent Mode**
+        No formatted output`"]
+        
+        MONITOR_DISPLAY["`**Monitor Summary**
+        Performance metrics`"]
+        
+        MONITOR_JSON["`**Monitor JSON**
+        Real-time data`"]
+    end
+    
+    FINISH["`**Complete**
+    Return exit code`"]
+    
+    %% Main Flow
+    START --> PARSE
+    PARSE --> DEVICE_FLAG
+    PARSE --> NETWORK_FLAG
+    PARSE --> SYSTEM_FLAG
+    PARSE --> MONITOR_FLAG
+    
+    %% Collection Routes
+    DEVICE_FLAG -->|Yes| GET_DEVICE
+    NETWORK_FLAG -->|Yes| GET_NETWORK
+    SYSTEM_FLAG -->|Yes| GET_SYSTEM
+    MONITOR_FLAG -->|Yes| START_MONITOR
+    
+    %% Output Decision Flow
+    GET_DEVICE --> PRINT_FLAG
+    GET_NETWORK --> PRINT_FLAG
+    GET_SYSTEM --> PRINT_FLAG
+    START_MONITOR --> PRINT_FLAG
+    
+    PRINT_FLAG -->|No| JSON_FLAG
+    PRINT_FLAG -->|Yes| JSON_FLAG
+    
+    %% Output Generation
+    JSON_FLAG -->|No & Print=No| TREE_OUTPUT
+    JSON_FLAG -->|Yes & Print=No| JSON_OUTPUT
+    JSON_FLAG -->|No & Print=Yes| SILENT
+    JSON_FLAG -->|Yes & Print=Yes| JSON_OUTPUT
+    
+    START_MONITOR -->|Print=No| MONITOR_DISPLAY
+    START_MONITOR -->|Print=Yes & JSON=Yes| MONITOR_JSON
+    
+    %% Completion
+    TREE_OUTPUT --> FINISH
+    JSON_OUTPUT --> FINISH
+    SILENT --> FINISH
+    MONITOR_DISPLAY --> FINISH
+    MONITOR_JSON --> FINISH
+    
+    %% No flags case
+    DEVICE_FLAG -->|No| NETWORK_FLAG
+    NETWORK_FLAG -->|No| SYSTEM_FLAG
+    SYSTEM_FLAG -->|No| MONITOR_FLAG
+    MONITOR_FLAG -->|No| HELP["`**Show Help**
+    Display usage info`"]
+    HELP --> FINISH
+    
+    %% Styling
+    classDef startEnd fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
+    classDef decision fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef process fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef output fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class START,FINISH startEnd
+    class DEVICE_FLAG,NETWORK_FLAG,SYSTEM_FLAG,MONITOR_FLAG,PRINT_FLAG,JSON_FLAG decision
+    class PARSE,GET_DEVICE,GET_NETWORK,GET_SYSTEM,START_MONITOR process
+    class TREE_OUTPUT,JSON_OUTPUT,SILENT,MONITOR_DISPLAY,MONITOR_JSON,HELP output

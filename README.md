@@ -1,5 +1,4 @@
 # SyInfo - Simple System Information Library
-# SyInfo - Simple System Information Library
 <p align="center">
   <img src="docs/images/logo.png" alt="SyInfo logo - textual art" width="420" />
 </p>

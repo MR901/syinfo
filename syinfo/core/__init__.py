@@ -1,23 +1,43 @@
-"""
-Core system information modules.
+"""Core module for SyInfo.
 
-This module provides the original SyInfo functionality for gathering
-system and network information.
+This module provides the core functionality for system information gathering,
+including device information, system information, and utility functions.
 """
 
+# Import core classes and functions
 from .device_info import DeviceInfo
-from .network_info import NetworkInfo
 from .sys_info import SysInfo, print_brief_sys_info
-from .search_network import search_devices_on_network, get_vendor
-from .utils import Execute, HumanReadable
+from .utils import Execute, HumanReadable, create_highlighted_heading
+
+# Exceptions are now imported from parent package
+
+# Try to import network info if available
+try:
+    from .network_info import NetworkInfo
+
+    NETWORK_AVAILABLE = True
+except ImportError:
+    NETWORK_AVAILABLE = False
+
+    # Create dummy class for compatibility
+    class NetworkInfo:
+        def __init__(self, *args, **kwargs):
+            raise ImportError(
+                "Network features not available. Install required dependencies.",
+            )
+
 
 __all__ = [
+    # Core classes
     "DeviceInfo",
-    "NetworkInfo",
     "SysInfo",
-    "print_brief_sys_info",
-    "search_devices_on_network",
-    "get_vendor",
+    "NetworkInfo",
+    # Utility classes
+    "HumanReadable",
     "Execute",
-    "HumanReadable"
-] 
+    # Utility functions
+    "create_highlighted_heading",
+    "print_brief_sys_info",
+    # Feature flag
+    "NETWORK_AVAILABLE",
+]

@@ -44,9 +44,7 @@ def search_devices_on_network(time=10, seach_device_vendor_too=True):
     # Check for the run environment
     plat = platform.system()
     if ((plat == "Linux") or (plat == "Darwin")) and (os.getuid() == 1000):
-        print(
-            "\033[1m\033[31mPlease run search_devices_on_network() with sudo access!\033[0m",
-        )
+        # Return NEED_SUDO without printing - caller will handle message display
         return NEED_SUDO
 
     # get needed infomation

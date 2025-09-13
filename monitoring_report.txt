@@ -1,0 +1,10 @@
+SyInfo Monitoring Report
+=========================
+
+Duration: 8 seconds
+Data Points: 4
+CPU Average: 8.1%
+CPU Maximum: 8.4%
+Memory Average: 68.5%
+Memory Peak: 68.5%
+Disk Usage: 82.8%

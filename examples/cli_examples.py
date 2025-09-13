@@ -1,196 +1,258 @@
 #!/usr/bin/env python3
 """
-CLI Examples
+SyInfo CLI Examples
 
-This example demonstrates how to use SyInfo's CLI features
-both programmatically and through command-line interface.
+Comprehensive examples for using the SyInfo command line interface.
+This file demonstrates all CLI capabilities including basic info gathering,
+network operations, system monitoring, data export, and integration with other tools.
+
+Author: SyInfo Team
+License: MIT
 """
 
-import subprocess
+import os
 import sys
+import time
+import json
+import subprocess
 from pathlib import Path
 
-# Add project root to path for imports
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
-from syinfo.cli.commands import analyze_commands, info_commands, monitor_commands
-
-
-def programmatic_cli_example():
-    """Demonstrate using CLI commands programmatically."""
+def basic_information_examples():
+    """Demonstrate basic information gathering with flag-based CLI."""
     print("=" * 60)
-    print("SyInfo - Programmatic CLI Example")
+    print("SyInfo - Basic Information Examples")
     print("=" * 60)
 
-    # 1. System Information Commands
-    print("\n1. System Information Commands:")
-    print("-" * 30)
-
-    # Get system info
-    result = info_commands.InfoCommands.get_system_info()
-    if result["success"]:
-        print("System Information:")
-        print(f"  OS: {result['data']['os']}")
-        print(f"  Kernel: {result['data']['kernel']}")
-        print(f"  Architecture: {result['data']['architecture']}")
-    else:
-        print(f"Error: {result['error']}")
-
-    # Get device info
-    result = info_commands.InfoCommands.get_device_info()
-    if result["success"]:
-        print("\nDevice Information:")
-        print(f"  CPU: {result['data']['cpu']['model']}")
-        print(f"  Memory: {result['data']['memory']['total']}")
-        print(f"  Disk: {result['data']['disk']['total']}")
-    else:
-        print(f"Error: {result['error']}")
-
-    # Get network info
-    result = info_commands.InfoCommands.get_network_info()
-    if result["success"]:
-        print("\nNetwork Information:")
-        for interface, info in result["data"]["interfaces"].items():
-            if info["addresses"]:
-                print(f"  {interface}: {info['addresses'].get('inet', 'N/A')}")
-    else:
-        print(f"Error: {result['error']}")
-
-    # 2. Monitoring Commands
-    print("\n2. Monitoring Commands:")
-    print("-" * 30)
-
-    # Start monitoring (brief example)
-    result = monitor_commands.MonitorCommands.start_monitoring(
-        interval=10, duration=5, output_dir="./monitoring_output",
-    )
-    if result["success"]:
-        print(f"Monitoring: {result['message']}")
-    else:
-        print(f"Monitoring Error: {result['error']}")
-
-    # Get monitoring status
-    result = monitor_commands.MonitorCommands.get_status()
-    if result["success"]:
-        print(f"Monitoring Status: {result['data']['status']}")
-    else:
-        print(f"Status Error: {result['error']}")
-
-    # 3. Analysis Commands
-    print("\n3. Analysis Commands:")
-    print("-" * 30)
-
-    # Analyze system performance
-    result = analyze_commands.AnalyzeCommands.analyze_system_performance()
-    if result["success"]:
-        print("System Performance Analysis:")
-        print(f"  CPU Usage: {result['data']['cpu_usage']}%")
-        print(f"  Memory Usage: {result['data']['memory_usage']}%")
-        print(f"  Disk Usage: {result['data']['disk_usage']}%")
-    else:
-        print(f"Analysis Error: {result['error']}")
-
-    # Get system health
-    result = analyze_commands.AnalyzeCommands.get_system_health()
-    if result["success"]:
-        print(f"\nSystem Health: {result['data']['health']}")
-        print(f"Score: {result['data']['score']}/100")
-        if result["data"]["issues"]:
-            print("Issues:")
-            for issue in result["data"]["issues"]:
-                print(f"  - {issue}")
-    else:
-        print(f"Health Check Error: {result['error']}")
+    # ===============================================
+    # DEVICE INFORMATION
+    # ===============================================
+    print("\n=== Device Information ===")
+    os.system("syinfo -d")
+    
+    print("\n=== Device Information (JSON) ===")
+    os.system("syinfo -dj | jq '.cpu_info.model'")
+    
+    # ===============================================
+    # NETWORK OPERATIONS
+    # ===============================================
+    print("\n=== Network Discovery ===")
+    os.system("syinfo -n -t 10")
+    
+    print("\n=== Network Information (JSON) ===")
+    os.system("syinfo -nj -t 8 | jq '.network_devices | length'")
+    
+    # ===============================================
+    # SYSTEM INFORMATION (COMBINED)
+    # ===============================================
+    print("\n=== Combined System Information ===")
+    os.system("syinfo -s -t 10")
 
 
-def command_line_example():
-    """Demonstrate command-line interface usage."""
+def monitoring_examples():
+    """Demonstrate system monitoring capabilities."""
     print("\n" + "=" * 60)
-    print("SyInfo - Command Line Interface Examples")
+    print("SyInfo - System Monitoring Examples")
     print("=" * 60)
 
-    # Example commands to run
-    commands = [
-        "python -m syinfo info system",
-        "python -m syinfo info device",
-        "python -m syinfo info network",
-        "python -m syinfo monitor start --interval 5 --duration 10",
-        "python -m syinfo analyze performance",
-        "python -m syinfo analyze health",
-        "python -m syinfo --help",
-    ]
+    # ===============================================
+    # BASIC MONITORING
+    # ===============================================
+    print("\n=== Basic System Monitoring ===")
+    print("Monitoring system for 15 seconds with 3-second intervals...")
+    os.system("syinfo -m -t 15 -i 3")
+    
+    # ===============================================
+    # JSON MONITORING DATA
+    # ===============================================
+    print("\n=== JSON Monitoring Data ===")
+    print("Getting monitoring data as JSON...")
+    os.system("syinfo -mpj -t 12 -i 2 | tail -1 | jq '.summary'")
+    
+    # ===============================================
+    # MONITORING METRICS EXTRACTION
+    # ===============================================
+    print("\n=== Monitoring Metrics Extraction ===")
+    
+    print("CPU Average:")
+    os.system("syinfo -mpj -t 10 -i 2 | tail -1 | jq -r '.summary.cpu_avg'")
+    
+    print("\nMemory Peak:")
+    os.system("syinfo -mpj -t 10 -i 2 | tail -1 | jq -r '.summary.memory_peak'")
+    
+    print("\nData Points Count:")
+    os.system("syinfo -mpj -t 10 -i 2 | tail -1 | jq '.total_points'")
 
-    print("Available CLI commands:")
-    for i, cmd in enumerate(commands, 1):
-        print(f"{i}. {cmd}")
 
-    print("\nTo run these commands:")
-    print("1. Navigate to the project root directory")
-    print("2. Run: python -m syinfo <command>")
-    print("\nExamples:")
-    print("  python -m syinfo info system")
-    print("  python -m syinfo monitor start --interval 30")
-    print("  python -m syinfo analyze health")
-
-
-def subprocess_example():
-    """Demonstrate running CLI commands via subprocess."""
+def data_export_examples():
+    """Demonstrate data export capabilities."""
     print("\n" + "=" * 60)
-    print("SyInfo - Subprocess CLI Example")
+    print("SyInfo - Data Export Examples")
     print("=" * 60)
 
-    # Change to project root
-    project_root = Path(__file__).parent.parent
+    # ===============================================
+    # SYSTEM INFO EXPORT
+    # ===============================================
+    print("\n=== Device Info Export ===")
+    print("Exporting device information to JSON file...")
+    os.system("syinfo -dpj > device_info.json")
+    print("Device info saved to device_info.json")
+    
+    # ===============================================
+    # MONITORING DATA EXPORT
+    # ===============================================
+    print("\n=== Monitoring Data Export ===")
+    print("Exporting 30-second monitoring data...")
+    os.system("syinfo -mpj -t 30 -i 5 | tail -1 > monitoring_data.json")
+    print("Monitoring data saved to monitoring_data.json")
+    
+    # ===============================================
+    # NETWORK DATA EXPORT
+    # ===============================================
+    print("\n=== Network Data Export ===")
+    print("Exporting network scan data...")
+    os.system("syinfo -npj -t 8 | tail -1 > network_scan.json")
+    print("Network scan saved to network_scan.json")
 
-    try:
-        # Run system info command
-        print("Running: python -m syinfo info system")
-        result = subprocess.run(
-            ["python", "-m", "syinfo", "info", "system"],
-            cwd=project_root,
-            capture_output=True,
-            text=True,
-            timeout=10, check=False,
-        )
 
-        if result.returncode == 0:
-            print("System Info Output:")
-            print(result.stdout)
-        else:
-            print(f"Error: {result.stderr}")
+def advanced_usage_examples():
+    """Demonstrate advanced CLI usage patterns."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Advanced Usage Examples")
+    print("=" * 60)
 
-        # Run help command
-        print("\nRunning: python -m syinfo --help")
-        result = subprocess.run(
-            ["python", "-m", "syinfo", "--help"],
-            cwd=project_root,
-            capture_output=True,
-            text=True,
-            timeout=10, check=False,
-        )
+    # ===============================================
+    # PERFORMANCE ANALYSIS
+    # ===============================================
+    print("\n=== Performance Analysis ===")
+    
+    print("Finding high CPU usage periods:")
+    os.system("""syinfo -mpj -t 20 -i 2 | tail -1 | jq '.data_points[] | select(.cpu_percent > 5) | "\\(.timestamp): \\(.cpu_percent)%"'""")
+    
+    print("\nNetwork throughput calculation:")
+    os.system("""syinfo -mpj -t 15 -i 5 | tail -1 | jq '.data_points | [.[0], .[-1]] | .[1].network_io.bytes_sent - .[0].network_io.bytes_sent | . / 1024 / 1024 | "Throughput: \\(.) MB"'""")
+    
+    # ===============================================
+    # MONITORING AUTOMATION
+    # ===============================================
+    print("\n=== Monitoring Automation ===")
+    
+    print("CPU threshold monitoring:")
+    cpu_check = """
+CPU_AVG=$(syinfo -mpj -t 10 -i 2 | tail -1 | jq -r '.summary.cpu_avg')
+if (( $(echo "$CPU_AVG > 2" | bc -l) 2>/dev/null )); then
+  echo "CPU usage: $CPU_AVG%"
+else
+  echo "Low CPU usage detected"
+fi
+"""
+    os.system(cpu_check)
+    
+    # ===============================================
+    # DATA PROCESSING PIPELINES
+    # ===============================================
+    print("\n=== Data Processing Pipelines ===")
+    
+    print("Memory usage trend analysis:")
+    os.system("syinfo -mpj -t 15 -i 3 | tail -1 | jq '.data_points | [.[].memory_percent] | add / length | \"Average Memory: \\(.)%\"'")
+    
+    print("\nSystem health summary:")
+    os.system("""syinfo -mpj -t 12 -i 2 | tail -1 | jq '{
+      cpu_status: (if .summary.cpu_avg > 70 then "HIGH" elif .summary.cpu_avg > 30 then "MEDIUM" else "LOW" end),
+      memory_status: (if .summary.memory_avg > 80 then "HIGH" elif .summary.memory_avg > 50 then "MEDIUM" else "LOW" end),
+      duration: .summary.duration_seconds,
+      data_points: .total_points
+    }'""")
 
-        if result.returncode == 0:
-            print("Help Output:")
-            print(result.stdout)
-        else:
-            print(f"Error: {result.stderr}")
 
-    except subprocess.TimeoutExpired:
-        print("Command timed out")
-    except Exception as e:
-        print(f"Error running command: {e}")
+def integration_examples():
+    """Demonstrate integration with other tools and systems."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Integration Examples")
+    print("=" * 60)
+
+    # ===============================================
+    # LOG FILE INTEGRATION
+    # ===============================================
+    print("\n=== Log File Integration ===")
+    
+    print("Timestamped performance logging:")
+    log_command = '''syinfo -mpj -t 8 -i 2 | tail -1 | jq -r '"[" + now + "] CPU: " + (.summary.cpu_avg | tostring) + "% Memory: " + (.summary.memory_avg | tostring) + "%"' '''
+    os.system(log_command)
+    
+    # ===============================================
+    # MONITORING SCRIPTS
+    # ===============================================
+    print("\n=== Monitoring Scripts ===")
+    
+    print("System status check script:")
+    status_script = """
+RESULT=$(syinfo -mpj -t 6 -i 1 | tail -1)
+CPU=$(echo "$RESULT" | jq -r '.summary.cpu_avg // 0')
+MEM=$(echo "$RESULT" | jq -r '.summary.memory_avg // 0')
+
+echo "System Status:"
+echo "  CPU: ${CPU}%"
+echo "  Memory: ${MEM}%"
+echo "  Status: $(echo "$RESULT" | jq -r 'if (.summary.cpu_avg // 0) > 80 or (.summary.memory_avg // 0) > 90 then "WARNING" else "OK" end')"
+"""
+    os.system(status_script)
+
+
+def help_and_usage():
+    """Display help and usage information."""
+    print("\n" + "=" * 60)
+    print("SyInfo - Help and Usage")
+    print("=" * 60)
+    
+    print("\n=== CLI Help ===")
+    os.system("syinfo --help")
+    
+    print("\n=== Version Information ===")
+    os.system("syinfo --version")
 
 
 def main():
     """Run all CLI examples."""
-    programmatic_cli_example()
-    command_line_example()
-    subprocess_example()
-
-    print("\n" + "=" * 60)
-    print("CLI examples completed!")
-    print("=" * 60)
+    print("SyInfo CLI Examples")
+    print("==================")
+    print("This script demonstrates the full range of SyInfo CLI capabilities")
+    print("including device information, network operations, system monitoring,")
+    print("and data export features.\n")
+    
+    try:
+        # Basic information gathering
+        basic_information_examples()
+        
+        # System monitoring
+        monitoring_examples()
+        
+        # Data export
+        data_export_examples()
+        
+        # Advanced usage patterns
+        advanced_usage_examples()
+        
+        # Integration examples
+        integration_examples()
+        
+        # Help and usage
+        help_and_usage()
+        
+        print("\n" + "=" * 60)
+        print("All examples completed successfully!")
+        print("Check the generated JSON files:")
+        print("  - device_info.json")
+        print("  - monitoring_data.json") 
+        print("  - network_scan.json")
+        print("=" * 60)
+        
+    except KeyboardInterrupt:
+        print("\nExamples interrupted by user.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nError running examples: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

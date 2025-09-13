@@ -4,34 +4,36 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, and optional lightweight monitoring.
+A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, and real-time system monitoring.
 
 ## Key Features
 
-### Hardware Information
+### 🖥️ Device Information
 - **CPU Details**: Model, cores, frequency, usage statistics
 - **Memory Analysis**: RAM, swap, detailed memory mapping
 - **Storage Info**: Disk usage, I/O statistics, filesystem details
 - **GPU Detection**: NVIDIA, AMD, Intel graphics cards
 - **Device Identification**: Manufacturer, model, serial numbers
 
-### Network Capabilities  
+### 🌐 Network Capabilities  
 - **Interface Detection**: All network adapters with detailed info
 - **Connectivity Analysis**: Public/private IP, DNS, gateways
 - **Device Discovery**: Scan and identify devices on local network
-- **Traffic Monitoring**: Network I/O statistics and trends
+- **Network I/O Statistics**: Real-time and historical data
 - **WiFi Information**: SSID, signal strength, encryption
 
-### Simple Monitoring (Optional)
-- **Lightweight Monitoring**: Basic CPU, memory, disk tracking
-- **Data Export**: JSON, CSV, YAML formats
-- **Simple API**: Easy-to-use monitoring functions
+### 📊 System Monitoring (New!)
+- **Real-time Monitoring**: CPU, memory, disk, and network tracking
+- **Customizable Intervals**: 1 second to hours, configurable duration
+- **JSON Export**: Perfect for scripting and automation with jq
+- **Performance Analytics**: Averages, peaks, and trend analysis
+- **Non-blocking**: Background monitoring with graceful interruption
 
-### Developer Features
-- **Type Hints**: Full typing support for better IDE experience
-- **Simple Exceptions**: Clean error handling
-- **Easy Testing**: Straightforward test structure
-- **Clear Documentation**: Simple, focused documentation
+### 💻 Powerful CLI Interface
+- **Flag-based Commands**: Easy scripting (`syinfo -npj -t 10 | jq '.summary'`)
+- **JSON Output**: Native jq compatibility for data processing
+- **Monitoring Support**: Real-time system performance tracking
+- **Flexible Options**: Combine flags for exactly what you need
 
 ## Installation
 
@@ -39,10 +41,7 @@ A simple, well-designed Python library for gathering system information includin
 # Basic installation
 pip install syinfo
 
-# With monitoring features
-pip install syinfo[monitoring]
-
-# With network features  
+# With network discovery features
 pip install syinfo[network]
 
 # Full installation (all features)
@@ -61,7 +60,6 @@ info = syinfo.get_system_info()
 print(f"System: {info['system_name']}")
 print(f"CPU: {info['cpu_model']} ({info['cpu_cores']} cores)")
 print(f"Memory: {info['total_memory']} ({info['memory_usage_percent']:.1f}% used)")
-print(f"Public IP: {info['public_ip']}")
 ```
 
 ### Hardware Information
@@ -72,7 +70,7 @@ hardware = syinfo.get_hardware_info()
 
 print("CPU Information:")
 print(f"  Model: {hardware['cpu']['model']}")
-print(f"  Cores: {hardware['cpu']['cores_physical']} physical, {hardware['cpu']['cores_logical']} logical")
+print(f"  Cores: {hardware['cpu']['cores_physical']} physical")
 print(f"  Usage: {hardware['cpu']['usage_percent']:.1f}%")
 
 print("Memory Information:")  
@@ -92,40 +90,158 @@ for device in devices:
     print(f"  {device['ip']:15} - {device['hostname']} ({device['vendor']})")
 ```
 
-### System Tree View
-
-```python
-# Display detailed system information in tree format
-syinfo.print_system_tree()
-```
-
-### Simple Monitoring
+### System Monitoring (New!)
 
 ```python
 # Create a simple system monitor  
-monitor = syinfo.create_simple_monitor(interval=30)
+monitor = syinfo.create_simple_monitor(interval=5)
 
-# Start monitoring for 5 minutes
-monitor.start(duration=300)
+# Start monitoring for 60 seconds
+monitor.start(duration=60)
+import time
+time.sleep(61)
 results = monitor.stop()
+
 print(f"Average CPU Usage: {results['summary']['cpu_avg']:.1f}%")
 print(f"Peak Memory Usage: {results['summary']['memory_peak']:.1f}%")
+print(f"Data Points Collected: {results['total_points']}")
 ```
 
-### Command Line Interface
+## CLI Interface - Flag-Based Commands
 
+### Device Information
 ```bash
-# System information
-syinfo info system
+# Device/hardware information
+syinfo -d
 
-# Hardware details
-syinfo info device
+# With JSON output
+syinfo -dj | jq '.cpu_info.model'
+```
 
+### Network Operations
+```bash
 # Network information
-syinfo info network
+syinfo -n -t 10          # Scan network for 10 seconds
 
-# Export system info
-syinfo export --format json --output system_info.json
+# Network with device info
+syinfo -s -t 15          # Combined system info, 15-second network scan
+
+# JSON output for parsing
+syinfo -nj -t 5 | jq '.network_devices | length'
+```
+
+### System Monitoring (New!)
+```bash
+# Monitor system for 30 seconds, 5-second intervals
+syinfo -m -t 30 -i 5
+
+# JSON monitoring data
+syinfo -mpj -t 60 -i 10 | tail -1 | jq '.summary'
+
+# Extract specific metrics
+syinfo -mpj -t 120 -i 15 | tail -1 | jq -r '.summary.cpu_avg'
+
+# Continuous monitoring to file
+syinfo -mpj -t 300 -i 30 | tail -1 > performance.json
+```
+
+### Advanced CLI Usage
+```bash
+# Disable output, just get JSON
+syinfo -dpj > device_info.json
+
+# Network scan without vendor lookup (faster)
+syinfo -noj -t 5
+
+# Monitor and process with jq
+syinfo -mpj -t 60 -i 10 | tail -1 | jq '.data_points[].cpu_percent | max'
+
+# Complex monitoring workflows
+CPU_AVG=$(syinfo -mpj -t 30 -i 5 | tail -1 | jq -r '.summary.cpu_avg')
+if (( $(echo "$CPU_AVG > 80" | bc -l) )); then
+  echo "High CPU usage detected: $CPU_AVG%"
+fi
+```
+
+## CLI Flag Reference
+
+| Flag | Long Flag | Description |
+|------|-----------|-------------|
+| `-d` | `--device` | Show device/hardware information |
+| `-n` | `--network` | Show network information and scan devices |
+| `-s` | `--system` | Show combined device and network information |
+| `-m` | `--monitor` | **Start system monitoring** |
+| `-t` | `--time` | Duration in seconds (network scan or monitoring) |
+| `-i` | `--interval` | **Monitoring interval in seconds (default: 5)** |
+| `-p` | `--disable-print` | Suppress formatted output |
+| `-j` | `--return-json` | Output as JSON |
+| `-o` | `--disable-vendor-search` | Skip vendor lookup (faster network scans) |
+
+## System Monitoring Features
+
+### Real-time Performance Tracking
+- **CPU Usage**: Per-core and overall utilization
+- **Memory Statistics**: Usage, available, swap information
+- **Disk I/O**: Read/write operations and usage percentages
+- **Network Activity**: Bytes and packets sent/received
+
+### JSON Data Structure
+```json
+{
+  "total_points": 12,
+  "data_points": [
+    {
+      "timestamp": "2025-09-14T02:20:42.029017",
+      "cpu_percent": 7.8,
+      "memory_percent": 68.2,
+      "disk_percent": 82.8,
+      "network_io": {
+        "bytes_sent": 3301001170,
+        "bytes_recv": 4409283972,
+        "packets_sent": 3556700,
+        "packets_recv": 5418377
+      }
+    }
+  ],
+  "summary": {
+    "duration_seconds": 60,
+    "cpu_avg": 5.3,
+    "cpu_max": 8.3,
+    "memory_avg": 68.2,
+    "memory_peak": 68.4,
+    "disk_avg": 82.8,
+    "start_time": "2025-09-14T02:20:42.029017",
+    "end_time": "2025-09-14T02:21:42.029017"
+  }
+}
+```
+
+### Monitoring Use Cases
+```bash
+# Server performance monitoring
+syinfo -mpj -t 3600 -i 60 | tail -1 > hourly_stats.json
+
+# Quick system check
+syinfo -m -t 10 -i 2
+
+# CPU spike detection
+syinfo -mpj -t 300 -i 5 | tail -1 | jq '.data_points[] | select(.cpu_percent > 90)'
+
+# Network throughput analysis
+syinfo -mpj -t 120 -i 10 | tail -1 | jq '.data_points | [.[0], .[-1]] | .[1].network_io.bytes_sent - .[0].network_io.bytes_sent'
+```
+
+## Error Handling
+
+```python
+from syinfo.exceptions import SystemAccessError, DataCollectionError
+
+try:
+    info = syinfo.get_system_info()
+except SystemAccessError as e:
+    print(f"Permission error: {e}")
+except DataCollectionError as e:
+    print(f"Data collection failed: {e}")
 ```
 
 ## Performance & Reliability
@@ -134,196 +250,48 @@ syinfo export --format json --output system_info.json
 - **Data Collection**: < 2 seconds for complete system scan
 - **Memory Usage**: < 50MB peak memory consumption  
 - **Network Scan**: < 15 seconds for typical home network
-- **CPU Overhead**: < 1% during continuous monitoring
+- **Monitoring Overhead**: < 1% CPU during continuous monitoring
 
-### Error Handling
-```python
-from syinfo.exceptions import SystemAccessError, DataCollectionError
+## Development
 
-try:
-    info = syinfo.get_system_info()
-except SystemAccessError as e:
-    print(f"Permission error: {e}")
-    print(f"Try running with elevated privileges")
-except DataCollectionError as e:
-    print(f"Data collection failed: {e}")
-    print(f"Some system information may be unavailable")
-```
-
-## Advanced Usage
-
-### Custom Data Collection
-
-```python
-from syinfo.core import DeviceInfoCollector, NetworkScanner
-
-# Custom device information collector
-collector = DeviceInfoCollector()
-device_info = collector.get_system_info()
-
-# Advanced network scanning
-scanner = NetworkScanner()
-devices = scanner.scan_network(
-    timeout=30,
-    resolve_hostnames=True,
-    get_vendor_info=True,
-    port_scan=True
-)
-```
-
-### Configuration & Customization
-
-```python
-# Configure monitoring
-monitor_config = {
-    'interval': 60,
-    'metrics': ['cpu', 'memory', 'disk', 'network'],
-    'thresholds': {
-        'cpu_warning': 80,
-        'memory_critical': 95
-    },
-    'export_format': 'json',
-    'data_retention_days': 30
-}
-
-monitor = syinfo.create_system_monitor(**monitor_config)
-```
-
-### Data Export & Integration
-
-```python
-# Export system information
-json_data = syinfo.export_system_info('json')
-yaml_data = syinfo.export_system_info('yaml', output_file='system.yaml')
-
-# Integration with monitoring systems
-data = syinfo.get_system_info()
-# Send to Prometheus, InfluxDB, etc.
-```
-
-## Architecture & Design
-
-### Clean Architecture
-- **Core Domain**: Pure business logic, no external dependencies
-- **Application Layer**: Use cases and application services  
-- **Infrastructure**: External integrations, file systems, networks
-- **Interfaces**: Clean APIs and abstractions
-
-### SOLID Principles
-- **Single Responsibility**: Each class has one reason to change
-- **Open/Closed**: Open for extension, closed for modification
-- **Liskov Substitution**: Derived classes are substitutable
-- **Interface Segregation**: Many specific interfaces
-- **Dependency Inversion**: Depend on abstractions
-
-### Error Handling Strategy
-```python
-# Hierarchical exception handling
-SyInfoException
-├── ConfigurationError
-├── DataCollectionError
-├── NetworkError
-├── SystemAccessError
-├── ValidationError
-├── MonitoringError
-└── StorageError
-```
-
-## Testing & Quality
-
-### Comprehensive Testing
+### Setup
 ```bash
-# Run all tests
+git clone https://github.com/MR901/syinfo.git
+cd syinfo
+python -m venv venv
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+pip install -e .[dev,full]
+```
+
+### Testing
+```bash
+# Run tests
 pytest
 
 # Run with coverage
 pytest --cov=syinfo --cov-report=html
 
-# Run performance tests
-pytest tests/performance/
-
-# Run security tests
-bandit -r syinfo
+# Test monitoring functionality
+python -c "import syinfo; m=syinfo.create_simple_monitor(1); m.start(5); import time; time.sleep(6); print(m.stop())"
 ```
 
-### Code Quality Tools
-- **Black**: Code formatting
-- **isort**: Import sorting  
-- **Ruff**: Fast Python linting
-- **MyPy**: Static type checking
-- **Bandit**: Security scanning
-- **Pre-commit**: Git hooks for quality
+## Examples
 
-## Documentation
-
-### API Reference
-- [Core API](docs/api/core.md) - Basic system information
-- [Monitoring API](docs/api/monitoring.md) - Real-time monitoring
-- [Network API](docs/api/network.md) - Network operations
-- [CLI Reference](docs/cli/index.md) - Command line tools
-
-### Guides
-- [Installation Guide](docs/installation.md)
-- [Quick Start Tutorial](docs/quickstart.md)
-- [Advanced Usage](docs/advanced.md)
-- [Contributing](CONTRIBUTING.md)
-
-### Examples
-- [Basic Usage](examples/basic_usage.py)
-- [Monitoring Setup](examples/monitoring_example.py)
-- [Network Discovery](examples/network_example.py)
-- [Data Export](examples/export_example.py)
+Check out the [examples/](examples/) directory for comprehensive usage examples:
+- [API Usage](examples/api_example.py) - Python API examples
+- [CLI Examples](examples/cli_examples.py) - Command line usage
+- [Monitoring Examples](examples/monitoring_example.py) - System monitoring
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-```bash
-git clone https://github.com/MR901/syinfo.git
-cd syinfo
-python -m venv venv
-source venv/bin/activate
-pip install -e .[dev,full]
-pre-commit install
-```
-
-### Code Standards
-- Follow PEP 8 and use type hints
-- Write comprehensive tests (>80% coverage)
-- Update documentation for changes
-- Use semantic commit messages
-
-## Roadmap
-
-### Version 0.3.0
-- Windows and macOS support
-- Docker container information
-- Cloud provider metadata
-- GraphQL API endpoint
-- Real-time web dashboard
-
-### Version 0.4.0
-- Machine learning anomaly detection
-- Predictive failure analysis
-- Custom plugin system
-- REST API server mode
-- Kubernetes integration
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-- **psutil** - Cross-platform system and process utilities
-- **GPUtil** - GPU monitoring capabilities
-- **scapy** - Network packet manipulation
-- **tabulate** - Pretty-print tabular data
-
 ## Support
 
-- **Documentation**: [https://syinfo.readthedocs.io](https://syinfo.readthedocs.io)
 - **Issues**: [GitHub Issues](https://github.com/MR901/syinfo/issues)  
-- **Discussions**: [GitHub Discussions](https://github.com/MR901/syinfo/discussions)
 - **Email**: mohitrajput901@gmail.com
+- **GitHub**: [https://github.com/MR901/syinfo](https://github.com/MR901/syinfo)

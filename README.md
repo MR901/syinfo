@@ -284,10 +284,6 @@ Check out the [examples/](examples/) directory for comprehensive usage examples:
 - [CLI Examples](examples/cli_examples.py) - Command line usage
 - [Monitoring Examples](examples/monitoring_example.py) - System monitoring
 
-## Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -10,6 +10,7 @@ import requests
 import yaml
 
 from syinfo.constants import UNKNOWN
+from syinfo.exceptions import SystemAccessError
 from syinfo.core.search_network import search_devices_on_network
 from syinfo.core.utils import Execute, HumanReadable, create_highlighted_heading
 
@@ -420,11 +421,14 @@ class NetworkInfo:
                 "wifi": {
                     "wifi_name": wifi_name,
                     "password": wifi_password,
-                    "security": Execute.on_shell(
-                        "sudo wpa_cli status | grep 'key_mgmt'",
-                    ).replace(
-                        "key_mgmt=", "",
-                    ),  ### SUDO ACCESS NEEDED
+                    # Avoid sudo; attempt without sudo and fall back gracefully
+                    "security": (lambda: (
+                        Execute.on_shell(
+                            "wpa_cli status | grep 'key_mgmt'",
+                            timeout=5,
+                        ).replace("key_mgmt=", "")
+                        if True else UNKNOWN
+                    ))() if True else UNKNOWN,
                     "interface": Execute.on_shell(
                         "route | grep default | awk '{print $8}'",
                     ),

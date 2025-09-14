@@ -160,7 +160,9 @@ system_info_export.*
 monitoring_results.*
 monitoring_summary.*
 network_scan.*
-device_info.*
+# Avoid ignoring source file syinfo/core/device_info.py
+# If you need to ignore generated artifacts, use specific names, e.g.:
+# device_info_output.json
 monitoring_data.*
 
 # Temporary files

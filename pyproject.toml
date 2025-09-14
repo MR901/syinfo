@@ -44,7 +44,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "psutil>=5.9.5",
-    "PyYAML>=6.0.1", 
+    "PyYAML>=5.3.1", 
     "tabulate>=0.9.0",
     "getmac>=0.9.4",
     "GPUtil>=1.4.0",
@@ -112,15 +112,18 @@ path = "syinfo/_version.py"
 [tool.hatch.build.targets.wheel]
 packages = ["syinfo"]
 
+[tool.hatch.build]
+only-include = ["syinfo"]
+force-include = {"syinfo/core/device_info.py" = "syinfo/core/device_info.py"}
+
 [tool.hatch.build.targets.sdist]
 include = [
-    "/syinfo",
-    "/docs",
-    "/tests",
-    "/examples",
+    "syinfo",
+    "docs",
+    "tests",
+    "examples",
     "README.md",
-    "LICENSE",
-    "CHANGELOG.md",
+    "LICENSE"
 ]
 
 # Black configuration

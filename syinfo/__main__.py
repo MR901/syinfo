@@ -226,7 +226,10 @@ def main() -> int:
                 )
                 
                 # Check if network scan failed due to sudo requirements
-                if hasattr(info, 'get') and info.get('network_devices') == 'NEED_SUDO':
+                if hasattr(info, "get") and (
+                    info.get("network_devices") == "NEED_SUDO" or
+                    (isinstance(info.get("network_info", {}), dict) and info["network_info"].get("devices_on_network") == "NEED_SUDO")
+                ):
                     if not args.disable_print:
                         print("\033[1m\033[31mPlease run search_devices_on_network() with sudo access!\033[0m")
                     # Continue with available info (without network devices)

@@ -1,116 +1,81 @@
 SyInfo Documentation
-===================
+====================
 
-.. image:: images/logo/logo.png
-   :alt: SyInfo Logo
-   :align: center
-   :width: 200px
+Simple, well-designed system information library with real-time monitoring and analysis capabilities (log search, package inventory, health checks).
 
-**System Information & Monitoring Tool**
+Technical Overview
+------------------
 
-SyInfo is a comprehensive Python library and command-line tool for system information gathering and advanced system monitoring. It provides both legacy system information capabilities and modern monitoring features with data analysis and visualization.
+SyInfo collects system and hardware data via:
+
+- psutil for CPU, memory, disks, network IO
+- /proc, /sys parsing for Linux details
+- optional GPU backends (GPUtil/NVIDIA tools, fallback to lspci)
+- YAML/JSON/CSV export and a tree print view
+- **Real-time system monitoring** with customizable intervals and durations
+
+The public API (`syinfo.*`) wraps the core collectors and provides stable
+functions for application use. The CLI provides powerful flag-based commands
+for both one-time information gathering and continuous monitoring.
+
+Supported Platforms
+-------------------
+
+- Linux (primary)
+- macOS and Windows (best-effort for core info; some features may vary)
+
+Dependencies
+------------
+
+- Required: psutil, PyYAML, tabulate, getmac, py-cpuinfo, pydantic, rich, click
+- Optional: scapy (network discovery), GPUtil/NVIDIA tools (GPU)
+
+Key Features
+------------
+
+- **Device Information**: Hardware details, CPU, memory, storage
+- **Network Discovery**: Scan and identify devices on your network
+- **System Monitoring**: Real-time performance tracking with JSON export
+- **Analysis**: Log queries, package inventory, health checks
+- **Flexible CLI**: Flag-based commands perfect for scripting and automation
+- **JSON Integration**: Native jq compatibility for data processing
+
+Contents
+--------
+
+- :doc:`usage`
+- :doc:`api`
+- :doc:`publishing`
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
-   user_guide/index
-   api/index
-   cli/index
-   developer/index
-   installation
-   examples/index
-   changelog
+   usage
+   api
+   monitoring_with_syinfo
+   publishing
 
-Quick Start
-----------
+Architecture
+------------
 
-**Installation**
+.. mermaid:: images/diagrams/package-architecture.mmd
 
-.. code-block:: bash
+The simplified architecture focuses on core functionality without over-engineering.
 
-   pip install syinfo
+System Components
+-----------------
 
-**Basic Usage**
+.. mermaid:: images/diagrams/system-components.mmd
 
-.. code-block:: python
+Data Flow
+---------
 
-   from syinfo import DeviceInfo, NetworkInfo, SysInfo
-   
-   # Get device information
-   device_info = DeviceInfo.get_all()
-   
-   # Get network information
-   network_info = NetworkInfo.get_all()
-   
-   # Get combined system information
-   system_info = SysInfo.get_all()
+.. mermaid:: images/diagrams/data-flow.mmd
 
-**Command Line**
+Images
+------
 
-.. code-block:: bash
-
-   # Legacy commands (backward compatible)
-   syinfo -d                    # Device info
-   syinfo -n                    # Network info
-   syinfo -s                    # System info
-   
-   # New subcommand structure
-   syinfo info --device         # Device info
-   syinfo monitor --start       # Start monitoring
-   syinfo analyze --trends      # Analyze data trends
-
-Key Features
------------
-
-* **System Information**: Comprehensive device, network, and system information
-* **Real-time Monitoring**: CPU, memory, disk, network, and process monitoring
-* **Data Analysis**: Trend analysis and anomaly detection
-* **Visualization**: Charts and dashboards for system metrics
-* **Automated Scheduling**: Cron job integration for continuous monitoring
-* **Backward Compatibility**: Full compatibility with existing SyInfo usage
-* **Dual Mode**: Both Python library and CLI tool support
-
-Installation Options
--------------------
-
-* **Basic Installation**: Core system information features
-* **Full Installation**: Includes monitoring and analysis features
-* **Development Installation**: For contributing to the project
-
-.. code-block:: bash
-
-   # Basic installation
-   pip install syinfo
-   
-   # Full installation with monitoring features
-   pip install syinfo[monitoring]
-   
-   # Development installation
-   git clone https://github.com/MR901/syinfo.git
-   cd syinfo
-   pip install -e .
-
-System Requirements
-------------------
-
-* **Python**: 3.7 or higher
-* **Operating System**: Linux, macOS, Windows
-* **Dependencies**: 
-  - Core: No additional dependencies
-  - Monitoring: psutil, matplotlib, pandas, pyyaml
-
-Getting Help
------------
-
-* **Documentation**: This documentation
-* **GitHub**: https://github.com/MR901/syinfo
-* **Email**: mohitrajput901@gmail.com
-* **Issues**: https://github.com/MR901/syinfo/issues
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search` 
+.. image:: images/logo.png
+   :alt: SyInfo logo
+   :width: 200

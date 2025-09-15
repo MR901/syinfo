@@ -1,0 +1,94 @@
+graph TB
+    %% SyInfo Package Architecture - Simplified Design
+    
+    subgraph "Public API (syinfo.__init__.py)"
+        API["`**Public Functions**
+        • get_system_info()
+        • get_hardware_info()
+        • get_complete_info()
+        • discover_network_devices()
+        • create_simple_monitor()
+        • export_system_info()
+        • print_system_tree()`"]
+    end
+    
+    subgraph "CLI Interface"
+        CLI["`**syinfo.__main__.py**
+        Flag-based CLI
+        -d, -n, -s, -m, -j, -p`"]
+    end
+    
+    subgraph "Core Modules (syinfo.core)"
+        DEV["`**device_info.py**
+        DeviceInfo class
+        Hardware detection`"]
+        NET["`**network_info.py**
+        NetworkInfo class
+        Network scanning`"]
+        SYS["`**sys_info.py**
+        SysInfo class
+        Combined info`"]
+        SEARCH["`**search_network.py**
+        Network device discovery`"]
+        UTILS["`**utils.py**
+        Utilities & formatters`"]
+    end
+    
+    subgraph "Support Modules"
+        MON["`**simple_monitoring.py**
+        SimpleMonitor class
+        Performance tracking`"]
+        EXC["`**exceptions.py**
+        Custom exceptions`"]
+        CONST["`**constants.py**
+        System constants`"]
+    end
+    
+    subgraph "External Dependencies"
+        PSUTIL["psutil"]
+        SCAPY["scapy"]
+        YAML["PyYAML"]
+        TABULATE["tabulate"]
+        OTHERS["getmac, py-cpuinfo, etc."]
+    end
+    
+    %% Connections
+    API --> DEV
+    API --> NET
+    API --> SYS
+    API --> MON
+    
+    CLI --> API
+    CLI --> DEV
+    CLI --> NET
+    CLI --> SYS
+    CLI --> MON
+    
+    SYS --> DEV
+    SYS --> NET
+    
+    NET --> SEARCH
+    DEV --> UTILS
+    NET --> UTILS
+    SYS --> UTILS
+    
+    MON --> PSUTIL
+    DEV --> PSUTIL
+    DEV --> OTHERS
+    NET --> SCAPY
+    NET --> OTHERS
+    UTILS --> YAML
+    UTILS --> TABULATE
+    
+    %% Styling
+    classDef publicAPI fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef coreModule fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef supportModule fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef cli fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class API publicAPI
+    class DEV,NET,SYS,SEARCH,UTILS coreModule
+    class MON,EXC,CONST supportModule
+    class PSUTIL,SCAPY,YAML,TABULATE,OTHERS external
+    class CLI cli

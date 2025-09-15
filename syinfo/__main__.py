@@ -1,395 +1,439 @@
-"""Main file
+"""SyInfo CLI - Powerful Flag-Based Interface
 
-Enhanced SyInfo CLI with subcommand support for both legacy info mode and new monitoring mode.
+Restored the original powerful CLI with flag-based commands for easy scripting and JSON processing.
 """
 
+import argparse
+import json
+import sys
+import textwrap
+import time
 import warnings
+from typing import Optional
+
+# Suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
 
-import sys
-import json
-import argparse
-import textwrap
-import platform
-from typing import Dict, Any
-
 from syinfo._version import __version__
-from syinfo.cli.utils.formatter import OutputFormatter
-from syinfo.cli.utils.validator import CLIValidator
+from syinfo.core.device_info import DeviceInfo
+from syinfo.core.network_info import NetworkInfo  
+from syinfo.core.sys_info import SystemInfo
+from syinfo.monitoring.system_monitor import SystemMonitor
+from syinfo.exceptions import SyInfoException
+from syinfo.analysis.logs import LogAnalyzer, LogAnalysisConfig
+from syinfo.analysis.system import SystemAnalyzer
+from syinfo.analysis.packages import PackageManager, PackageManagerType
 
 
-def contact(msg=True):
+def contact(msg: bool = True) -> str:
     """Contact links."""
+    _msg = "\n  --  Email: \033[4m\033[94mmohitrajput901@gmail.com\033[0m"
+    _msg += "\n  -- GitHub: \033[4m\033[94mhttps://github.com/MR901/syinfo\033[0m"
     if msg:
-        print(OutputFormatter.print_contact())
-    return OutputFormatter.print_contact()
+        print(_msg)
+    return _msg
 
 
-def handle_info_command(args):
-    """Handle info subcommand."""
-    try:
-        from syinfo.cli.commands.info_commands import InfoCommands
-        
-        commands = InfoCommands()
-        
-        if args.device:
-            result = commands.handle_device_info(
-                disable_print=args.disable_print,
-                return_json=args.return_json
-            )
-        elif args.network:
-            result = commands.handle_network_info(
-                search_period=args.time,
-                search_device_vendor_too=args.disable_vendor_search,
-                disable_print=args.disable_print,
-                return_json=args.return_json
-            )
-        elif args.system:
-            result = commands.handle_system_info(
-                search_period=args.time,
-                search_device_vendor_too=args.disable_vendor_search,
-                disable_print=args.disable_print,
-                return_json=args.return_json
-            )
-        else:
-            print("❌ No info type specified. Use --device, --network, or --system")
-            sys.exit(1)
-        
-        if not result["success"]:
-            print(OutputFormatter.error(result["error"]))
-            sys.exit(1)
-            
-    except ImportError as e:
-        print(OutputFormatter.error(f"Info features not available: {e}"))
-        sys.exit(1)
-
-
-def handle_monitor_command(args):
-    """Handle monitor subcommand."""
-    try:
-        from syinfo.cli.commands.monitor_commands import MonitorCommands
-        
-        commands = MonitorCommands()
-        
-        # Validate arguments
-        validation_args = {
-            'interval': args.interval,
-            'duration': args.duration,
-            'output_dir': args.output_dir,
-            'config_path': args.config
-        }
-        valid, errors = CLIValidator.validate_monitoring_args(validation_args)
-        if not valid:
-            CLIValidator.print_validation_errors(errors)
-            sys.exit(1)
-        
-        if args.start:
-            result = commands.start_monitoring(
-                config_path=args.config,
-                output_dir=args.output_dir,
-                interval=args.interval,
-                duration=args.duration,
-                format=args.format
-            )
-        elif args.stop:
-            result = commands.stop_monitoring()
-        elif args.status:
-            result = commands.get_status()
-        elif args.collect:
-            result = commands.collect_data(
-                output_dir=args.output_dir,
-                format=args.format,
-                include_processes=args.include_processes,
-                include_logs=args.include_logs
-            )
-        else:
-            print("❌ No monitor action specified. Use --start, --stop, --status, or --collect")
-            sys.exit(1)
-        
-        OutputFormatter.print_result(result, format=args.output_format)
-        if not result["success"]:
-            sys.exit(1)
-            
-    except ImportError as e:
-        print(OutputFormatter.error(f"Monitoring features not available: {e}"))
-        sys.exit(1)
-
-
-def handle_analyze_command(args):
-    """Handle analyze subcommand."""
-    try:
-        from syinfo.cli.commands.analyze_commands import AnalyzeCommands
-        
-        commands = AnalyzeCommands()
-        
-        # Validate arguments
-        validation_args = {
-            'data_file': args.data_file,
-            'output_path': args.output,
-            'chart_type': args.chart_type
-        }
-        valid, errors = CLIValidator.validate_analysis_args(validation_args)
-        if not valid:
-            CLIValidator.print_validation_errors(errors)
-            sys.exit(1)
-        
-        if args.trends:
-            result = commands.analyze_trends(args.data_file)
-        elif args.anomalies:
-            result = commands.detect_anomalies(args.data_file)
-        elif args.report:
-            result = commands.generate_report(args.data_file, args.output)
-        elif args.dashboard:
-            result = commands.create_dashboard(
-                args.data_file,
-                args.output,
-                args.chart_types
-            )
-        elif args.chart:
-            if not args.chart_type:
-                print("❌ Chart type is required for --chart option")
-                sys.exit(1)
-            result = commands.create_chart(
-                args.data_file,
-                args.chart_type,
-                args.output
-            )
-        else:
-            print("❌ No analysis action specified. Use --trends, --anomalies, --report, --dashboard, or --chart")
-            sys.exit(1)
-        
-        OutputFormatter.print_result(result, format=args.output_format)
-        if not result["success"]:
-            sys.exit(1)
-            
-    except ImportError as e:
-        print(OutputFormatter.error(f"Analysis features not available: {e}"))
-        sys.exit(1)
-
-
-def handle_setup_command(args):
-    """Handle setup subcommand."""
-    try:
-        from syinfo.cli.commands.setup_commands import SetupCommands
-        
-        commands = SetupCommands()
-        
-        # Validate arguments
-        validation_args = {
-            'interval_minutes': args.interval_minutes,
-            'config_path': args.config_path,
-            'output_path': args.output_path
-        }
-        valid, errors = CLIValidator.validate_setup_args(validation_args)
-        if not valid:
-            CLIValidator.print_validation_errors(errors)
-            sys.exit(1)
-        
-        if args.install_cron:
-            result = commands.install_cron_jobs(
-                interval_minutes=args.interval_minutes,
-                config_path=args.config_path
-            )
-        elif args.remove_cron:
-            result = commands.remove_cron_jobs()
-        elif args.create_config:
-            result = commands.create_config(
-                output_path=args.output_path,
-                template_type=args.template_type
-            )
-        elif args.validate_config:
-            result = commands.validate_config(args.config_path)
-        elif args.setup_dirs:
-            result = commands.setup_directories(args.base_path)
-        else:
-            print("❌ No setup action specified. Use --install-cron, --remove-cron, --create-config, --validate-config, or --setup-dirs")
-            sys.exit(1)
-        
-        OutputFormatter.print_result(result, format=args.output_format)
-        if not result["success"]:
-            sys.exit(1)
-            
-    except ImportError as e:
-        print(OutputFormatter.error(f"Setup features not available: {e}"))
-        sys.exit(1)
-
-
-def main():
-    """Enhanced main function with subcommand support."""
-    description = "SyInfo - System Information & Monitoring Tool"
+def _handle_monitoring(args) -> int:
+    """Handle monitoring mode with -m flag.
     
+    Args:
+        args: Parsed command line arguments
+        
+    Returns:
+        Exit code (0 for success, 1 for error)
+    """
+    try:
+        if not args.disable_print:
+            print(f"\033[95mStarting system monitoring...\033[0m")
+            print(f"Interval: {args.interval} seconds")
+            print(f"Duration: {args.time} seconds")
+            print(f"Press Ctrl+C to stop early\n")
+        
+        # Create monitor
+        monitor = SystemMonitor(interval=args.interval)
+        
+        # Start monitoring
+        monitor.start(duration=args.time)
+        
+        # Wait for monitoring to complete (with user interrupt handling)
+        try:
+            time.sleep(args.time + 1)  # Wait a bit longer than monitoring duration
+            
+            # Get results (monitor may have stopped automatically)
+            if monitor.is_running:
+                results = monitor.stop()
+            else:
+                # Monitoring completed automatically, get the data that was collected
+                results = {
+                    "total_points": len(monitor.data_points),
+                    "data_points": monitor.data_points,
+                    "summary": monitor._calculate_summary() if monitor.data_points else {}
+                }
+                
+        except KeyboardInterrupt:
+            if not args.disable_print:
+                print("\n\033[93mMonitoring stopped by user\033[0m")
+            # Try to get partial results
+            results = monitor.stop() if monitor.is_running else {"error": "Monitoring interrupted", "data_points": monitor.data_points}
+        
+        # Handle output based on flags
+        if not args.disable_print:
+            if 'summary' in results and results['summary']:
+                _print_monitoring_summary(results['summary'])
+            else:
+                print(f"Monitoring completed. Collected {results.get('total_points', 0)} data points.")
+                
+        # Print JSON output if requested
+        if args.return_json:
+            print(json.dumps(results, default=str, indent=None))
+        
+        return 0
+        
+    except Exception as e:
+        print(f"Monitoring error: {e}")
+        return 1
+
+
+def _print_monitoring_summary(summary: dict) -> None:
+    """Print monitoring summary in a nice format."""
+    print(f"\033[95m{'━' * 60}\033[0m")
+    print(f"\033[95m{'System Monitoring Summary':^60}\033[0m")  
+    print(f"\033[95m{'━' * 60}\033[0m")
+    
+    print(f"Duration: {summary.get('duration_seconds', 0)} seconds")
+    print(f"Start Time: {summary.get('start_time', 'N/A')}")
+    print(f"End Time: {summary.get('end_time', 'N/A')}")
+    print()
+    
+    print("Performance Metrics:")
+    print(f"  CPU Usage     - Avg: {summary.get('cpu_avg', 0):.1f}%  Max: {summary.get('cpu_max', 0):.1f}%")
+    print(f"  Memory Usage  - Avg: {summary.get('memory_avg', 0):.1f}%  Peak: {summary.get('memory_peak', 0):.1f}%")
+    print(f"  Disk Usage    - Avg: {summary.get('disk_avg', 0):.1f}%")
+    
+    print(f"\033[95m{'━' * 60}\033[0m")
+
+
+def main() -> int:
+    """Main CLI entry point with flag-based interface.
+    
+    Returns:
+        Exit code (0 for success, 1 for error, 130 for interrupted)
+    """
+    wrapper = textwrap.TextWrapper(width=50)
+    description = wrapper.fill(text="SyInfo - System Information Library")
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         description=description,
         epilog=textwrap.dedent(contact(msg=False))
     )
-    
-    # Global arguments
+
+    # Contact and version
     parser.add_argument(
-        "-v", "--version", action="version", version=__version__, help="show current version"
+        "-c", "--contact", 
+        action="store_true", 
+        help="show contact information"
     )
     parser.add_argument(
-        "-c", "--contact", action="store_true", help="show contact information"
+        "-v", "--version", 
+        action="version", 
+        version=__version__, 
+        help="show current version"
+    )
+    
+    # Information type flags
+    parser.add_argument(
+        "-d", "--device", 
+        action="store_true",
+        help="\033[93m" + "show information about your device." + "\033[0m"
     )
     parser.add_argument(
-        "--output-format", choices=['auto', 'json'], default='auto',
-        help="output format (default: auto)"
+        "-n", "--network", 
+        action="store_true",
+        help="\033[94m" + "show information about your network." + "\033[0m"
+    )
+    parser.add_argument(
+        "-s", "--system", 
+        action="store_true",
+        help="\033[92m" + "show combined information about your device and network." + "\033[0m"
+    )
+    parser.add_argument(
+        "-m", "--monitor", 
+        action="store_true",
+        help="\033[95m" + "start system monitoring." + "\033[0m"
+    )
+    parser.add_argument(
+        "-l", "--logs",
+        action="store_true",
+        help="\033[96m" + "query system logs (use --text/--level/--process/--regex)." + "\033[0m"
+    )
+    parser.add_argument(
+        "-P", "--packages",
+        action="store_true",
+        help="\033[96m" + "list installed packages (use --manager/--name)." + "\033[0m"
+    )
+    parser.add_argument(
+        "-H", "--health",
+        action="store_true",
+        help="\033[96m" + "show quick system health report (last 24h)." + "\033[0m"
+    )
+    parser.add_argument(
+        "-S", "--search",
+        type=str,
+        metavar="",
+        required=False,
+        help="cross-surface search term (logs + packages)"
     )
     
-    # Create subparsers
-    subparsers = parser.add_subparsers(dest='command', help='available commands')
-    
-    # Info subcommand (legacy compatibility)
-    info_parser = subparsers.add_parser('info', help='system information commands')
-    info_parser.add_argument(
-        "-d", "--device", action="store_true", help="show device information"
+    # Network scanning and monitoring time options
+    parser.add_argument(
+        "-t", "--time", 
+        type=int, 
+        metavar="", 
+        required=False, 
+        default=10,
+        help="int supplement for `-n` or `-s` command (scanning `-t` seconds) or `-m` (monitoring duration)"
     )
-    info_parser.add_argument(
-        "-n", "--network", action="store_true", help="show network information"
+    parser.add_argument(
+        "-i", "--interval", 
+        type=int, 
+        metavar="", 
+        required=False, 
+        default=5,
+        help="int supplement for `-m` command (monitoring interval in seconds, default: 5)"
     )
-    info_parser.add_argument(
-        "-s", "--system", action="store_true", help="show combined system information"
+    parser.add_argument(
+        "-o", "--disable-vendor-search", 
+        action="store_false",
+        help="supplement for `-n` or `-s` command to stop searching for vendor for the device (mac)"
     )
-    info_parser.add_argument(
-        "-t", "--time", type=int, default=10, help="scanning period in seconds (default: 10)"
+
+    # Log query options
+    parser.add_argument("--text", type=str, metavar="", required=False, default="", help="text filter for logs")
+    parser.add_argument("--level", type=str, metavar="", required=False, default="", help="comma-separated log levels (e.g., ERROR,WARNING)")
+    parser.add_argument("--process", type=str, metavar="", required=False, default="", help="process name filter for logs")
+    parser.add_argument("--hours", type=int, metavar="", required=False, default=24, help="hours back for log time range (default: 24)")
+    parser.add_argument("--limit", type=int, metavar="", required=False, default=100, help="maximum log entries to return")
+    parser.add_argument("--regex", type=str, metavar="", required=False, default="", help="regular expression pattern for logs")
+    # Package query options
+    parser.add_argument("--manager", type=str, metavar="", required=False, default="", help="package manager (apt|yum|dnf|pip|conda|npm|snap)")
+    parser.add_argument("--name", type=str, metavar="", required=False, default="", help="package name filter substring")
+
+    # Output control flags
+    parser.add_argument(
+        "-p", "--disable-print", 
+        action="store_true", 
+        help="disable printing of the information."
     )
-    info_parser.add_argument(
-        "-o", "--disable-vendor-search", action="store_false",
-        help="disable vendor search for devices"
+    parser.add_argument(
+        "-j", "--return-json", 
+        action="store_true", 
+        help="return output as json"
     )
-    info_parser.add_argument(
-        "-p", "--disable-print", action="store_true", help="disable printing of information"
-    )
-    info_parser.add_argument(
-        "-j", "--return-json", action="store_true", help="return output as JSON"
-    )
-    
-    # Monitor subcommand
-    monitor_parser = subparsers.add_parser('monitor', help='system monitoring commands')
-    monitor_parser.add_argument(
-        "--start", action="store_true", help="start monitoring"
-    )
-    monitor_parser.add_argument(
-        "--stop", action="store_true", help="stop monitoring"
-    )
-    monitor_parser.add_argument(
-        "--status", action="store_true", help="get monitoring status"
-    )
-    monitor_parser.add_argument(
-        "--collect", action="store_true", help="collect one-time data snapshot"
-    )
-    monitor_parser.add_argument(
-        "--interval", type=int, default=60, help="monitoring interval in seconds (default: 60)"
-    )
-    monitor_parser.add_argument(
-        "--duration", type=int, help="monitoring duration in seconds (default: continuous)"
-    )
-    monitor_parser.add_argument(
-        "--config", help="configuration file path"
-    )
-    monitor_parser.add_argument(
-        "--output-dir", help="output directory for monitoring data"
-    )
-    monitor_parser.add_argument(
-        "--format", choices=['csv', 'json'], default='csv', help="output format"
-    )
-    monitor_parser.add_argument(
-        "--include-processes", action="store_true", default=True, help="include process data"
-    )
-    monitor_parser.add_argument(
-        "--include-logs", action="store_true", help="include log data"
-    )
-    
-    # Analyze subcommand
-    analyze_parser = subparsers.add_parser('analyze', help='data analysis commands')
-    analyze_parser.add_argument(
-        "--data-file", required=True, help="input data file path"
-    )
-    analyze_parser.add_argument(
-        "--trends", action="store_true", help="analyze system trends"
-    )
-    analyze_parser.add_argument(
-        "--anomalies", action="store_true", help="detect anomalies"
-    )
-    analyze_parser.add_argument(
-        "--report", action="store_true", help="generate analysis report"
-    )
-    analyze_parser.add_argument(
-        "--dashboard", action="store_true", help="create visualization dashboard"
-    )
-    analyze_parser.add_argument(
-        "--chart", action="store_true", help="create specific chart"
-    )
-    analyze_parser.add_argument(
-        "--chart-type", help="chart type for --chart option"
-    )
-    analyze_parser.add_argument(
-        "--chart-types", nargs='+', help="chart types for dashboard"
-    )
-    analyze_parser.add_argument(
-        "--output", help="output file path"
-    )
-    
-    # Setup subcommand
-    setup_parser = subparsers.add_parser('setup', help='system setup commands')
-    setup_parser.add_argument(
-        "--install-cron", action="store_true", help="install monitoring cron jobs"
-    )
-    setup_parser.add_argument(
-        "--remove-cron", action="store_true", help="remove monitoring cron jobs"
-    )
-    setup_parser.add_argument(
-        "--create-config", action="store_true", help="create configuration file"
-    )
-    setup_parser.add_argument(
-        "--validate-config", action="store_true", help="validate configuration file"
-    )
-    setup_parser.add_argument(
-        "--setup-dirs", action="store_true", help="setup monitoring directories"
-    )
-    setup_parser.add_argument(
-        "--interval-minutes", type=int, default=1, help="cron interval in minutes (default: 1)"
-    )
-    setup_parser.add_argument(
-        "--config-path", help="configuration file path"
-    )
-    setup_parser.add_argument(
-        "--output-path", default="monitoring_config.yaml", help="output file path"
-    )
-    setup_parser.add_argument(
-        "--template-type", default="default", help="configuration template type"
-    )
-    setup_parser.add_argument(
-        "--base-path", default="./monitoring_data", help="base path for directories"
-    )
-    
-    args = parser.parse_args()
-    
-    # Handle contact and version
-    if args.contact:
-        contact(msg=True)
-        return
-    elif args.version:
-        print(__version__)
-        return
-    
-    # Handle subcommands
-    if args.command == 'info':
-        handle_info_command(args)
-    elif args.command == 'monitor':
-        handle_monitor_command(args)
-    elif args.command == 'analyze':
-        handle_analyze_command(args)
-    elif args.command == 'setup':
-        handle_setup_command(args)
-    elif len(sys.argv) == 1:
-        # No arguments provided, show help
-        parser.print_help()
-    else:
-        # Invalid command
-        print("❌ Invalid command. Use --help for available commands.")
-        sys.exit(1)
+
+    try:
+        args = parser.parse_args()
+        
+        # Handle contact
+        if args.contact:
+            contact(msg=True)
+            return 0
+            
+        # Handle no arguments
+        if len(sys.argv) == 1:
+            parser.print_help()
+            return 0
+
+        # Determine what information to gather
+        instance = None
+        info = None
+        
+        if args.device:
+            instance = DeviceInfo
+            info = instance.get_all()
+            
+        elif args.network:
+            try:
+                instance = NetworkInfo
+                info = instance.get_all(
+                    search_period=args.time,
+                    search_device_vendor_too=args.disable_vendor_search
+                )
+                
+                # Check if network scan failed due to sudo requirements
+                if hasattr(info, "get") and (
+                    info.get("network_devices") == "NEED_SUDO" or
+                    (isinstance(info.get("network_info", {}), dict) and info["network_info"].get("devices_on_network") == "NEED_SUDO")
+                ):
+                    if not args.disable_print:
+                        print("\033[1m\033[31mPlease run search_devices_on_network() with sudo access!\033[0m")
+                    # Continue with available info (without network devices)
+                    
+            except ImportError:
+                if not args.disable_print:
+                    print("Error: Network features not available. Install with: pip install syinfo[network]")
+                return 1
+                
+        elif args.system:
+            try:
+                instance = SystemInfo
+                info = instance.get_all(
+                    search_period=args.time,
+                    search_device_vendor_too=args.disable_vendor_search
+                )
+            except ImportError:
+                if not args.disable_print:
+                    print("Error: Network features not available. Install with: pip install syinfo[network]")
+                    # Fall back to device info only
+                    print("Falling back to device information only...")
+                instance = DeviceInfo
+                info = instance.get_all()
+                
+        elif args.monitor:
+            # Handle monitoring mode
+            return _handle_monitoring(args)
+        elif args.logs:
+            # Log query handler
+            analyzer = LogAnalyzer(LogAnalysisConfig())
+            levels = None
+            if args.level:
+                levels = [lvl.strip().upper() for lvl in args.level.split(",") if lvl.strip()]
+            start_time = None
+            end_time = None
+            if args.hours and args.hours > 0:
+                from datetime import datetime, timedelta
+
+                end_time = datetime.now()
+                start_time = end_time - timedelta(hours=args.hours)
+            entries = analyzer.query_logs(
+                text_filter=args.text or "",
+                level_filter=levels,
+                time_range=(start_time, end_time) if start_time and end_time else None,
+                process_filter=args.process or "",
+                regex_pattern=args.regex or None,
+                limit=args.limit or 100,
+            )
+            # Output
+            if args.return_json:
+                print(
+                    json.dumps(
+                        [
+                            {
+                                "timestamp": e.timestamp,
+                                "level": e.level,
+                                "process": e.process,
+                                "message": e.message,
+                                "file": e.file_path,
+                                "line": e.line_number,
+                            }
+                            for e in entries
+                        ],
+                        default=str,
+                        indent=None,
+                    )
+                )
+            elif not args.disable_print:
+                print(f"Found {len(entries)} log entries")
+                for e in entries[: min(10, len(entries))]:
+                    ts = e.timestamp.isoformat() if e.timestamp else ""
+                    print(f"{ts} | {e.level or '-'} | {e.process or '-'} | {e.message}")
+            return 0
+        elif args.packages:
+            # Package listing handler
+            pm = PackageManager()
+            selected = None
+            if args.manager:
+                try:
+                    selected = PackageManagerType(args.manager)
+                except ValueError:
+                    selected = None
+            packages = pm.list_packages(manager=selected, name_filter=args.name or "")
+            if args.return_json:
+                print(
+                    json.dumps(
+                        [
+                            {
+                                "name": p.name,
+                                "version": p.version,
+                                "architecture": p.architecture,
+                                "description": p.description,
+                                "manager": p.manager,
+                            }
+                            for p in packages
+                        ],
+                        indent=None,
+                        default=str,
+                    )
+                )
+            elif not args.disable_print:
+                print(f"Total installed packages: {len(packages)}")
+                # Show by manager summary
+                counts = {}
+                for p in packages:
+                    counts[p.manager] = counts.get(p.manager, 0) + 1
+                for mgr, count in sorted(counts.items()):
+                    print(f"{mgr}: {count}")
+            return 0
+        elif args.health:
+            sa = SystemAnalyzer()
+            report = sa.quick_system_health_check()
+            if args.return_json:
+                print(json.dumps(report, default=str, indent=None))
+            elif not args.disable_print:
+                print("=== System Health Report (24h) ===")
+                print(f"Platform: {report['system_info']['platform']}")
+                print(f"Recent Errors: {len(report.get('recent_errors', []))}")
+                print(f"Recent Warnings: {len(report.get('warnings', []))}")
+            return 0
+        elif args.search:
+            sa = SystemAnalyzer()
+            result = sa.search_system(args.search, include_logs=True, include_packages=True)
+            if args.return_json:
+                print(json.dumps(result, default=str, indent=None))
+            elif not args.disable_print:
+                print(f"Term: {result['search_term']}")
+                print(f"Log entries: {len(result.get('log_entries', []))}")
+                print(f"Packages: {len(result.get('packages', []))}")
+            return 0
+                
+        else:
+            # No valid flag provided
+            parser.print_help()
+            return 0
+
+        # Handle output
+        if instance and info:
+            # Print formatted output (unless disabled)
+            if not args.disable_print:
+                try:
+                    instance.print(info)
+                except Exception as e:
+                    print(f"Error displaying information: {e}")
+                    return 1
+
+            # Print JSON output (if requested)
+            if args.return_json:
+                try:
+                    print(json.dumps(info, default=str, indent=None))
+                except Exception as e:
+                    print(f"Error generating JSON: {e}")
+                    return 1
+
+        return 0
+        
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user")
+        return 130
+        
+    except SyInfoException as e:
+        print(f"Error: {e}")
+        return 1
+        
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

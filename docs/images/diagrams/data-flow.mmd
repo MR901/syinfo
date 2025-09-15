@@ -1,0 +1,121 @@
+graph TD
+    %% SyInfo Data Flow Diagram
+    
+    subgraph "Input Sources"
+        USER["`**User Request**
+        CLI flags or API calls`"]
+        SYSTEM["`**System APIs**
+        /proc, /sys, psutil`"]
+        NETWORK["`**Network**
+        Interfaces, devices`"]
+        GPU["`**GPU APIs**
+        nvidia-smi, GPUtil`"]
+    end
+    
+    subgraph "Data Collection Layer"
+        DEVICE["`**DeviceInfo**
+        • CPU information
+        • Memory details  
+        • GPU detection
+        • System metadata`"]
+        
+        NETINFO["`**NetworkInfo**
+        • Interface details
+        • IP configuration
+        • WiFi information
+        • Device discovery`"]
+        
+        MONITOR["`**SimpleMonitor**
+        • CPU usage tracking
+        • Memory monitoring
+        • Disk I/O stats
+        • Network activity`"]
+    end
+    
+    subgraph "Processing Layer"
+        FORMATTER["`**Formatters**
+        • Human readable sizes
+        • Tree structure
+        • Table formatting
+        • Color output`"]
+        
+        AGGREGATOR["`**SysInfo**
+        • Combine device + network
+        • Apply search filters
+        • Handle timeouts`"]
+        
+        ANALYZER["`**Monitor Analysis**
+        • Calculate averages
+        • Find peaks
+        • Generate summaries`"]
+    end
+    
+    subgraph "Output Layer"
+        TREE["`**Tree Display**
+        Hierarchical system view`"]
+        
+        JSON["`**JSON Export**
+        Structured data output`"]
+        
+        YAML["`**YAML Export**
+        Configuration-friendly`"]
+        
+        TABLE["`**Tabulated Output**
+        CLI-friendly tables`"]
+        
+        SUMMARY["`**Monitor Summary**
+        Performance analytics`"]
+    end
+    
+    subgraph "Delivery"
+        CLI_OUT["`**CLI Output**
+        Terminal display`"]
+        
+        API_RETURN["`**API Return**
+        Python dictionaries`"]
+        
+        FILE_EXPORT["`**File Export**
+        JSON, YAML files`"]
+    end
+    
+    %% Data Flow Connections
+    USER --> DEVICE
+    USER --> NETINFO
+    USER --> MONITOR
+    
+    SYSTEM --> DEVICE
+    NETWORK --> NETINFO
+    GPU --> DEVICE
+    
+    DEVICE --> FORMATTER
+    NETINFO --> FORMATTER
+    MONITOR --> ANALYZER
+    
+    DEVICE --> AGGREGATOR
+    NETINFO --> AGGREGATOR
+    
+    FORMATTER --> TREE
+    FORMATTER --> TABLE
+    AGGREGATOR --> JSON
+    AGGREGATOR --> YAML
+    ANALYZER --> SUMMARY
+    
+    TREE --> CLI_OUT
+    TABLE --> CLI_OUT
+    JSON --> API_RETURN
+    JSON --> FILE_EXPORT
+    YAML --> FILE_EXPORT
+    SUMMARY --> CLI_OUT
+    
+    %% Styling
+    classDef input fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px
+    classDef collection fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef processing fill:#faf2ff,stroke:#4a148c,stroke-width:2px
+    classDef output fill:#fff8e1,stroke:#e65100,stroke-width:2px
+    classDef delivery fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class USER,SYSTEM,NETWORK,GPU input
+    class DEVICE,NETINFO,MONITOR collection
+    class FORMATTER,AGGREGATOR,ANALYZER processing
+    class TREE,JSON,YAML,TABLE,SUMMARY output
+    class CLI_OUT,API_RETURN,FILE_EXPORT delivery

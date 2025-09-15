@@ -116,7 +116,7 @@ class SystemMonitor:
         self._thread = threading.Thread(target=monitor_loop, daemon=True)
         self._thread.start()
 
-    def stop(self) -> Dict[str, Any]:
+    def stop(self, print_summary: bool = True, save_plot_to: Optional[str] = None) -> Dict[str, Any]:
         """Stop monitoring and return collected data.
 
         Returns:
@@ -135,6 +135,13 @@ class SystemMonitor:
         else:
             summary = {"error": "No data points collected"}
 
+        # Optionally print summary to stdout
+        if print_summary:
+            try:
+                self._print_summary(summary)
+            except Exception:
+                pass
+
         # Write summary next to JSONL file
         if self._summary_on_stop and self._resolved_output_path:
             try:
@@ -143,6 +150,14 @@ class SystemMonitor:
                     json.dump(summary, sfp, ensure_ascii=False, indent=2, default=str)
             except Exception:
                 pass
+
+        # Optionally save a plot locally
+        plot_path: Optional[str] = None
+        if save_plot_to:
+            try:
+                plot_path = self._save_plot(save_plot_to)
+            except Exception as _:
+                plot_path = None
 
         # Close file handle
         try:
@@ -156,6 +171,7 @@ class SystemMonitor:
             "summary": summary,
             "data_points": self.data_points,
             "total_points": len(self.data_points),
+            "plot_path": plot_path,
         }
 
     def _collect_data_point(self) -> Dict[str, Any]:
@@ -177,8 +193,15 @@ class SystemMonitor:
         memory_values = [dp["memory_percent"] for dp in self.data_points]
         disk_values = [dp["disk_percent"] for dp in self.data_points]
 
+        samples = len(self.data_points)
+        duration_seconds = samples * self.interval
+        approx_rate_hz = (samples / duration_seconds) if duration_seconds > 0 else 0.0
+
         return {
-            "duration_seconds": len(self.data_points) * self.interval,
+            "duration_seconds": duration_seconds,
+            "samples": samples,
+            "interval_seconds": self.interval,
+            "approx_rate_hz": approx_rate_hz,
             "cpu_avg": sum(cpu_values) / len(cpu_values) if cpu_values else 0.0,
             "cpu_max": max(cpu_values) if cpu_values else 0.0,
             "memory_avg": sum(memory_values) / len(memory_values) if memory_values else 0.0,
@@ -187,6 +210,54 @@ class SystemMonitor:
             "start_time": self.data_points[0]["timestamp"] if self.data_points else None,
             "end_time": self.data_points[-1]["timestamp"] if self.data_points else None,
         }
+
+    def _print_summary(self, summary: Dict[str, Any]) -> None:
+        """Print a compact summary to stdout."""
+        try:
+            print("\033[95m" + "━" * 60 + "\033[0m")
+            print("\033[95m" + f"{'System Monitoring Summary':^60}" + "\033[0m")
+            print("\033[95m" + "━" * 60 + "\033[0m")
+            print(f"Duration: {summary.get('duration_seconds', 0)} seconds")
+            # Sampling details
+            samples = summary.get("samples", 0)
+            interval = summary.get("interval_seconds", 0)
+            rate_hz = summary.get("approx_rate_hz", 0.0)
+            print(f"Samples: {samples} (interval: {interval}s, ≈ {rate_hz:.3f} Hz)")
+            print(f"Start Time: {summary.get('start_time', 'N/A')}")
+            print(f"End Time: {summary.get('end_time', 'N/A')}")
+            print()
+            print("Performance Metrics:")
+            print(
+                "  CPU Usage     - Avg: "
+                + f"{summary.get('cpu_avg', 0):.1f}%  Max: {summary.get('cpu_max', 0):.1f}%"
+            )
+            print(
+                "  Memory Usage  - Avg: "
+                + f"{summary.get('memory_avg', 0):.1f}%  Peak: {summary.get('memory_peak', 0):.1f}%"
+            )
+            print("  Disk Usage    - Avg: " + f"{summary.get('disk_avg', 0):.1f}%")
+            print("\033[95m" + "━" * 60 + "\033[0m")
+        except Exception:
+            # Best-effort printing; ignore formatting failures
+            try:
+                print("Summary:", summary)
+            except Exception:
+                pass
+
+    def _save_plot(self, save_path: str) -> Optional[str]:
+        """Save a simple PNG plot of CPU/Memory/Disk vs time.
+
+        Returns the resolved file path if successful; otherwise None.
+        """
+        if not self.data_points:
+            return None
+        try:
+            from syinfo.monitor.visualization import plot_data_with_matplotlib  # local import
+        except Exception:
+            return None
+
+        saved = plot_data_with_matplotlib(self.data_points, save_to=save_path, show=False)
+        return saved
 
     # ----------------------------
     # Persistence helpers
@@ -258,25 +329,5 @@ class SystemMonitor:
         self._bytes_written = 0
 
 
-def create_system_monitor(
-    interval: int = 60,
-    output_path: Optional[str] = None,
-    rotate_max_lines: Optional[int] = None,
-    rotate_max_bytes: Optional[int] = None,
-    keep_in_memory: bool = True,
-    summary_on_stop: bool = True,
-) -> SystemMonitor:
-    """Create a system monitor instance."""
-    return SystemMonitor(
-        interval=interval,
-        output_path=output_path,
-        rotate_max_lines=rotate_max_lines,
-        rotate_max_bytes=rotate_max_bytes,
-        keep_in_memory=keep_in_memory,
-        summary_on_stop=summary_on_stop,
-    )
-
-
-__all__ = ["SystemMonitor", "create_system_monitor"]
-
+__all__ = ["SystemMonitor"]
 

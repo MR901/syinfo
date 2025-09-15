@@ -8,12 +8,14 @@ import os
 import platform
 import sys
 from typing import Any, Dict, Optional
+import copy
 
 import cpuinfo
 import psutil
 
 from syinfo.core.device_info import DeviceInfo
 from syinfo.core.network_info import NetworkInfo
+from syinfo.core.utils import export_data
 
 
 class SystemInfo:
@@ -57,6 +59,46 @@ class SystemInfo:
         network_info = NetworkInfo.get_all(search_period, search_device_vendor_too)
         device_info["network_info"] = network_info["network_info"]
         return device_info
+
+    @staticmethod
+    def export(
+        format: str = "json",
+        output_file: Optional[str] = None,
+        include_sensitive: bool = False,
+        info: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Export combined system (device + network) information.
+
+        Args:
+            format: Export format ("json" or "yaml")
+            output_file: Optional path to write the exported content
+            include_sensitive: Include potentially sensitive fields if True
+            info: Optional pre-collected info dict to export
+
+        Returns:
+            Exported string content
+        """
+        data: Dict[str, Any] = (
+            info if info is not None else SystemInfo.get_all()
+        )
+        sanitized: Dict[str, Any] = copy.deepcopy(data)
+
+        if not include_sensitive:
+            try:
+                di = sanitized.get("dev_info")
+                if isinstance(di, dict):
+                    di["mac_address"] = "***"
+                ni = sanitized.get("network_info")
+                if isinstance(ni, dict):
+                    ni["mac_address"] = "***"
+                    if isinstance(ni.get("wifi"), dict) and "password" in ni["wifi"]:
+                        ni["wifi"]["password"] = "***"
+            except Exception:
+                pass
+
+        return export_data(sanitized, format=format, output_file=output_file)
+
+
 
 
 def print_brief_sys_info() -> None:

@@ -5,6 +5,7 @@ with detailed tree structure output, error handling, type hints, and performance
 """
 
 import glob
+import copy
 import os
 import platform
 import re
@@ -28,7 +29,7 @@ from syinfo.exceptions import (
     SystemAccessError, 
     ValidationError
 )
-from syinfo.core.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error
+from syinfo.core.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data
 
 
 class DeviceInfo:
@@ -669,6 +670,42 @@ class DeviceInfo:
                 "Failed to collect comprehensive system information",
                 original_exception=e
             )
+
+
+    @staticmethod
+    def export(
+        format: str = "json",
+        output_file: Optional[str] = None,
+        include_sensitive: bool = False,
+        info: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Export device information to JSON or YAML.
+
+        Args:
+            format: Export format ("json" or "yaml")
+            output_file: Optional path to write the exported content
+            include_sensitive: Include potentially sensitive fields if True
+            info: Optional pre-collected info dict to export
+
+        Returns:
+            Exported string content
+        """
+        data: Dict[str, Any] = info if info is not None else DeviceInfo.get_all()
+        sanitized: Dict[str, Any] = copy.deepcopy(data)
+
+        if not include_sensitive:
+            try:
+                if isinstance(sanitized.get("dev_info"), dict):
+                    sanitized["dev_info"]["mac_address"] = "***"
+                if isinstance(sanitized.get("network_info"), dict):
+                    sanitized["network_info"]["mac_address"] = "***"
+                    if isinstance(sanitized["network_info"].get("wifi"), dict):
+                        if "password" in sanitized["network_info"]["wifi"]:
+                            sanitized["network_info"]["wifi"]["password"] = "***"
+            except Exception:
+                pass
+
+        return export_data(sanitized, format=format, output_file=output_file)
 
 
 __all__ = ["DeviceInfo"]

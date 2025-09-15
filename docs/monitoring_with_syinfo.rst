@@ -24,7 +24,7 @@ Quick start: System monitoring
 .. code-block:: python
 
    import syinfo as si
-   from syinfo.monitoring.visualization import plot_with_matplotlib
+   from syinfo.resource_monitor.visualization import plot_with_matplotlib
 
    # Persist to ./monitoring as JSONL (one object per line) with rotation
    mon = si.create_system_monitor(interval=2, output_path="./monitoring", rotate_max_lines=1000)
@@ -115,8 +115,7 @@ prefer JSONL for crash safety, but CSV is simple to add:
 Visualization
 -------------
 
-- Matplotlib: ``syinfo.monitoring.visualization.plot_with_matplotlib(path)``
-- Plotly: ``syinfo.monitoring.visualization.plot_with_plotly(path)``
+- Matplotlib: ``syinfo.resource_monitor.visualization.plot_with_matplotlib(path)``
 
 Tips & additions
 ----------------

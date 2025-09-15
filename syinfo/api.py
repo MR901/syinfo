@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from .core.device_info import DeviceInfo
-from .core.sys_info import SystemInfo, print_brief_sys_info
+from .core.system_info import SystemInfo, print_brief_sys_info
 from .core.utils import HumanReadable
 from .exceptions import (
     ConfigurationError,
@@ -191,9 +191,9 @@ class SyInfoAPI:
 
     # ---------- Monitoring ----------
     def create_system_monitor(self, interval: int = 60, **kwargs):
-        from .monitoring.system_monitor import create_system_monitor as _create
+        from .resource_monitor.system_monitor import SystemMonitor
 
-        return _create(interval=interval, **kwargs)
+        return SystemMonitor(interval=interval, **kwargs)
 
     # ---------- Feature status ----------
     def get_available_features(self) -> Dict[str, bool]:

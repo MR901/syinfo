@@ -7,7 +7,7 @@ import json
 from typing import Any, Dict
 
 from .core.device_info import DeviceInfo
-from .core.sys_info import SysInfo, print_brief_sys_info
+from .core.system_info import SystemInfo, print_brief_sys_info
 from .exceptions import SyInfoException
 
 
@@ -36,9 +36,9 @@ def handle_info_command(info_type: str, output_json: bool = False) -> Dict[str, 
             return {"success": True, "data": info}
 
         elif info_type == "system":
-            info = SysInfo.get_all()
+            info = SystemInfo.get_all()
             if not output_json:
-                SysInfo.print(info)
+                SystemInfo.print(info)
             else:
                 print(json.dumps(info, indent=2, default=str))
             return {"success": True, "data": info}

@@ -50,6 +50,7 @@ dependencies = [
     "GPUtil>=1.4.0",
     "scapy>=2.5.0",
     "py-cpuinfo>=9.0.0",
+    "requests>=2.25.0",
     "click>=8.0.0",  # For better CLI experience
     "rich>=12.0.0",  # For better terminal output
     "pydantic>=2.0.0",  # For data validation
@@ -64,14 +65,12 @@ monitoring = [
 ]
 network = [
     "paramiko>=2.8.0",
-    "requests>=2.25.0",
 ]
 visualization = [
-    "plotly>=5.0.0",
-    "dash>=2.0.0",
+    # Plotly support removed
 ]
 full = [
-    "syinfo[monitoring,network,visualization]",
+    "syinfo[monitoring,network]",
 ]
 dev = [
     "pytest>=7.0.0",

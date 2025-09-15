@@ -6,7 +6,7 @@ including device information, system information, and utility functions.
 
 # Import core classes and functions
 from .device_info import DeviceInfo
-from .sys_info import SysInfo, print_brief_sys_info
+from .system_info import SystemInfo, print_brief_sys_info
 from .utils import Execute, HumanReadable, create_highlighted_heading
 
 # Exceptions are now imported from parent package
@@ -30,7 +30,7 @@ except ImportError:
 __all__ = [
     # Core classes
     "DeviceInfo",
-    "SysInfo",
+    "SystemInfo",
     "NetworkInfo",
     # Utility classes
     "HumanReadable",

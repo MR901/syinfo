@@ -17,8 +17,8 @@ warnings.filterwarnings("ignore")
 from syinfo._version import __version__
 from syinfo.core.device_info import DeviceInfo
 from syinfo.core.network_info import NetworkInfo  
-from syinfo.core.sys_info import SystemInfo
-from syinfo.monitoring.system_monitor import SystemMonitor
+from syinfo.core.system_info import SystemInfo
+from syinfo.resource_monitor.system_monitor import SystemMonitor
 from syinfo.exceptions import SyInfoException
 from syinfo.analysis.logs import LogAnalyzer, LogAnalysisConfig
 from syinfo.analysis.system import SystemAnalyzer

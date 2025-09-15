@@ -44,7 +44,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 # Simplified exception imports
 # Import core functionality
 from .core.device_info import DeviceInfo
-from .core.sys_info import SystemInfo, print_brief_sys_info
+from .core.system_info import SystemInfo, print_brief_sys_info
 from .core.utils import Execute, HumanReadable
 from .exceptions import (
     ConfigurationError,
@@ -389,23 +389,15 @@ def export_system_info(
 
 
 def create_system_monitor(interval: int = 60, **kwargs):
-    """Create a system monitor.
+    """Create a system monitor (thin wrapper for convenience)."""
+    from .resource_monitor.system_monitor import SystemMonitor
 
-    Args:
-        interval: Monitoring interval in seconds
+    return SystemMonitor(interval=interval, **kwargs)
 
-    Returns:
-        SimpleMonitor instance for basic monitoring
 
-    Examples:
-        >>> monitor = syinfo.create_simple_monitor(interval=30)
-        >>> monitor.start(duration=300)  # Monitor for 5 minutes
-        >>> results = monitor.stop()
-        >>> print(f"Average CPU: {results['summary']['cpu_avg']:.1f}%")
-    """
-    from .monitoring.system_monitor import create_system_monitor as _create_monitor
-
-    return _create_monitor(interval=interval, **kwargs)
+def create_simple_monitor(interval: int = 60, **kwargs):
+    """Backward-compatible alias for create_system_monitor."""
+    return create_system_monitor(interval=interval, **kwargs)
 
 
 def get_available_features() -> Dict[str, bool]:
@@ -463,6 +455,7 @@ __all__ = [
     "print_brief_info",
     "export_system_info",
     "create_system_monitor",
+    "create_simple_monitor",
     # Analysis (new)
     "LogAnalyzer",
     "LogAnalysisConfig",

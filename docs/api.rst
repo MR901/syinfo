@@ -121,10 +121,10 @@ NetworkInfo
 .. autoclass:: syinfo.core.network_info.NetworkInfo
    :members:
 
-SysInfo
-~~~~~~~
+SystemInfo
+~~~~~~~~~~
 
-.. autoclass:: syinfo.core.sys_info.SystemInfo
+.. autoclass:: syinfo.core.system_info.SystemInfo
    :members:
 
 Exceptions

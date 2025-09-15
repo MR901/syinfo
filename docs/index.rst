@@ -37,6 +37,7 @@ Key Features
 - **Network Discovery**: Scan and identify devices on your network
 - **System Monitoring**: Real-time performance tracking with JSON export
 - **Analysis**: Log queries, package inventory, health checks
+- **Advanced Logging**: Production-ready logging with incident tracking and syslog support
 - **Flexible CLI**: Flag-based commands perfect for scripting and automation
 - **JSON Integration**: Native jq compatibility for data processing
 
@@ -45,6 +46,8 @@ Contents
 
 - :doc:`usage`
 - :doc:`api`
+- :doc:`logging`
+- :doc:`monitoring_with_syinfo`
 - :doc:`publishing`
 
 .. toctree::
@@ -53,6 +56,7 @@ Contents
 
    usage
    api
+   logging
    monitoring_with_syinfo
    publishing
 

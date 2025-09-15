@@ -1,6 +1,5 @@
 """System operations and command execution utilities."""
 
-import logging
 import os
 import platform
 import subprocess
@@ -11,9 +10,10 @@ from typing import Dict, Optional, Union
 from syinfo.constants import UNKNOWN, NEED_SUDO
 from syinfo.exceptions import SystemAccessError, ValidationError
 from .common import handle_system_error
+from .logger import Logger
 
-# Configure logging
-logger = logging.getLogger(__name__)
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class Execute:

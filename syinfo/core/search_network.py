@@ -8,7 +8,10 @@ import getmac
 from scapy.all import ARP, Ether, srp
 
 from syinfo.constants import NEED_SUDO, UNKNOWN
-from syinfo.utils import Execute
+from syinfo.utils import Execute, Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

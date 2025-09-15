@@ -40,6 +40,14 @@ A simple, well-designed Python library for gathering system information includin
 - **Package Inventory**: `--packages` with `--manager` and `--name` filters
 - **Health/Search**: `--health` (24h errors/warnings), `--search "term"` (logs + packages)
 
+### Advanced Logging (New!)
+- **Production-Ready**: Sophisticated singleton logger with advanced features
+- **Incident Tracking**: Automatic numbering of warnings and errors
+- **Enhanced Tracebacks**: Beautiful, readable error traces with file context
+- **Multiple Outputs**: Console, files, and system log (syslog) simultaneously
+- **Runtime Configuration**: Dynamic log levels, handler management, statistics
+- **Platform-Aware**: Auto-detects syslog paths for Linux, macOS, and Windows
+
 ## Installation
 
 ```bash
@@ -259,17 +267,52 @@ syinfo -mpj -t 300 -i 5 | tail -1 | jq '.data_points[] | select(.cpu_percent > 9
 syinfo -mpj -t 120 -i 10 | tail -1 | jq '.data_points | [.[0], .[-1]] | .[1].network_io.bytes_sent - .[0].network_io.bytes_sent'
 ```
 
+## Advanced Logging
+
+SyInfo includes a production-ready logging system:
+
+```python
+from syinfo import Logger, LoggerConfig
+import logging
+
+# Basic usage
+logger = syinfo.Logger.get_logger()
+logger.info("Application started")
+
+# Advanced configuration
+config = LoggerConfig(
+    log_level=logging.DEBUG,
+    log_files=["app.log", "debug.log"],
+    output_to_stdout=True,
+    verbose_logs=True,           # Include function names and line numbers
+    enable_incident_counting=True, # Number warnings/errors
+    enable_traceback=True,       # Beautiful formatted tracebacks
+    enable_syslog=True           # System log integration
+)
+
+logger = Logger.get_logger(config)
+logger.warning("This will be numbered")  # (incident #1) This will be numbered
+
+# Runtime management
+logger_instance = syinfo.Logger.get_instance()
+stats = logger_instance.get_stats()
+print(f"Warnings: {stats['warning_count']}, Errors: {stats['error_count']}")
+```
+
 ## Error Handling
 
 ```python
 from syinfo.exceptions import SystemAccessError, DataCollectionError
 
+logger = syinfo.Logger.get_logger()
+
 try:
     info = syinfo.get_system_info()
+    logger.info("System info collected successfully")
 except SystemAccessError as e:
-    print(f"Permission error: {e}")
+    logger.error(f"Permission error: {e}")  # Includes traceback if enabled
 except DataCollectionError as e:
-    print(f"Data collection failed: {e}")
+    logger.error(f"Data collection failed: {e}")
 ```
 
 ## Performance & Reliability

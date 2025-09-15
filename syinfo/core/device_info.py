@@ -29,7 +29,10 @@ from syinfo.exceptions import (
     SystemAccessError, 
     ValidationError
 )
-from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data, Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class DeviceInfo:

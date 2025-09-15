@@ -1,19 +1,19 @@
 """Common utility functions and decorators."""
 
 import functools
-import logging
 import platform
 import time
 from functools import lru_cache
 from typing import Any, Callable, Dict, Tuple, TypeVar
 
 from syinfo.exceptions import SystemAccessError, ValidationError
+from .logger import Logger
 
 # Type variables for generic functions
 F = TypeVar("F", bound=Callable[..., Any])
 
-# Configure logging
-logger = logging.getLogger(__name__)
+# Get logger instance
+logger = Logger.get_logger()
 
 
 def handle_system_error(func):

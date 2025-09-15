@@ -16,6 +16,7 @@ from .common import (
 from .formatters import HumanReadable
 from .system import Execute, safe_file_read
 from .export import export_data
+from .logger import Logger, LoggerConfig
 
 __all__ = [
     # Common utilities
@@ -30,4 +31,7 @@ __all__ = [
     "safe_file_read",
     # Export
     "export_data",
+    # Logging
+    "Logger",
+    "LoggerConfig",
 ]

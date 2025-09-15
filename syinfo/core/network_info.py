@@ -14,7 +14,10 @@ import yaml
 from syinfo.constants import UNKNOWN
 from syinfo.exceptions import SystemAccessError
 from syinfo.core.search_network import search_devices_on_network
-from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, export_data
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, export_data, Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

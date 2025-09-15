@@ -45,7 +45,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 # Import core functionality
 from .core.device_info import DeviceInfo
 from .core.system_info import SystemInfo, print_brief_sys_info
-from .utils import Execute, HumanReadable
+from .utils import Execute, HumanReadable, Logger, LoggerConfig
 from .exceptions import (
     ConfigurationError,
     DataCollectionError,
@@ -494,6 +494,9 @@ __all__ = [
     "ValidationError",
     # Legacy compatibility
     "print_brief_sys_info",
+    # Logging
+    "Logger",
+    "LoggerConfig",
 ]
 
 # Module initialization (debug only)

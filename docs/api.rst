@@ -36,6 +36,12 @@ Feature Detection
 
 .. autofunction:: syinfo.print_feature_status
 
+Logging Classes
+~~~~~~~~~~~~~~~
+
+.. autoclass:: syinfo.Logger
+   :members: get_logger, get_instance
+
 Monitoring Functions (New!)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -125,6 +131,21 @@ SystemInfo
 ~~~~~~~~~~
 
 .. autoclass:: syinfo.core.system_info.SystemInfo
+   :members:
+
+Logging Classes
+---------------
+
+Logger
+~~~~~~
+
+.. autoclass:: syinfo.utils.logger.Logger
+   :members:
+
+LoggerConfig  
+~~~~~~~~~~~~
+
+.. autoclass:: syinfo.utils.logger.LoggerConfig
    :members:
 
 Exceptions
@@ -226,15 +247,43 @@ System Monitoring:
        if point['cpu_percent'] > 80:
            print(f"High CPU at {point['timestamp']}: {point['cpu_percent']:.1f}%")
 
+Logging Usage:
+
+.. code-block:: python
+
+   from syinfo import Logger, LoggerConfig
+   import logging
+   
+   # Basic logging
+   logger = syinfo.Logger.get_logger()
+   logger.info("Application started")
+   
+   # Advanced configuration
+   config = LoggerConfig(
+       log_level=logging.DEBUG,
+       log_files=["app.log"],
+       enable_incident_counting=True,
+       enable_traceback=True
+   )
+   logger = syinfo.Logger.get_logger(config)
+   
+   # Runtime management
+   logger_instance = syinfo.Logger.get_instance()
+   stats = logger_instance.get_stats()
+   print(f"Warnings: {stats['warning_count']}")
+
 Error Handling:
 
 .. code-block:: python
 
    from syinfo.exceptions import SystemAccessError, DataCollectionError
    
+   logger = syinfo.Logger.get_logger()
+   
    try:
        info = syinfo.get_system_info()
+       logger.info("System info collected successfully")
    except SystemAccessError as e:
-       print(f"Permission error: {e}")
+       logger.error(f"Permission error: {e}")
    except DataCollectionError as e:
-       print(f"Collection failed: {e}")
+       logger.error(f"Collection failed: {e}")

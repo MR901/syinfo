@@ -16,7 +16,10 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import psutil
 
 from syinfo.exceptions import DataCollectionError
-from syinfo.utils import HumanReadable
+from syinfo.utils import HumanReadable, Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class ProcessMonitor:
@@ -145,7 +148,7 @@ class ProcessMonitor:
                     self._stop_event.wait(self.interval)
 
                 except Exception as e:
-                    print(f"Process monitoring error: {e}")
+                    logger.error(f"Process monitoring error: {e}")
                     continue
 
             self.is_running = False
@@ -266,7 +269,7 @@ class ProcessMonitor:
                     continue
 
         except Exception as e:
-            print(f"Error collecting process data: {e}")
+            logger.error(f"Error collecting process data: {e}")
 
         return {
             'timestamp': timestamp,

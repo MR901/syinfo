@@ -15,6 +15,10 @@ from typing import Any, Callable, Dict, List, Optional
 import psutil
 
 from syinfo.exceptions import DataCollectionError
+from syinfo.utils import Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class SystemMonitor:
@@ -116,7 +120,7 @@ class SystemMonitor:
                     self._stop_event.wait(self.interval)
 
                 except Exception as e:
-                    print(f"Monitoring error: {e}")
+                    logger.error(f"Monitoring error: {e}")
                     continue
 
             self.is_running = False

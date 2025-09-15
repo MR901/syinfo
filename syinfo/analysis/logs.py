@@ -16,10 +16,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Pattern, Tuple, Union
 
-import logging
+from syinfo.utils import Logger
 
-
-logger = logging.getLogger("syinfo.analysis.logs")
+# Get logger instance
+logger = Logger.get_logger()
 
 
 @dataclass

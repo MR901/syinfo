@@ -7,15 +7,16 @@ Linux-first support for APT/YUM/DNF/SNAP plus PIP/Conda/NPM.
 from __future__ import annotations
 
 import json
-import logging
 import platform
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
+from syinfo.utils import Logger
 
-logger = logging.getLogger("syinfo.analysis.packages")
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class PackageManagerType(Enum):

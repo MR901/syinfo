@@ -203,3 +203,30 @@ Advanced/Dev
 
     pytest -q
     python -m ruff check --fix . && python -m black .
+
+Advanced Features
+-----------------
+
+Logging
+~~~~~~~
+
+SyInfo includes a sophisticated logging system with advanced features:
+
+.. code-block:: python
+
+   from syinfo import Logger, LoggerConfig
+   import logging
+   
+   # Configure advanced logging
+   config = LoggerConfig(
+       log_level=logging.INFO,
+       log_files=["app.log"],
+       enable_incident_counting=True,
+       enable_traceback=True,
+       enable_syslog=True
+   )
+   
+   logger = Logger.get_logger(config)
+   logger.info("Application started")
+
+For complete logging documentation, see :doc:`logging`.

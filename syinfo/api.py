@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from .core.device_info import DeviceInfo
 from .core.system_info import SystemInfo, print_brief_sys_info
-from .core.utils import HumanReadable
+from .utils import HumanReadable
 from .exceptions import (
     ConfigurationError,
     DataCollectionError,

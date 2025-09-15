@@ -29,7 +29,7 @@ from syinfo.exceptions import (
     SystemAccessError, 
     ValidationError
 )
-from syinfo.core.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data
 
 
 class DeviceInfo:

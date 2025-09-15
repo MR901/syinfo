@@ -15,7 +15,7 @@ import psutil
 
 from syinfo.core.device_info import DeviceInfo
 from syinfo.core.network_info import NetworkInfo
-from syinfo.core.utils import export_data
+from syinfo.utils import export_data
 
 
 class SystemInfo:

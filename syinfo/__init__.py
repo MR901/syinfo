@@ -45,7 +45,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 # Import core functionality
 from .core.device_info import DeviceInfo
 from .core.system_info import SystemInfo, print_brief_sys_info
-from .core.utils import Execute, HumanReadable
+from .utils import Execute, HumanReadable
 from .exceptions import (
     ConfigurationError,
     DataCollectionError,
@@ -71,14 +71,12 @@ except ImportError:
         )
 
 # Analysis helpers (logs, packages, system)
-from .analysis.logs import LogAnalyzer, LogAnalysisConfig, LogEntry, analyze_logs
+from .analysis.logs import LogAnalyzer, LogAnalysisConfig, LogEntry
 from .analysis.packages import (
     PackageManager,
     PackageManagerType,
     PackageInfo,
-    list_installed_packages,
 )
-from .analysis.system import SystemAnalyzer
 from .api import SyInfoAPI
 
 
@@ -395,6 +393,17 @@ def create_system_monitor(interval: int = 60, **kwargs):
     return SystemMonitor(interval=interval, **kwargs)
 
 
+def create_process_monitor(
+    filters: Optional[List[str]] = None,
+    interval: int = 30,
+    **kwargs
+):
+    """Create a process monitor (thin wrapper for convenience)."""
+    from .resource_monitor.process_monitoring import ProcessMonitor
+
+    return ProcessMonitor(filters=filters, interval=interval, **kwargs)
+
+
 def create_simple_monitor(interval: int = 60, **kwargs):
     """Backward-compatible alias for create_system_monitor."""
     return create_system_monitor(interval=interval, **kwargs)
@@ -460,16 +469,17 @@ __all__ = [
     "LogAnalyzer",
     "LogAnalysisConfig",
     "LogEntry",
-    "analyze_logs",
     "PackageManager",
     "PackageManagerType",
     "PackageInfo",
-    "list_installed_packages",
-    "SystemAnalyzer",
     "SyInfoAPI",
     # Feature management
     "get_available_features",
     "print_feature_status",
+    # Monitoring
+    "create_system_monitor",
+    "create_process_monitor",
+    "create_simple_monitor",
     # Core classes (for advanced usage)
     "DeviceInfo",
     "SystemInfo",

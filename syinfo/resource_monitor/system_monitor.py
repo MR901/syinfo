@@ -60,6 +60,10 @@ class SystemMonitor:
         self._lines_written = 0
         self._bytes_written = 0
 
+        # Network I/O rate tracking
+        self._prev_net_io: Optional[Dict[str, int]] = None
+        self._prev_timestamp: Optional[float] = None
+
     def start(
         self,
         duration: Optional[int] = None,
@@ -77,6 +81,10 @@ class SystemMonitor:
         self.is_running = True
         self._stop_event.clear()
         self.data_points = []
+
+        # Reset network I/O tracking
+        self._prev_net_io = None
+        self._prev_timestamp = None
 
         # Prepare persistence
         if self._output_path:
@@ -176,12 +184,55 @@ class SystemMonitor:
 
     def _collect_data_point(self) -> Dict[str, Any]:
         """Collect a single data point."""
+        current_time = time.time()
+        current_net_io = psutil.net_io_counters()
+        current_net_dict = dict(current_net_io._asdict())
+        
+        # Calculate network I/O rates if we have previous data
+        network_rates = {}
+        if self._prev_net_io is not None and self._prev_timestamp is not None:
+            time_delta = current_time - self._prev_timestamp
+            if time_delta > 0:
+                # Calculate bytes per second
+                bytes_sent_rate = (current_net_dict['bytes_sent'] - self._prev_net_io['bytes_sent']) / time_delta
+                bytes_recv_rate = (current_net_dict['bytes_recv'] - self._prev_net_io['bytes_recv']) / time_delta
+                packets_sent_rate = (current_net_dict['packets_sent'] - self._prev_net_io['packets_sent']) / time_delta
+                packets_recv_rate = (current_net_dict['packets_recv'] - self._prev_net_io['packets_recv']) / time_delta
+                
+                # Ensure rates are non-negative (handle counter resets)
+                bytes_sent_rate = max(0, bytes_sent_rate)
+                bytes_recv_rate = max(0, bytes_recv_rate)
+                packets_sent_rate = max(0, packets_sent_rate)
+                packets_recv_rate = max(0, packets_recv_rate)
+                
+                network_rates = {
+                    'bytes_sent_per_sec': bytes_sent_rate,
+                    'bytes_recv_per_sec': bytes_recv_rate,
+                    'packets_sent_per_sec': packets_sent_rate,
+                    'packets_recv_per_sec': packets_recv_rate,
+                    'total_bytes_per_sec': bytes_sent_rate + bytes_recv_rate,
+                    'total_packets_per_sec': packets_sent_rate + packets_recv_rate,
+                }
+                
+                # Add human-readable rates
+                from syinfo.utils import HumanReadable
+                network_rates.update({
+                    'bytes_sent_per_sec_human': f"{HumanReadable.bytes_to_size(bytes_sent_rate)}/s",
+                    'bytes_recv_per_sec_human': f"{HumanReadable.bytes_to_size(bytes_recv_rate)}/s",
+                    'total_bytes_per_sec_human': f"{HumanReadable.bytes_to_size(bytes_sent_rate + bytes_recv_rate)}/s",
+                })
+        
+        # Update previous values for next iteration
+        self._prev_net_io = current_net_dict
+        self._prev_timestamp = current_time
+        
         return {
             "timestamp": datetime.now().isoformat(),
             "cpu_percent": psutil.cpu_percent(),
             "memory_percent": psutil.virtual_memory().percent,
             "disk_percent": psutil.disk_usage("/").percent,
-            "network_io": dict(psutil.net_io_counters()._asdict()),
+            "network_io_cumulative": current_net_dict,  # Keep cumulative for reference
+            "network_io_rates": network_rates,  # New: rates per second
         }
 
     def _calculate_summary(self) -> Dict[str, Any]:
@@ -252,11 +303,11 @@ class SystemMonitor:
         if not self.data_points:
             return None
         try:
-            from syinfo.resource_monitor.visualization import plot_data_with_matplotlib  # local import
+            from syinfo.resource_monitor.visualization import create_monitoring_plot  # local import
         except Exception:
             return None
 
-        saved = plot_data_with_matplotlib(self.data_points, save_to=save_path, show=False)
+        saved = create_monitoring_plot(self.data_points, save_to=save_path, show=False)
         return saved
 
     # ----------------------------

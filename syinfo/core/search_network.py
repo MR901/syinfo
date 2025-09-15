@@ -8,7 +8,7 @@ import getmac
 from scapy.all import ARP, Ether, srp
 
 from syinfo.constants import NEED_SUDO, UNKNOWN
-from syinfo.core.utils import Execute
+from syinfo.utils import Execute
 
 __author__ = "Mohit Rajput"
 __copyright__ = "Copyright (c)"

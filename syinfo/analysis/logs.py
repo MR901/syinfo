@@ -193,7 +193,92 @@ class LogAnalyzer:
         limit: Optional[int] = None,
         reverse_order: bool = True,
     ) -> List[LogEntry]:
-        """Query logs with advanced filtering capabilities."""
+        """Query log entries with advanced filtering and search capabilities.
+
+        This method provides comprehensive log analysis functionality, allowing you to
+        search, filter, and retrieve log entries based on multiple criteria. It supports
+        text searching, log level filtering, time range queries, process filtering,
+        regex pattern matching, and file-specific searches.
+
+        Args:
+            text_filter (str, optional): Case-insensitive text to search for in log messages.
+                Searches in the main log message content. Defaults to "" (no text filter).
+            
+            level_filter (str | List[str], optional): Filter by log levels. Can be a single
+                level string (e.g., "ERROR") or a list of levels (e.g., ["ERROR", "WARN"]).
+                Common levels: DEBUG, INFO, WARN, WARNING, ERROR, CRITICAL, FATAL.
+                Defaults to None (all levels included).
+            
+            time_range (Tuple[datetime, datetime], optional): Filter logs within a specific
+                time range. Tuple of (start_time, end_time) as datetime objects.
+                Only logs with timestamps within this range will be included.
+                Defaults to None (no time filtering).
+            
+            process_filter (str, optional): Filter by process name or PID. Searches for
+                the specified text in process information fields. Case-insensitive.
+                Defaults to "" (no process filter).
+            
+            regex_pattern (str, optional): Regular expression pattern to match against
+                log messages. Uses case-insensitive matching. If the pattern is invalid,
+                it will be ignored. Defaults to None (no regex filtering).
+            
+            file_patterns (List[str], optional): List of file patterns to search in.
+                Supports glob patterns like "*.log", "/var/log/app*.log", etc.
+                If not specified, searches in all discovered log files.
+                Defaults to None (search all files).
+            
+            limit (int, optional): Maximum number of log entries to return.
+                If not specified, uses the default limit from configuration.
+                Defaults to None (use config default).
+            
+            reverse_order (bool, optional): Whether to return results in reverse
+                chronological order (newest first). When True, returns most recent
+                entries first. Defaults to True.
+
+        Returns:
+            List[LogEntry]: List of LogEntry objects matching the specified criteria.
+                Each LogEntry contains parsed log information including timestamp,
+                level, message, process info, and source file.
+
+        Examples:
+            Basic text search:
+            >>> analyzer = LogAnalyzer()
+            >>> errors = analyzer.query_logs(text_filter="connection failed")
+            
+            Filter by log level:
+            >>> critical_logs = analyzer.query_logs(level_filter="ERROR")
+            >>> multi_level = analyzer.query_logs(level_filter=["ERROR", "CRITICAL"])
+            
+            Time range query:
+            >>> from datetime import datetime, timedelta
+            >>> end_time = datetime.now()
+            >>> start_time = end_time - timedelta(hours=1)
+            >>> recent_logs = analyzer.query_logs(time_range=(start_time, end_time))
+            
+            Process-specific logs:
+            >>> app_logs = analyzer.query_logs(process_filter="nginx")
+            
+            Regex pattern matching:
+            >>> ip_logs = analyzer.query_logs(regex_pattern=r"\\d+\\.\\d+\\.\\d+\\.\\d+")
+            
+            File-specific search:
+            >>> app_logs = analyzer.query_logs(file_patterns=["/var/log/app*.log"])
+            
+            Combined filtering:
+            >>> complex_query = analyzer.query_logs(
+            ...     text_filter="database",
+            ...     level_filter=["ERROR", "WARN"],
+            ...     time_range=(start_time, end_time),
+            ...     limit=50
+            ... )
+
+        Note:
+            - All text-based filters (text_filter, process_filter) are case-insensitive
+            - Multiple filters are combined with AND logic (all must match)
+            - Invalid regex patterns are silently ignored
+            - The method automatically discovers log files if file_patterns is not specified
+            - Results are sorted by timestamp, with reverse_order controlling the direction
+        """
 
         limit = limit or self.config.default_limit
         results: List[LogEntry] = []
@@ -246,6 +331,16 @@ class LogAnalyzer:
         return results[:limit]
 
     def get_log_statistics(self, entries: List[LogEntry]) -> Dict[str, Any]:
+        """Generate basic statistics for a collection of log entries.
+
+        Args:
+            entries: List of LogEntry objects to analyze.
+
+        Returns:
+            Dictionary containing statistics including total_entries, date_range,
+            level_distribution, process_distribution, file_distribution, and
+            hourly_distribution. Returns empty dict if no entries provided.
+        """
         if not entries:
             return {}
 
@@ -281,21 +376,4 @@ class LogAnalyzer:
                 stats["hourly_distribution"][hour] = stats["hourly_distribution"].get(hour, 0) + 1
 
         return stats
-
-
-def analyze_logs(
-    text_filter: str = "",
-    level_filter: Optional[Union[str, List[str]]] = None,
-    hours_back: int = 24,
-    limit: int = 100,
-) -> List[LogEntry]:
-    analyzer = LogAnalyzer()
-    start_time = datetime.now() - timedelta(hours=hours_back)
-    return analyzer.query_logs(
-        text_filter=text_filter,
-        level_filter=level_filter,
-        time_range=(start_time, datetime.now()),
-        limit=limit,
-    )
-
 

@@ -24,7 +24,7 @@ Quick start: System monitoring
 .. code-block:: python
 
    import syinfo as si
-   from syinfo.resource_monitor.visualization import plot_with_matplotlib
+   from syinfo.resource_monitor.visualization import create_monitoring_plot
 
    # Persist to ./monitoring as JSONL (one object per line) with rotation
    mon = si.create_system_monitor(interval=2, output_path="./monitoring", rotate_max_lines=1000)
@@ -33,7 +33,7 @@ Quick start: System monitoring
    results = mon.stop()  # also writes a summary JSON next to the JSONL file
 
    # Visualize the JSONL after collection
-   plot_with_matplotlib("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl")
+   create_monitoring_plot("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl", show=True)
 
 Process snapshots (top-N, grep)
 --------------------------------

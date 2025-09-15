@@ -12,7 +12,7 @@ import platform
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 logger = logging.getLogger("syinfo.analysis.packages")
@@ -84,30 +84,6 @@ class PackageManager:
 
         logger.debug("Detected package managers: %s", [m.value for m in managers])
         return managers
-
-    def list_packages(
-        self,
-        manager: Optional[PackageManagerType] = None,
-        name_filter: str = "",
-        installed_only: bool = True,
-    ) -> List[PackageInfo]:
-        managers_to_query = [manager] if manager else self.supported_managers
-        all_packages: List[PackageInfo] = []
-
-        for mgr in managers_to_query:
-            try:
-                all_packages.extend(
-                    self._list_packages_for_manager(mgr, name_filter, installed_only)
-                )
-            except Exception as exc:
-                logger.debug("Failed to query %s: %s", mgr.value, exc)
-
-        unique: Dict[tuple, PackageInfo] = {}
-        for pkg in all_packages:
-            key = (pkg.name, pkg.manager)
-            if key not in unique:
-                unique[key] = pkg
-        return list(unique.values())
 
     def _list_packages_for_manager(
         self,
@@ -293,15 +269,57 @@ class PackageManager:
                     )
         return packages
 
+    def list_packages(
+        self,
+        name_filter: str = "",
+        manager: Optional[PackageManagerType] = None,
+        installed_only: bool = True,
+        as_dict: bool = True,
+    ) -> Union[List[PackageInfo], List[Dict[str, str]]]:
+        """List packages from one or all supported package managers.
 
-def list_installed_packages(name_filter: str = "", manager: Optional[str] = None) -> List[PackageInfo]:
-    pm = PackageManager()
-    selected: Optional[PackageManagerType] = None
-    if manager:
-        try:
-            selected = PackageManagerType(manager)
-        except ValueError:
-            selected = None
-    return pm.list_packages(manager=selected, name_filter=name_filter)
+        Args:
+            name_filter: Filter packages by name (case-insensitive substring match).
+            manager: Specific package manager to query. If None, queries all supported managers.
+            installed_only: Whether to include only installed packages.
+            as_dict: If True, return list of dictionaries instead of PackageInfo objects.
 
+        Returns:
+            List of unique PackageInfo objects or dictionaries. Duplicates across managers are removed.
+
+        Examples:
+            >>> pm = PackageManager()
+            >>> all_packages = pm.list_packages()
+            >>> python_packages = pm.list_packages(name_filter="python")
+            >>> apt_packages = pm.list_packages(manager=PackageManagerType.APT)
+            >>> PackageManager().list_packages(
+            ... # name_filter="matplot", manager=PackageManagerType.PIP,
+            ... name_filter="gcc", manager=PackageManagerType.APT,
+            ... installed_only= True, as_dict=True
+)
+        """
+        managers_to_query = [manager] if manager else self.supported_managers
+        all_packages: List[PackageInfo] = []
+
+        for mgr in managers_to_query:
+            try:
+                all_packages.extend(
+                    self._list_packages_for_manager(mgr, name_filter, installed_only)
+                )
+            except Exception as exc:
+                logger.debug("Failed to query %s: %s", mgr.value, exc)
+
+        unique: Dict[tuple, PackageInfo] = {}
+        for pkg in all_packages:
+            key = (pkg.name, pkg.manager)
+            if key not in unique:
+                unique[key] = pkg
+        
+        result = list(unique.values())
+        
+        if as_dict:
+            from dataclasses import asdict
+            return [asdict(pkg) for pkg in result]
+        
+        return result
 

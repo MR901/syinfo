@@ -7,7 +7,7 @@ including device information, system information, and utility functions.
 # Import core classes and functions
 from .device_info import DeviceInfo
 from .system_info import SystemInfo, print_brief_sys_info
-from .utils import Execute, HumanReadable, create_highlighted_heading
+from ..utils import Execute, HumanReadable, create_highlighted_heading
 
 # Exceptions are now imported from parent package
 

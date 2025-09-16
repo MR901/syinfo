@@ -57,19 +57,65 @@ class LoggerConfig:
 
 
 class Logger:
-    """Singleton logger class with dynamic configuration capabilities."""
+    """Advanced singleton logger with comprehensive configuration options.
+    
+    Provides centralized logging for the SyInfo package with features including:
+    - Multiple output destinations (console, files, syslog)
+    - Automatic incident counting for warnings/errors
+    - Configurable log rotation and formatting
+    - Syslog integration for system-wide logging
+    - Thread-safe singleton pattern
+    - Environment variable overrides
+    
+    The logger is designed as a singleton to ensure consistent configuration
+    across all modules in the package. Configuration is done once at 
+    initialization and applies to all subsequent usage.
+    
+    Examples:
+        >>> config = LoggerConfig(log_level=logging.DEBUG)
+        >>> logger = Logger.get_logger(config)
+        >>> logger.info("System information collection started")
+        
+        # Singleton behavior - same instance returned
+        >>> logger2 = Logger.get_logger()
+        >>> assert logger is logger2
+        
+    Note:
+        The first call to Logger() or get_logger() determines the 
+        configuration for all subsequent calls.
+    """
     
     _instance: Optional['Logger'] = None
     
     def __new__(cls, config: Optional[LoggerConfig] = None) -> 'Logger':
-        """Ensure singleton pattern."""
+        """Create or return singleton Logger instance.
+        
+        Args:
+            config: Logger configuration (only used on first instantiation)
+            
+        Returns:
+            Singleton Logger instance
+            
+        Note:
+            Configuration is only applied during the first instantiation.
+            Subsequent calls ignore the config parameter.
+        """
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.__initialized = False
         return cls._instance
     
-    def __init__(self, config: Optional[LoggerConfig] = None):
-        """Initialize only once."""
+    def __init__(self, config: Optional[LoggerConfig] = None) -> None:
+        """Initialize logger configuration (singleton - only runs once).
+        
+        Args:
+            config: Logger configuration. If None, uses default LoggerConfig.
+                   Only applied during first initialization.
+                   
+        Note:
+            This method implements the singleton pattern - it only executes
+            the initialization code once, even if called multiple times.
+        """
         if hasattr(self, '_Logger__initialized') and self.__initialized:
             return
         
@@ -80,12 +126,15 @@ class Logger:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(config.log_level)
         
-        # Incident counters
+        # Incident tracking for numbered warnings/errors
         self.warning_count = 0
         self.error_count = 0
         
-        # Clear existing handlers to avoid duplicates
+        # Clear any existing handlers to prevent duplicates
         self.logger.handlers.clear()
+        
+        # Prevent propagation to root logger to avoid duplicate messages
+        self.logger.propagate = False
         
         # Setup handlers
         self._setup_handlers()
@@ -96,7 +145,7 @@ class Logger:
             self._apply_error_override()
         
         self.__initialized = True
-        self.logger.info("Logger initialized successfully")
+        # self.logger.info("Logger initialized successfully")
     
     @classmethod
     def get_logger(cls, config: Optional[LoggerConfig] = None) -> logging.Logger:

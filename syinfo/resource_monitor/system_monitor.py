@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional
 import psutil
 
 from syinfo.exceptions import DataCollectionError
-from syinfo.utils import Logger
+from syinfo.utils import Logger, HumanReadable
 
 # Get logger instance
 logger = Logger.get_logger()
@@ -219,7 +219,6 @@ class SystemMonitor:
                 }
                 
                 # Add human-readable rates
-                from syinfo.utils import HumanReadable
                 network_rates.update({
                     'bytes_sent_per_sec_human': f"{HumanReadable.bytes_to_size(bytes_sent_rate)}/s",
                     'bytes_recv_per_sec_human': f"{HumanReadable.bytes_to_size(bytes_recv_rate)}/s",

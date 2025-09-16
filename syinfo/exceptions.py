@@ -30,12 +30,6 @@ class DataCollectionError(SyInfoException):
     pass
 
 
-class NetworkError(SyInfoException):
-    """Raised when network operations fail."""
-
-    pass
-
-
 class SystemAccessError(SyInfoException):
     """Raised when system access is denied or insufficient privileges."""
     def __init__(self, *args, **kwargs):
@@ -48,17 +42,9 @@ class ValidationError(SyInfoException):
         super().__init__(*args, **kwargs)
 
 
-class ConfigurationError(SyInfoException):
-    """Raised when configuration is invalid."""
-
-    pass
-
-
 __all__ = [
     "SyInfoException",
-    "DataCollectionError",
-    "NetworkError",
+    "DataCollectionError", 
     "SystemAccessError",
     "ValidationError",
-    "ConfigurationError",
 ]

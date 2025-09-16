@@ -10,8 +10,6 @@ This package provides various utility functions organized by functionality:
 from .common import (
     handle_system_error,
     create_highlighted_heading,
-    monitor_performance,
-    get_system_info_cached,
 )
 from .formatters import HumanReadable
 from .system import Execute, safe_file_read
@@ -21,9 +19,7 @@ from .logger import Logger, LoggerConfig
 __all__ = [
     # Common utilities
     "handle_system_error",
-    "create_highlighted_heading", 
-    "monitor_performance",
-    "get_system_info_cached",
+    "create_highlighted_heading",
     # Formatters
     "HumanReadable",
     # System operations

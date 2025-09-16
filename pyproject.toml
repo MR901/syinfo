@@ -51,27 +51,14 @@ dependencies = [
     "scapy>=2.5.0",
     "py-cpuinfo>=9.0.0",
     "requests>=2.25.0",
-    "click>=8.0.0",  # For better CLI experience
-    "rich>=12.0.0",  # For better terminal output
-    "pydantic>=2.0.0",  # For data validation
-]
-
-[project.optional-dependencies]
-monitoring = [
     "pandas>=1.5.0",
     "matplotlib>=3.5.0",
     "seaborn>=0.12.0",
     "numpy>=1.21.0",
-]
-network = [
     "paramiko>=2.8.0",
 ]
-visualization = [
-    # Plotly support removed
-]
-full = [
-    "syinfo[monitoring,network]",
-]
+
+[project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -113,12 +100,6 @@ packages = ["syinfo"]
 
 [tool.hatch.build]
 only-include = ["syinfo"]
-
-[tool.hatch.build.force-include]
-"syinfo/core/device_info.py" = "syinfo/core/device_info.py"
-"syinfo/analysis/logs.py" = "syinfo/analysis/logs.py"
-"syinfo/analysis/packages.py" = "syinfo/analysis/packages.py"
-"syinfo/analysis/system.py" = "syinfo/analysis/system.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

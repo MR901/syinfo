@@ -36,7 +36,21 @@ logger = Logger.get_logger()
 
 
 class DeviceInfo:
-    """Device information collector with detailed tree output format."""
+    """Comprehensive device information collector.
+    
+    Provides detailed hardware information including CPU, memory, GPU, 
+    disk, and manufacturer details. Uses system interfaces like /proc,
+    /sys, DMI, and external tools to gather comprehensive data.
+    
+    All methods are static for stateless operation and can be called
+    without instantiation. Results include both raw values and 
+    human-readable formatted data.
+    
+    Examples:
+        >>> info = DeviceInfo.get_all()
+        >>> print(info['cpu_info']['design']['model name'])
+        >>> DeviceInfo.print(info)  # Pretty-print tree format
+    """
     
     def __init__(self) -> None:
         """Initialize the device information collector."""
@@ -96,27 +110,47 @@ class DeviceInfo:
     @handle_system_error
     @lru_cache(maxsize=1)
     def _get_cpu_info() -> Dict[str, Any]:
-        """Get detailed CPU information from /proc/cpuinfo.
+        """Get comprehensive CPU information from system interfaces.
+        
+        Reads from /proc/cpuinfo and gathers additional CPU data including
+        frequency information, usage statistics, and core topology. Results
+        are cached to avoid repeated expensive operations.
         
         Returns:
-            Dictionary containing CPU details
+            Dict containing:
+                - design: CPU model, vendor, architecture info
+                - cores: Physical/logical core counts
+                - frequency_Mhz: Current/min/max frequencies  
+                - percentage_used: Current CPU utilization
+                - Raw /proc/cpuinfo data organized by core
+                
+        Raises:
+            SystemAccessError: If /proc/cpuinfo cannot be read
+            
+        Note:
+            Function is cached with LRU cache (maxsize=1) for performance.
+            CPU frequency and usage are live values at time of collection.
         """
         try:
+            logger.debug("Reading CPU information from /proc/cpuinfo")
             cpu_info_raw = Execute.on_shell("cat /proc/cpuinfo")
             if cpu_info_raw == UNKNOWN:
+                logger.warning("Unable to read /proc/cpuinfo - CPU info unavailable")
                 return {"error": "Cannot read /proc/cpuinfo"}
             
-            # Parse CPU info blocks
+            # Parse CPU info into blocks (one per logical core)
             cpu_blocks = [
                 block.strip() for block in cpu_info_raw.split("\n\n") 
                 if block.strip()
             ]
+            logger.debug(f"Found {len(cpu_blocks)} CPU core blocks in /proc/cpuinfo")
             
+            # Consolidate information from all CPU cores
             consolidated_info = {}
-            for block in cpu_blocks:
+            for i, block in enumerate(cpu_blocks):
                 try:
-                    # Convert to YAML-like format for parsing
-                    yaml_block = block.replace("\t", "")
+                    # Convert /proc/cpuinfo format to YAML-parseable format
+                    yaml_block = block.replace("\t", "")  # Remove tabs
                     block_data = yaml.safe_load(yaml_block)
                     
                     if isinstance(block_data, dict):

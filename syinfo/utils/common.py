@@ -1,16 +1,17 @@
-"""Common utility functions and decorators."""
+"""Common utilities, decorators, and formatting functions for SyInfo.
 
-import functools
-import platform
-import time
-from functools import lru_cache
-from typing import Any, Callable, Dict, Tuple, TypeVar
+This module provides shared functionality used across the package including:
+- Error handling decorators with exception translation
+- Text formatting and display utilities with ANSI color support
+
+The utilities here are designed to be lightweight, stateless, and reusable
+across different modules without creating dependencies.
+"""
+
+from typing import Tuple
 
 from syinfo.exceptions import SystemAccessError, ValidationError
 from .logger import Logger
-
-# Type variables for generic functions
-F = TypeVar("F", bound=Callable[..., Any])
 
 # Get logger instance
 logger = Logger.get_logger()
@@ -80,58 +81,7 @@ def create_highlighted_heading(
     return _msg
 
 
-def monitor_performance(func: F) -> F:
-    """Decorator to monitor function performance.
-    
-    Args:
-        func: Function to monitor
-        
-    Returns:
-        Wrapped function with performance monitoring
-    """
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        try:
-            result = func(*args, **kwargs)
-            execution_time = time.time() - start_time
-            logger.debug(
-                f"Function {func.__name__} executed in {execution_time:.4f} seconds"
-            )
-            return result
-        except Exception as e:
-            execution_time = time.time() - start_time
-            logger.error(
-                f"Function {func.__name__} failed after {execution_time:.4f} seconds: {e}"
-            )
-            raise
-    return wrapper
-
-
-def get_system_info_cached() -> Dict[str, Any]:
-    """Get cached system information to avoid repeated system calls.
-    
-    Returns:
-        Dictionary containing basic system information
-    """
-    @lru_cache(maxsize=1)
-    def _get_system_info():
-        return {
-            "platform": platform.platform(),
-            "system": platform.system(),
-            "release": platform.release(),
-            "version": platform.version(),
-            "machine": platform.machine(),
-            "processor": platform.processor(),
-            "hostname": platform.node(),
-        }
-    
-    return _get_system_info()
-
-
 __all__ = [
     "handle_system_error",
     "create_highlighted_heading",
-    "monitor_performance", 
-    "get_system_info_cached",
 ]

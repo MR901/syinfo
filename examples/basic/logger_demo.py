@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Example: Advanced logging configuration with SyInfo.
-
-This example demonstrates how to use SyInfo's sophisticated logger
-with various configurations including file logging, incident counting,
-and different verbosity levels.
-"""
+"""Example: Advanced logging configuration with SyInfo (updated API, no emojis)."""
 
 import sys
 import tempfile
@@ -13,17 +8,16 @@ from pathlib import Path
 # Add parent directory to path for development
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import syinfo
-from syinfo.utils import LoggerConfig
+from syinfo import Logger, LoggerConfig, DeviceInfo, SystemInfo
 
 
 def demo_basic_logging():
     """Demonstrate basic logging functionality."""
-    print("🔧 Basic Logging Demo")
+    print("Basic Logging Demo")
     print("=" * 50)
     
     # Get default logger
-    logger = syinfo.Logger.get_logger()
+    logger = Logger.get_logger()
     
     # Test different log levels
     logger.debug("This is a debug message")
@@ -31,12 +25,12 @@ def demo_basic_logging():
     logger.warning("This is a warning message")
     logger.error("This is an error message")
     
-    print("✅ Basic logging completed\n")
+    print("Basic logging completed\n")
 
 
 def demo_configured_logging():
     """Demonstrate advanced logger configuration."""
-    print("⚙️ Advanced Configuration Demo")
+    print("Advanced Configuration Demo")
     print("=" * 50)
     
     # Create temporary log file
@@ -56,7 +50,7 @@ def demo_configured_logging():
         )
         
         # Get configured logger
-        logger = syinfo.Logger.get_logger(config)
+        logger = Logger.get_logger(config)
         
         # Test logging with configuration
         logger.debug("Debug message with verbose logging")
@@ -72,7 +66,7 @@ def demo_configured_logging():
         
         # Show log file contents
         log_content = Path(log_file).read_text()
-        print(f"\n📄 Log file contents ({log_file}):")
+        print(f"\nLog file contents ({log_file}):")
         print("-" * 40)
         print(log_content)
         print("-" * 40)
@@ -81,16 +75,16 @@ def demo_configured_logging():
         # Cleanup
         Path(log_file).unlink(missing_ok=True)
     
-    print("✅ Advanced logging completed\n")
+    print("Advanced logging completed\n")
 
 
 def demo_logger_stats():
     """Demonstrate logger statistics and management."""
-    print("📊 Logger Statistics Demo")
+    print("Logger Statistics Demo")
     print("=" * 50)
     
     # Get logger instance for advanced operations
-    logger_instance = syinfo.Logger.get_instance()
+    logger_instance = Logger.get_instance()
     
     if logger_instance:
         # Show initial stats
@@ -100,7 +94,7 @@ def demo_logger_stats():
             print(f"  {key}: {value}")
         
         # Generate some incidents
-        logger = syinfo.Logger.get_logger()
+        logger = Logger.get_logger()
         logger.warning("Test warning 1")
         logger.warning("Test warning 2") 
         logger.error("Test error 1")
@@ -118,12 +112,12 @@ def demo_logger_stats():
         for key, value in stats.items():
             print(f"  {key}: {value}")
     
-    print("✅ Statistics demo completed\n")
+    print("Statistics demo completed\n")
 
 
 def demo_syinfo_with_logging():
-    """Demonstrate SyInfo functionality with logging enabled."""
-    print("🖥️ SyInfo with Logging Demo")
+    """Demonstrate SyInfo functionality with logging enabled (new API)."""
+    print("SyInfo with Logging Demo")
     print("=" * 50)
     
     # Configure logger to show debug info
@@ -134,29 +128,30 @@ def demo_syinfo_with_logging():
         enable_incident_counting=False,  # No numbering for this demo
     )
     
-    logger = syinfo.Logger.get_logger(config)
+    logger = Logger.get_logger(config)
     
     # Use SyInfo functionality - this will generate log messages
     logger.info("Starting system information collection...")
     
     try:
-        # Get basic system info (will generate debug logs internally)
-        system_info = syinfo.get_system_info()
-        logger.info(f"Collected system info: {system_info.get('system_name', 'Unknown')}")
+        # Get combined system info (device + network summary)
+        system_info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+        logger.info("Collected system info")
         
-        # Get hardware info
-        hardware = syinfo.get_hardware_info()  
-        logger.info(f"CPU cores: {hardware.get('cpu', {}).get('cores', 'Unknown')}")
+        # Get device info
+        hardware = DeviceInfo.get_all()
+        cpu_cores = (hardware.get('cpu_info', {}) or {}).get('cores', {})
+        logger.info(f"CPU cores: physical={cpu_cores.get('physical')}, total={cpu_cores.get('total')}")
         
     except Exception as e:
         logger.error(f"Error during system info collection: {e}")
     
     logger.info("System information collection completed")
-    print("✅ SyInfo with logging completed\n")
+    print("SyInfo with logging completed\n")
 
 
 if __name__ == "__main__":
-    print("🚀 SyInfo Logger Demonstration")
+    print("SyInfo Logger Demonstration")
     print("=" * 60)
     print()
     
@@ -166,9 +161,9 @@ if __name__ == "__main__":
         demo_logger_stats()
         demo_syinfo_with_logging()
         
-        print("🎉 All logger demonstrations completed successfully!")
+        print("All logger demonstrations completed successfully!")
         
     except Exception as e:
-        print(f"❌ Demo failed: {e}")
+        print(f"Demo failed: {e}")
         import traceback
         traceback.print_exc()

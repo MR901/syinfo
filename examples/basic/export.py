@@ -1,15 +1,18 @@
-"""Basic example: export system info in JSON/YAML/CSV."""
+"""Basic example: export information using DeviceInfo/SystemInfo."""
 
-import syinfo as si
+from syinfo import DeviceInfo, SystemInfo
 
 
 def main():
-    print("JSON:\n", si.export_system_info("json")[:200], "...")
+    # Export device-only info
+    print("JSON (device):\n", DeviceInfo.export("json")[:200], "...")
     try:
-        print("\nYAML:\n", si.export_system_info("yaml")[:200], "...")
+        print("\nYAML (device):\n", DeviceInfo.export("yaml")[:200], "...")
     except Exception as e:
         print("YAML export not available:", e)
-    print("\nCSV:\n", si.export_system_info("csv")[:200], "...")
+
+    # Export combined system info (device + network without scanning)
+    print("\nJSON (system):\n", SystemInfo.export("json")[:200], "...")
 
 
 if __name__ == "__main__":

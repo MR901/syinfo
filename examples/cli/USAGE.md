@@ -1,27 +1,27 @@
 # CLI Usage Examples
 
 ```bash
-# Device info
-syinfo -d
+# Device info (JSON)
+syinfo -d --json | jq '.cpu_info.cores'
 
-# Network info (no device vendor lookup)
-syinfo -n -o
+# Network info (disable vendor lookup)
+syinfo -n --disable-vendor-search
 
-# System info (device + network)
+# System info (device + network summary)
 syinfo -s -t 5
 
-# Monitor for 10s at 2s interval, JSON output
-syinfo -m -t 10 -i 2 -j
+# System monitor (10s at 2s interval)
+syinfo --system-monitor -t 10 -i 2
 
-# Logs: errors about sshd in last 24h, JSON
-syinfo --logs --text "failed" --process sshd --level ERROR --hours 24 -j
+# Process monitor, filter python, JSON
+syinfo --process-monitor --filter python --json | jq '.data_points[0].processes'
+
+# Logs: regex for errors
+syinfo -l --pattern 'error|fail' --json | jq '.[0]'
 
 # Packages: list pip django*
-syinfo --packages --manager pip --name django -j
+syinfo -p --manager pip --name django --json
 
-# Health report
-syinfo --health
-
-# Cross search
-syinfo --search nginx -j
+# Network scan (sudo)
+sudo syinfo -N --json | jq 'to_entries[] | {ip: .key, mac: .value.mac_address, vendor: .value.vendor}'
 ```

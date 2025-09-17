@@ -1,14 +1,26 @@
-"""Basic example: device information in simplified and tree formats."""
+"""Basic example: device information using the new public API."""
 
-import syinfo as si
+from syinfo import DeviceInfo
 
 
 def main():
-    info = si.get_hardware_info()
-    print("CPU model:", info["cpu"]["model"])
-    print("RAM total:", info["memory"]["total"])
-    # Tree print (device only)
-    si.print_system_tree(si.get_complete_info(include_network=False))
+    # Collect device info
+    info = DeviceInfo.get_all()
+
+    # Print a couple of key fields (safe access with fallbacks)
+    cpu_design = (info.get("cpu_info", {}) or {}).get("design", {}) or {}
+    cpu_model = cpu_design.get("model name") or cpu_design.get("model") or "Unknown"
+    mem_total = (
+        (info.get("memory_info", {}) or {})
+        .get("virtual", {})
+        .get("readable", {})
+        .get("total", "Unknown")
+    )
+    print("CPU model:", cpu_model)
+    print("RAM total:", mem_total)
+
+    # Pretty tree print (device only)
+    DeviceInfo.print(info)
 
 
 if __name__ == "__main__":

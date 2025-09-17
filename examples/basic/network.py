@@ -1,17 +1,16 @@
-"""Basic example: network information and device discovery (optional)."""
+"""Basic example: network information and (optional) device discovery."""
 
-import syinfo as si
+from syinfo import NetworkInfo
 
 
 def main():
-    try:
-        info = si.get_network_info(scan_devices=False)
-        print("Hostname:", info.get("hostname"))
-        print("Public IP:", info.get("current_addresses", {}).get("public_ip"))
-        # To scan devices (may require privileges / optional extras):
-        # info = si.get_network_info(scan_devices=True, scan_timeout=5)
-    except Exception as e:
-        print("Network features not available:", e)
+    info = NetworkInfo.get_all(search_period=0, search_device_vendor_too=False)
+    net = info.get("network_info", {})
+    print("Hostname:", net.get("hostname"))
+    print("Public IP:", net.get("current_addresses", {}).get("public_ip"))
+
+    # To scan devices (may require sudo):
+    # info = NetworkInfo.get_all(search_period=5, search_device_vendor_too=True)
 
 
 if __name__ == "__main__":

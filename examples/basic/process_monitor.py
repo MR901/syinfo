@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-"""Example: Process monitoring with string-based filtering.
-
-This example demonstrates how to use ProcessMonitor to monitor specific
-processes based on string matching in their name, command line, or executable path.
-"""
+"""Example: Process monitoring with string-based filtering (updated API)."""
 
 import time
-import syinfo
-from syinfo.resource_monitor.process_monitoring import ProcessMonitor
+from syinfo import ProcessMonitor
 
 
 def example_monitor_python_processes():
     """Monitor all Python processes for 30 seconds."""
-    print("🐍 Monitoring Python processes for 30 seconds...")
+    print("Monitoring Python processes for 30 seconds...")
     print("=" * 60)
     
     # Create monitor for Python processes
@@ -49,7 +44,7 @@ def example_monitor_python_processes():
 
 def example_monitor_with_regex():
     """Monitor processes using regex patterns."""
-    print("\n🔍 Monitoring processes with regex (browser-related) for 20 seconds...")
+    print("\nMonitoring processes with regex (browser-related) for 20 seconds...")
     print("=" * 60)
     
     # Monitor browser processes using regex
@@ -88,7 +83,7 @@ def example_monitor_with_regex():
 
 def example_monitor_with_persistence():
     """Monitor processes with file persistence."""
-    print("\n💾 Monitoring system processes with file persistence...")
+    print("\nMonitoring system processes with file persistence...")
     print("=" * 60)
     
     # Monitor system processes and save to file
@@ -118,33 +113,23 @@ def example_monitor_with_persistence():
 
 
 def example_convenience_function():
-    """Use the convenience function from syinfo module."""
-    print("\n🚀 Using convenience function from syinfo...")
+    """Demonstrate short-lived monitoring without callbacks."""
+    print("\nMonitoring shell processes for 10 seconds...")
     print("=" * 60)
-    
-    # Use the top-level convenience function
-    monitor = syinfo.create_process_monitor(
-        filters=["bash", "zsh", "sh"],
-        interval=3,
-    )
-    
-    print("Monitoring shell processes for 10 seconds...")
-    
+
+    monitor = ProcessMonitor(filters=["bash", "zsh", "sh"], interval=3)
     try:
         monitor.start(duration=10)
-        
         while monitor.is_running:
             time.sleep(1)
-            
-        results = monitor.stop(print_summary=True)
-        
+        _ = monitor.stop(print_summary=True)
     except KeyboardInterrupt:
         print("\nStopping monitor...")
         monitor.stop()
 
 
 if __name__ == "__main__":
-    print("🔍 SyInfo Process Monitor Examples")
+    print("SyInfo Process Monitor Examples")
     print("=" * 60)
     
     try:
@@ -154,9 +139,9 @@ if __name__ == "__main__":
         example_monitor_with_persistence()
         example_convenience_function()
         
-        print("\n✅ All examples completed!")
+        print("\nAll examples completed!")
         
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\nError: {e}")
         import traceback
         traceback.print_exc()

@@ -63,19 +63,25 @@ Contents
 Architecture
 ------------
 
-.. mermaid:: images/diagrams/package-architecture.mmd
+.. image:: images/package-architecture.png
+   :alt: SyInfo Package Architecture
+   :width: 800
 
 The simplified architecture focuses on core functionality without over-engineering.
 
 System Components
 -----------------
 
-.. mermaid:: images/diagrams/system-components.mmd
+.. image:: images/system-components.png
+   :alt: SyInfo System Components
+   :width: 800
 
 Data Flow
 ---------
 
-.. mermaid:: images/diagrams/data-flow.mmd
+.. image:: images/data-flow.png
+   :alt: SyInfo Data Flow
+   :width: 800
 
 Images
 ------

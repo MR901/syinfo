@@ -35,8 +35,9 @@ Quickstart
 CLI - Flag-Based Commands
 -------------------------
 
-.. mermaid:: images/diagrams/cli-workflow.mmd
+.. image:: images/cli-workflow.png
    :alt: CLI Workflow
+   :width: 800
 
 The CLI uses a simple flag-based interface:
 
@@ -123,8 +124,9 @@ Flag       Long Flag                   Description
 Monitoring Examples
 -------------------
 
-.. mermaid:: images/diagrams/monitoring-workflow.mmd
+.. image:: images/monitoring-workflow.png
    :alt: Monitoring Workflow
+   :width: 800
 
 System monitoring workflow:
 

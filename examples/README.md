@@ -5,7 +5,6 @@ Organized, runnable examples covering the full functionality:
 - basic/: quick-start usage (device, system, network)
 - resource_monitor/: system and process monitoring
 - analysis/: log analysis, package inventory
-- general/: export, logger demos
 - cli/: command-line invocations and JSON outputs
 
 ## How to run
@@ -26,9 +25,7 @@ python -m examples.resource_monitor.process_monitor
 python -m examples.analysis.logs
 python -m examples.analysis.packages
 
-python -m examples.general.export
-
-python -m examples.monitoring.simple_monitoring
+``` 
 ```
 
 ## Requirements

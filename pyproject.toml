@@ -50,29 +50,15 @@ dependencies = [
     "GPUtil>=1.4.0",
     "scapy>=2.5.0",
     "py-cpuinfo>=9.0.0",
-    "click>=8.0.0",  # For better CLI experience
-    "rich>=12.0.0",  # For better terminal output
-    "pydantic>=2.0.0",  # For data validation
-]
-
-[project.optional-dependencies]
-monitoring = [
+    "requests>=2.25.0",
     "pandas>=1.5.0",
     "matplotlib>=3.5.0",
     "seaborn>=0.12.0",
     "numpy>=1.21.0",
-]
-network = [
     "paramiko>=2.8.0",
-    "requests>=2.25.0",
 ]
-visualization = [
-    "plotly>=5.0.0",
-    "dash>=2.0.0",
-]
-full = [
-    "syinfo[monitoring,network,visualization]",
-]
+
+[project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -114,7 +100,6 @@ packages = ["syinfo"]
 
 [tool.hatch.build]
 only-include = ["syinfo"]
-force-include = {"syinfo/core/device_info.py" = "syinfo/core/device_info.py"}
 
 [tool.hatch.build.targets.sdist]
 include = [

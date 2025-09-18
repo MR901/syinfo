@@ -1,57 +1,33 @@
 API Reference
 =============
 
-Core Functions
---------------
+Public API
+----------
 
-System Information
-~~~~~~~~~~~~~~~~~~
+Logging
+~~~~~~~
 
-.. autofunction:: syinfo.get_system_info
+.. autoclass:: syinfo.utils.logger.Logger
+   :members: get_logger, get_instance
 
-.. autofunction:: syinfo.get_complete_info
+Monitoring
+~~~~~~~~~~
 
-.. autofunction:: syinfo.get_hardware_info
+.. autoclass:: syinfo.resource_monitor.system_monitor.SystemMonitor
+   :members:
 
-.. autofunction:: syinfo.get_network_info
-
-.. autofunction:: syinfo.discover_network_devices
-
-Display Functions
-~~~~~~~~~~~~~~~~~
-
-.. autofunction:: syinfo.print_system_tree
-
-.. autofunction:: syinfo.print_brief_info
-
-Export Functions
-~~~~~~~~~~~~~~~~
-
-.. autofunction:: syinfo.export_system_info
-
-Feature Detection
-~~~~~~~~~~~~~~~~~
-
-.. autofunction:: syinfo.get_available_features
-
-.. autofunction:: syinfo.print_feature_status
-
-Monitoring Functions (New!)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: syinfo.create_simple_monitor
-
-Create a simple system monitor for real-time performance tracking.
+.. autoclass:: syinfo.resource_monitor.process_monitoring.ProcessMonitor
+   :members:
 
 **Example:**
 
 .. code-block:: python
 
-   import syinfo
+   from syinfo import SystemMonitor
    import time
    
    # Create monitor with 5-second intervals
-   monitor = syinfo.create_simple_monitor(interval=5)
+   monitor = SystemMonitor(interval=5)
    
    # Start monitoring for 60 seconds
    monitor.start(duration=60)
@@ -62,10 +38,10 @@ Create a simple system monitor for real-time performance tracking.
    print(f"Average CPU: {results['summary']['cpu_avg']:.1f}%")
    print(f"Peak Memory: {results['summary']['memory_peak']:.1f}%")
 
-SimpleMonitor Class
+SystemMonitor Class
 ~~~~~~~~~~~~~~~~~~~
 
-The ``SimpleMonitor`` class provides real-time system monitoring capabilities:
+The ``SystemMonitor`` class provides real-time system monitoring capabilities:
 
 **Methods:**
 
@@ -121,10 +97,25 @@ NetworkInfo
 .. autoclass:: syinfo.core.network_info.NetworkInfo
    :members:
 
-SysInfo
-~~~~~~~
+SystemInfo
+~~~~~~~~~~
 
-.. autoclass:: syinfo.core.sys_info.SysInfo
+.. autoclass:: syinfo.core.system_info.SystemInfo
+   :members:
+
+Logging Classes
+---------------
+
+Logger
+~~~~~~
+
+.. autoclass:: syinfo.utils.logger.Logger
+   :members:
+
+LoggerConfig  
+~~~~~~~~~~~~
+
+.. autoclass:: syinfo.utils.logger.LoggerConfig
    :members:
 
 Exceptions
@@ -134,13 +125,9 @@ Exceptions
 
 .. autoexception:: syinfo.exceptions.DataCollectionError
 
-.. autoexception:: syinfo.exceptions.NetworkError
-
 .. autoexception:: syinfo.exceptions.SystemAccessError
 
 .. autoexception:: syinfo.exceptions.ValidationError
-
-.. autoexception:: syinfo.exceptions.ConfigurationError
 
 Constants
 ---------
@@ -155,25 +142,18 @@ Basic System Information:
 
 .. code-block:: python
 
-   import syinfo
+   from syinfo import DeviceInfo, SystemInfo
    
    # Get basic system info
-   info = syinfo.get_system_info()
-   print(f"OS: {info['system_name']}")
-   print(f"CPU: {info['cpu_model']}")
-   
-   # Get complete information
-   complete = syinfo.get_complete_info(include_network=True)
-   
-   # Pretty print system tree
-   syinfo.print_system_tree()
+   info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+   print(f"OS: {info.get('dev_info', {}).get('system')}")
 
 Hardware Details:
 
 .. code-block:: python
 
    # Get hardware information
-   hardware = syinfo.get_hardware_info()
+   hardware = DeviceInfo.get_all()
    
    cpu_info = hardware['cpu']
    memory_info = hardware['memory']
@@ -185,28 +165,28 @@ Network Operations:
 
 .. code-block:: python
 
-   # Discover network devices
-   devices = syinfo.discover_network_devices(timeout=10)
-   
-   for device in devices:
-       print(f"{device['ip']} - {device['hostname']}")
+   # Discover network devices (sudo recommended)
+   from syinfo.core.search_network import search_devices_on_network
+   devices = search_devices_on_network(time=5, seach_device_vendor_too=False)
+   for ip, dev in devices.items():
+       print(f"{ip} - {dev.get('mac_address')}")
 
 Data Export:
 
 .. code-block:: python
 
-   # Export as JSON
-   json_data = syinfo.export_system_info('json')
-   
-   # Export to file
-   syinfo.export_system_info('yaml', output_file='system.yaml')
+   # Export as JSON/YAML
+   from syinfo.utils.export import export_data
+   json_data = export_data(hardware, format='json')
+   yaml_data = export_data(hardware, format='yaml')
 
 System Monitoring:
 
 .. code-block:: python
 
    # Create and start monitor
-   monitor = syinfo.create_simple_monitor(interval=10)
+   from syinfo import SystemMonitor
+   monitor = SystemMonitor(interval=10)
    monitor.start(duration=300)  # 5 minutes
    
    # Wait and get results
@@ -225,15 +205,44 @@ System Monitoring:
        if point['cpu_percent'] > 80:
            print(f"High CPU at {point['timestamp']}: {point['cpu_percent']:.1f}%")
 
+Logging Usage:
+
+.. code-block:: python
+
+   from syinfo import Logger, LoggerConfig
+   import logging
+   
+   # Basic logging
+   logger = Logger.get_logger()
+   logger.info("Application started")
+   
+   # Advanced configuration
+   config = LoggerConfig(
+       log_level=logging.DEBUG,
+       log_files=["app.log"],
+       enable_incident_counting=True,
+       enable_traceback=True
+   )
+   logger = Logger.get_logger(config)
+   
+   # Runtime management
+   logger_instance = Logger.get_instance()
+   stats = logger_instance.get_stats()
+   print(f"Warnings: {stats['warning_count']}")
+
 Error Handling:
 
 .. code-block:: python
 
    from syinfo.exceptions import SystemAccessError, DataCollectionError
+   from syinfo import Logger, SystemInfo
+   
+   logger = Logger.get_logger()
    
    try:
-       info = syinfo.get_system_info()
+       info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+       logger.info("System info collected successfully")
    except SystemAccessError as e:
-       print(f"Permission error: {e}")
+       logger.error(f"Permission error: {e}")
    except DataCollectionError as e:
-       print(f"Collection failed: {e}")
+       logger.error(f"Collection failed: {e}")

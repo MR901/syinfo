@@ -5,6 +5,7 @@ with detailed tree structure output, error handling, type hints, and performance
 """
 
 import glob
+import copy
 import os
 import platform
 import re
@@ -28,11 +29,28 @@ from syinfo.exceptions import (
     SystemAccessError, 
     ValidationError
 )
-from syinfo.core.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error
+from syinfo.utils import Execute, HumanReadable, create_highlighted_heading, handle_system_error, export_data, Logger
+
+# Get logger instance
+logger = Logger.get_logger()
 
 
 class DeviceInfo:
-    """Device information collector with detailed tree output format."""
+    """Comprehensive device information collector.
+    
+    Provides detailed hardware information including CPU, memory, GPU, 
+    disk, and manufacturer details. Uses system interfaces like /proc,
+    /sys, DMI, and external tools to gather comprehensive data.
+    
+    All methods are static for stateless operation and can be called
+    without instantiation. Results include both raw values and 
+    human-readable formatted data.
+    
+    Examples:
+        >>> info = DeviceInfo.get_all()
+        >>> print(info['cpu_info']['design']['model name'])
+        >>> DeviceInfo.print(info)  # Pretty-print tree format
+    """
     
     def __init__(self) -> None:
         """Initialize the device information collector."""
@@ -92,27 +110,47 @@ class DeviceInfo:
     @handle_system_error
     @lru_cache(maxsize=1)
     def _get_cpu_info() -> Dict[str, Any]:
-        """Get detailed CPU information from /proc/cpuinfo.
+        """Get comprehensive CPU information from system interfaces.
+        
+        Reads from /proc/cpuinfo and gathers additional CPU data including
+        frequency information, usage statistics, and core topology. Results
+        are cached to avoid repeated expensive operations.
         
         Returns:
-            Dictionary containing CPU details
+            Dict containing:
+                - design: CPU model, vendor, architecture info
+                - cores: Physical/logical core counts
+                - frequency_Mhz: Current/min/max frequencies  
+                - percentage_used: Current CPU utilization
+                - Raw /proc/cpuinfo data organized by core
+                
+        Raises:
+            SystemAccessError: If /proc/cpuinfo cannot be read
+            
+        Note:
+            Function is cached with LRU cache (maxsize=1) for performance.
+            CPU frequency and usage are live values at time of collection.
         """
         try:
+            logger.debug("Reading CPU information from /proc/cpuinfo")
             cpu_info_raw = Execute.on_shell("cat /proc/cpuinfo")
             if cpu_info_raw == UNKNOWN:
+                logger.warning("Unable to read /proc/cpuinfo - CPU info unavailable")
                 return {"error": "Cannot read /proc/cpuinfo"}
             
-            # Parse CPU info blocks
+            # Parse CPU info into blocks (one per logical core)
             cpu_blocks = [
                 block.strip() for block in cpu_info_raw.split("\n\n") 
                 if block.strip()
             ]
+            logger.debug(f"Found {len(cpu_blocks)} CPU core blocks in /proc/cpuinfo")
             
+            # Consolidate information from all CPU cores
             consolidated_info = {}
-            for block in cpu_blocks:
+            for i, block in enumerate(cpu_blocks):
                 try:
-                    # Convert to YAML-like format for parsing
-                    yaml_block = block.replace("\t", "")
+                    # Convert /proc/cpuinfo format to YAML-parseable format
+                    yaml_block = block.replace("\t", "")  # Remove tabs
                     block_data = yaml.safe_load(yaml_block)
                     
                     if isinstance(block_data, dict):
@@ -426,7 +464,9 @@ class DeviceInfo:
                 _msg += f"\n│       {prefix}       └── {'Percent':<15} {space['percent']} %"
         
         # GPU Information (integrated into tree structure)
-        _msg += "\n├── GPU Information"
+        # As the last top-level section, use "└" and no left vertical prefix.
+        _msg += "\n└── GPU Information"
+        top_prefix = "    "
         
         gpu_map: Dict[str, Any] = info.get("gpu_info", {}) or {}
         if gpu_map:
@@ -464,8 +504,8 @@ class DeviceInfo:
                 is_last_gpu = (i == len(gpu_keys) - 1)
                 gpu_connector = "└" if is_last_gpu else "├"
                 gpu_prefix = " " if is_last_gpu else "│"
-                
-                _msg += f"\n│   {gpu_connector}── {gpu_name}"
+
+                _msg += f"\n{top_prefix}{gpu_connector}── {gpu_name}"
                 
                 if isinstance(gpu_data, dict) and gpu_data:
                     # Get all available fields for this GPU
@@ -477,11 +517,11 @@ class DeviceInfo:
                         field_label = field_labels.get(field, field.title().replace('_', ' '))
                         field_value = format_gpu_value(field, gpu_data[field])
                         
-                        _msg += f"\n│   {gpu_prefix}   {field_connector}── {field_label:<16} {field_value}"
+                        _msg += f"\n{top_prefix}{gpu_prefix}   {field_connector}── {field_label:<16} {field_value}"
                 else:
-                    _msg += f"\n│   {gpu_prefix}   └── Status            No detailed information available"
+                    _msg += f"\n{top_prefix}{gpu_prefix}   └── Status            No detailed information available"
         else:
-            _msg += "\n│   └── Status              No GPU detected"
+            _msg += "\n    └── Status              No GPU detected"
         
         if return_msg:
             return _msg
@@ -667,6 +707,42 @@ class DeviceInfo:
                 "Failed to collect comprehensive system information",
                 original_exception=e
             )
+
+
+    @staticmethod
+    def export(
+        format: str = "json",
+        output_file: Optional[str] = None,
+        include_sensitive: bool = False,
+        info: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Export device information to JSON or YAML.
+
+        Args:
+            format: Export format ("json" or "yaml")
+            output_file: Optional path to write the exported content
+            include_sensitive: Include potentially sensitive fields if True
+            info: Optional pre-collected info dict to export
+
+        Returns:
+            Exported string content
+        """
+        data: Dict[str, Any] = info if info is not None else DeviceInfo.get_all()
+        sanitized: Dict[str, Any] = copy.deepcopy(data)
+
+        if not include_sensitive:
+            try:
+                if isinstance(sanitized.get("dev_info"), dict):
+                    sanitized["dev_info"]["mac_address"] = "***"
+                if isinstance(sanitized.get("network_info"), dict):
+                    sanitized["network_info"]["mac_address"] = "***"
+                    if isinstance(sanitized["network_info"].get("wifi"), dict):
+                        if "password" in sanitized["network_info"]["wifi"]:
+                            sanitized["network_info"]["wifi"]["password"] = "***"
+            except Exception:
+                pass
+
+        return export_data(sanitized, format=format, output_file=output_file)
 
 
 __all__ = ["DeviceInfo"]

@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/syinfo.svg)](https://badge.fury.io/py/syinfo)
 [![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/)
 
-A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, and real-time system monitoring.
+A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, real-time system monitoring, and analysis utilities (log search, package inventory).
 
 ## Key Features
 
@@ -31,23 +31,44 @@ A simple, well-designed Python library for gathering system information includin
 - **Performance Analytics**: Averages, peaks, and trend analysis
 - **Non-blocking**: Background monitoring with graceful interruption
 
-### Powerful CLI Interface
-- **Flag-based Commands**: Easy scripting (`syinfo -npj -t 10 | jq '.summary'`)
+### Powerful CLI Interface + Analysis
+- **Flag-based Commands**: Easy scripting (`syinfo --system-monitor --json -t 10 | jq '.summary'`)
 - **JSON Output**: Native jq compatibility for data processing
 - **Monitoring Support**: Real-time system performance tracking
 - **Flexible Options**: Combine flags for exactly what you need
+- **Log Analysis**: `-l/--logs` with filters (`--pattern`, `--level`, `--limit`)
+- **Package Inventory**: `-p/--packages` with `--manager` and `--name` filters
+
+### Advanced Logging (New!)
+- **Production-Ready**: Sophisticated singleton logger with advanced features
+- **Incident Tracking**: Automatic numbering of warnings and errors
+- **Enhanced Tracebacks**: Beautiful, readable error traces with file context
+- **Multiple Outputs**: Console, files, and system log (syslog) simultaneously
+- **Runtime Configuration**: Dynamic log levels, handler management, statistics
+- **Platform-Aware**: Auto-detects syslog paths for Linux, macOS, and Windows
 
 ## Installation
 
 ```bash
-# Basic installation
 pip install syinfo
+```
 
-# With network discovery features
-pip install syinfo[network]
+### From source (local)
 
-# Full installation (all features)
-pip install syinfo[full]
+```bash
+# Clone and install in editable mode (recommended for development)
+git clone https://github.com/MR901/syinfo.git
+cd syinfo
+python -m venv .venv && source .venv/bin/activate  # optional but recommended
+pip install -e .
+
+# Alternatively, install directly from a local path
+pip install /path/to/syinfo  # installs from sdist/wheel if present
+pip install -e /path/to/syinfo  # editable install from local directory
+
+# Build wheel/sdist locally (optional)
+python -m build
+pip install dist/syinfo-*.whl
 ```
 
 ## Quick Start
@@ -55,20 +76,20 @@ pip install syinfo[full]
 ### Basic Usage
 
 ```python
-import syinfo
+from syinfo import DeviceInfo, SystemInfo
 
 # Get comprehensive system information
-info = syinfo.get_system_info()
-print(f"System: {info['system_name']}")
-print(f"CPU: {info['cpu_model']} ({info['cpu_cores']} cores)")
-print(f"Memory: {info['total_memory']} ({info['memory_usage_percent']:.1f}% used)")
+info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+print(f"Hostname: {info.get('dev_info', {}).get('static_hostname')}")
+print(f"CPU cores: {info.get('cpu_info', {}).get('cores', {}).get('total')}")
 ```
 
 ### Hardware Information
 
 ```python
 # Get detailed hardware info
-hardware = syinfo.get_hardware_info()
+from syinfo import DeviceInfo
+hardware = DeviceInfo.get_all()
 
 print("CPU Information:")
 print(f"  Model: {hardware['cpu']['model']}")
@@ -84,19 +105,19 @@ print(f"  Usage: {hardware['memory']['usage_percent']:.1f}%")
 ### Network Discovery
 
 ```python
-# Discover devices on network
-devices = syinfo.discover_network_devices(timeout=10)
-print(f"Found {len(devices)} devices:")
-
-for device in devices:
-    print(f"  {device['ip']:15} - {device['hostname']} ({device['vendor']})")
+# Discover devices on network (sudo recommended)
+from syinfo.core.search_network import search_devices_on_network
+devices = search_devices_on_network(time=10)
+for ip, dev in (devices or {}).items():
+    print(f"  {ip:15} - {dev.get('mac_address')} ({dev.get('vendor')})")
 ```
 
-### System Monitoring (New!)
+### System Monitoring
 
 ```python
-# Create a simple system monitor  
-monitor = syinfo.create_simple_monitor(interval=5)
+# Create a system monitor
+from syinfo import SystemMonitor
+monitor = SystemMonitor(interval=5)
 
 # Start monitoring for 60 seconds
 monitor.start(duration=60)
@@ -117,49 +138,50 @@ print(f"Data Points Collected: {results['total_points']}")
 syinfo -d
 
 # With JSON output
-syinfo -dj | jq '.cpu_info.model'
+syinfo -d --json | jq '.cpu_info.cores'
 ```
 
 ### Network Operations
 ```bash
 # Network information
-syinfo -n -t 10          # Scan network for 10 seconds
+syinfo -n -t 10          # Network summary (no scan without sudo)
 
 # Network with device info
-syinfo -s -t 15          # Combined system info, 15-second network scan
+syinfo -s                # Combined system info
 
 # JSON output for parsing
-syinfo -nj -t 5 | jq '.network_devices | length'
+syinfo -n --json | jq '.'
 ```
 
-### System Monitoring (New!)
+### System Monitoring
 ```bash
 # Monitor system for 30 seconds, 5-second intervals
-syinfo -m -t 30 -i 5
+syinfo --system-monitor -t 30 -i 5
 
 # JSON monitoring data
-syinfo -mpj -t 60 -i 10 | tail -1 | jq '.summary'
+syinfo --system-monitor --json -t 60 -i 10 | tail -1 | jq '.summary'
 
 # Extract specific metrics
 syinfo -mpj -t 120 -i 15 | tail -1 | jq -r '.summary.cpu_avg'
 
-# Continuous monitoring to file
-syinfo -mpj -t 300 -i 30 | tail -1 > performance.json
+# Visualize monitoring JSONL (Python)
+from syinfo.resource_monitor.visualization import create_monitoring_plot
+create_monitoring_plot("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl")
 ```
 
 ### Advanced CLI Usage
 ```bash
-# Disable output, just get JSON
-syinfo -dpj > device_info.json
+# Disable formatted output, just get JSON
+syinfo -d --json > device_info.json
 
-# Network scan without vendor lookup (faster)
-syinfo -noj -t 5
+# Network scan (sudo) without vendor lookup (faster)
+sudo syinfo -N --disable-vendor-search --json | jq 'keys | length'
 
 # Monitor and process with jq
-syinfo -mpj -t 60 -i 10 | tail -1 | jq '.data_points[].cpu_percent | max'
+syinfo --system-monitor --json -t 60 -i 10 | tail -1 | jq '.data_points[].cpu_percent | max'
 
 # Complex monitoring workflows
-CPU_AVG=$(syinfo -mpj -t 30 -i 5 | tail -1 | jq -r '.summary.cpu_avg')
+CPU_AVG=$(syinfo --system-monitor --json -t 30 -i 5 | tail -1 | jq -r '.summary.cpu_avg')
 if (( $(echo "$CPU_AVG > 80" | bc -l) )); then
   echo "High CPU usage detected: $CPU_AVG%"
 fi
@@ -172,7 +194,10 @@ fi
 | `-d` | `--device` | Show device/hardware information |
 | `-n` | `--network` | Show network information and scan devices |
 | `-s` | `--system` | Show combined device and network information |
-| `-m` | `--monitor` | **Start system monitoring** |
+|       | `--system-monitor` | Start system monitoring |
+|       | `--process-monitor` | Start process-specific monitoring |
+| `-l` | `--logs` | Query system logs (use --pattern/--level/--limit) |
+| `-p` | `--packages` | List installed packages (use --manager/--name) |
 | `-t` | `--time` | Duration in seconds (network scan or monitoring) |
 | `-i` | `--interval` | **Monitoring interval in seconds (default: 5)** |
 | `-p` | `--disable-print` | Suppress formatted output |
@@ -233,17 +258,52 @@ syinfo -mpj -t 300 -i 5 | tail -1 | jq '.data_points[] | select(.cpu_percent > 9
 syinfo -mpj -t 120 -i 10 | tail -1 | jq '.data_points | [.[0], .[-1]] | .[1].network_io.bytes_sent - .[0].network_io.bytes_sent'
 ```
 
+## Advanced Logging
+
+SyInfo includes a production-ready logging system:
+
+```python
+from syinfo import Logger, LoggerConfig
+import logging
+
+# Basic usage
+logger = syinfo.Logger.get_logger()
+logger.info("Application started")
+
+# Advanced configuration
+config = LoggerConfig(
+    log_level=logging.DEBUG,
+    log_files=["app.log", "debug.log"],
+    output_to_stdout=True,
+    verbose_logs=True,           # Include function names and line numbers
+    enable_incident_counting=True, # Number warnings/errors
+    enable_traceback=True,       # Beautiful formatted tracebacks
+    enable_syslog=True           # System log integration
+)
+
+logger = Logger.get_logger(config)
+logger.warning("This will be numbered")  # (incident #1) This will be numbered
+
+# Runtime management
+logger_instance = syinfo.Logger.get_instance()
+stats = logger_instance.get_stats()
+print(f"Warnings: {stats['warning_count']}, Errors: {stats['error_count']}")
+```
+
 ## Error Handling
 
 ```python
 from syinfo.exceptions import SystemAccessError, DataCollectionError
 
+logger = syinfo.Logger.get_logger()
+
 try:
     info = syinfo.get_system_info()
+    logger.info("System info collected successfully")
 except SystemAccessError as e:
-    print(f"Permission error: {e}")
+    logger.error(f"Permission error: {e}")  # Includes traceback if enabled
 except DataCollectionError as e:
-    print(f"Data collection failed: {e}")
+    logger.error(f"Data collection failed: {e}")
 ```
 
 ## Performance & Reliability
@@ -262,7 +322,7 @@ git clone https://github.com/MR901/syinfo.git
 cd syinfo
 python -m venv venv
 source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -e .[dev,full]
+pip install -e .[dev]
 ```
 
 ### Testing
@@ -274,15 +334,22 @@ pytest
 pytest --cov=syinfo --cov-report=html
 
 # Test monitoring functionality
-python -c "import syinfo; m=syinfo.create_simple_monitor(1); m.start(5); import time; time.sleep(6); print(m.stop())"
+python -c "from syinfo import SystemMonitor; m=SystemMonitor(1); m.start(5); import time; time.sleep(6); print(m.stop())"
 ```
 
 ## Examples
 
-Check out the [examples/](examples/) directory for comprehensive usage examples:
-- [API Usage](examples/api_example.py) - Python API examples
-- [CLI Examples](examples/cli_examples.py) - Command line usage
-- [Monitoring Examples](examples/monitoring_example.py) - System monitoring
+Check out the organized [examples/](examples/) directory:
+- Basic: `examples/basic/` (device, system, network, export)
+- Analysis: `examples/analysis/` (logs, packages, system health/search)
+- Monitoring: `examples/monitoring/` (simple monitoring)
+- CLI: `examples/cli/USAGE.md`
+
+Run everything:
+
+```bash
+python -m examples.run_all
+```
 
 ## License
 

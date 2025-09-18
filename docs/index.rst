@@ -1,7 +1,7 @@
 SyInfo Documentation
 ====================
 
-Simple, well-designed system information library with real-time monitoring capabilities.
+Simple, well-designed system information library with real-time monitoring and analysis capabilities (log search, package inventory).
 
 Technical Overview
 ------------------
@@ -27,8 +27,8 @@ Supported Platforms
 Dependencies
 ------------
 
-- Required: psutil, PyYAML, tabulate, getmac, py-cpuinfo, pydantic, rich, click
-- Optional: scapy (network discovery), GPUtil/NVIDIA tools (GPU)
+- Required: psutil, PyYAML, tabulate, getmac, py-cpuinfo
+- Optional: GPUtil/NVIDIA tools (GPU detection)
 
 Key Features
 ------------
@@ -36,6 +36,8 @@ Key Features
 - **Device Information**: Hardware details, CPU, memory, storage
 - **Network Discovery**: Scan and identify devices on your network
 - **System Monitoring**: Real-time performance tracking with JSON export
+- **Analysis**: Log queries, package inventory
+- **Advanced Logging**: Production-ready logging with incident tracking and syslog support
 - **Flexible CLI**: Flag-based commands perfect for scripting and automation
 - **JSON Integration**: Native jq compatibility for data processing
 
@@ -43,7 +45,10 @@ Contents
 --------
 
 - :doc:`usage`
+- :doc:`builder`
 - :doc:`api`
+- :doc:`logging`
+- :doc:`monitoring_with_syinfo`
 - :doc:`publishing`
 
 .. toctree::
@@ -51,25 +56,34 @@ Contents
    :caption: Contents
 
    usage
+   builder
    api
+   logging
+   monitoring_with_syinfo
    publishing
 
 Architecture
 ------------
 
-.. mermaid:: images/diagrams/package-architecture.mmd
+.. image:: images/package-architecture.png
+   :alt: SyInfo Package Architecture
+   :width: 800
 
 The simplified architecture focuses on core functionality without over-engineering.
 
 System Components
 -----------------
 
-.. mermaid:: images/diagrams/system-components.mmd
+.. image:: images/system-components.png
+   :alt: SyInfo System Components
+   :width: 800
 
 Data Flow
 ---------
 
-.. mermaid:: images/diagrams/data-flow.mmd
+.. image:: images/data-flow.png
+   :alt: SyInfo Data Flow
+   :width: 800
 
 Images
 ------

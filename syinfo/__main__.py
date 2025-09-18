@@ -17,8 +17,6 @@ import re
 import sys
 import json
 import argparse
-import json
-import sys
 import textwrap
 import time
 import warnings

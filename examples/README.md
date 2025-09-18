@@ -18,6 +18,7 @@ python -m examples.basic.network
 python -m examples.basic.export
 python -m examples.basic.logger_demo
 python -m examples.basic.process_monitor
+python -m examples.basic.builder
 
 python -m examples.resource_monitor.system_monitor
 python -m examples.resource_monitor.process_monitor

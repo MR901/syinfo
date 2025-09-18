@@ -611,9 +611,11 @@ class SyInfoSystem:
             except ValueError:
                 selected_manager = None
         
+        # Request PackageInfo objects for uniform handling
         packages = pm.list_packages(
             manager=selected_manager,
-            name_filter=self.config.package_analysis.name_filter or ""
+            name_filter=self.config.package_analysis.name_filter or "",
+            as_dict=False,
         )
         
         return {"packages": [

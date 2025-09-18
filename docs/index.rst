@@ -45,6 +45,7 @@ Contents
 --------
 
 - :doc:`usage`
+- :doc:`builder`
 - :doc:`api`
 - :doc:`logging`
 - :doc:`monitoring_with_syinfo`
@@ -55,6 +56,7 @@ Contents
    :caption: Contents
 
    usage
+   builder
    api
    logging
    monitoring_with_syinfo

@@ -109,8 +109,9 @@ class SyInfoConfiguration:
     
     def validate(self) -> None:
         """Validate configuration settings."""
-        if self.network.timeout <= 0:
-            raise ValueError("Network timeout must be positive")
+        # Allow 0 to disable active scanning while still enabling network info
+        if self.network.timeout < 0:
+            raise ValueError("Network timeout must be non-negative")
         if self.monitoring.interval <= 0:
             raise ValueError("Monitoring interval must be positive")
         if self.cache_ttl <= 0:

@@ -218,6 +218,43 @@ Python API
    logger = Logger.get_logger(logger_config)
    logger.info("Application started with syinfo")
 
+Builder Pattern (Fluent API)
+----------------------------
+
+.. code-block:: python
+
+   from syinfo import InfoBuilder
+   import asyncio
+
+   # Basic system collection (cached)
+   system = (InfoBuilder()
+             .include_hardware()
+             .enable_caching(ttl=300)
+             .build())
+   data = system.collect()
+   print(system.summary())
+
+   # Network (async collection, no scanning)
+   async def run():
+       sys2 = (InfoBuilder()
+               .include_hardware()
+               .include_network(timeout=0, include_vendor_info=False)
+               .build())
+       net = await sys2.collect_async(scope="network")
+       print(list(net.get("network_info", {}).keys())[:5])
+
+   asyncio.run(run())
+
+   # Create a monitor via builder
+   sys3 = (InfoBuilder()
+           .include_monitoring(interval=2)
+           .build())
+   mon = sys3.create_monitor()
+   mon.start(duration=6)
+   import time; time.sleep(7)
+   results = mon.stop()
+   print("Total points:", results.get("total_points"))
+
 Screenshots (optional)
 ----------------------
 

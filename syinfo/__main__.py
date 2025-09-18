@@ -17,6 +17,8 @@ import re
 import sys
 import json
 import argparse
+import json
+import sys
 import textwrap
 import time
 import warnings
@@ -538,6 +540,8 @@ def create_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="\033[96mshow network information\033[0m"
     )
+    
+    # Network scanning and monitoring time options
     parser.add_argument(
         "-s", "--system", 
         action="store_true",

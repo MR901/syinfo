@@ -1,13 +1,13 @@
 graph LR
-    %% SyInfo System Components Overview
-    
+    %% SyInfo System Components Overview (Updated)
+
     subgraph "User Interfaces"
         CLI["`**Command Line**
-        syinfo -d -n -s -m
+        syinfo -d -n -s -l -p -N --system-monitor --process-monitor --json
         Flag-based interface`"]
-        
+
         API["`**Python API**
-        import syinfo
+        from syinfo import *
         Programmatic access`"]
     end
     
@@ -23,7 +23,7 @@ graph LR
         🌐 Network Analysis  
         • Interface scanning
         • IP configuration
-        • Device discovery
+        • Device discovery (via search_devices_on_network)
         • WiFi details`"]
         
         SYSTEM["`**Combined Info**
@@ -34,7 +34,7 @@ graph LR
     end
     
     subgraph "Real-time Monitoring"
-        MONITOR["`**Performance Monitor**
+        MONITOR["`**Performance Monitor (SystemMonitor/ProcessMonitor)**
         📊 Live Tracking
         • CPU usage over time
         • Memory consumption
@@ -69,13 +69,13 @@ graph LR
     subgraph "Data Sources"
         PSUTIL["`**psutil**
         System metrics`"]
-        
+
         PROCFS["`**/proc /sys**
         Linux internals`"]
-        
-        SCAPY["`**scapy**
-        Network scanning`"]
-        
+
+        GETMAC["`**getmac**
+        MAC address`"]
+
         GPU_APIS["`**GPU APIs**
         Hardware detection`"]
     end
@@ -116,7 +116,7 @@ graph LR
     PSUTIL --> DEVICE
     PSUTIL --> MONITOR
     PROCFS --> DEVICE
-    SCAPY --> NETWORK
+    GETMAC --> NETWORK
     GPU_APIS --> DEVICE
     
     %% Styling

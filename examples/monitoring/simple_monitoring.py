@@ -3,17 +3,16 @@
 import json
 import time
 
-import syinfo as si
+from syinfo import SystemMonitor
 
 
 def main():
-    monitor = si.create_system_monitor(interval=2, output_path="./monitoring", rotate_max_lines=5)
+    monitor = SystemMonitor(interval=2, keep_in_memory=True)
     monitor.start(duration=6)
     time.sleep(7)
     results = monitor.stop() if monitor.is_running else {
         "total_points": len(monitor.data_points),
         "data_points": monitor.data_points,
-        "summary": monitor._calculate_summary() if monitor.data_points else {},
     }
     print(json.dumps(results, default=str))
 

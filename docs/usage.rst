@@ -7,9 +7,6 @@ Install
 .. code-block:: bash
 
    pip install syinfo
-   # optional extras
-   pip install 'syinfo[network]'
-   pip install 'syinfo[full]'
 
 From source:
 
@@ -25,13 +22,15 @@ Quickstart
 
 .. code-block:: python
 
-   import syinfo
+   from syinfo import DeviceInfo, SystemInfo
 
-   info = syinfo.get_system_info()
-   print('OS:', info['system_name'])
-   print('CPU:', info['cpu_model'])
+   # Device information
+   device = DeviceInfo.get_all()
+   print('CPU model:', device.get('cpu_info', {}).get('design', {}).get('model name'))
 
-   syinfo.print_system_tree()
+   # Combined system info (device + network summary)
+   system = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+   print('Hostname:', system.get('dev_info', {}).get('static_hostname'))
 
 CLI - Flag-Based Commands
 -------------------------
@@ -45,76 +44,81 @@ Device Information:
 
 .. code-block:: bash
 
-   syinfo -d                    # Device/hardware information
-   syinfo -dj | jq '.cpu_info' # Device info as JSON
+   syinfo -d                      # Device/hardware information
+   syinfo -d --json | jq '.cpu_info.cores'  # JSON output
 
 Network Operations:
 
 .. code-block:: bash
 
-   syinfo -n -t 10             # Network scan for 10 seconds
-   syinfo -s -t 15             # Combined system info
-   syinfo -nj -t 5 | jq '.'    # Network info as JSON
+   syinfo -n -t 10               # Network info (summary)
+   syinfo -s                     # Combined system info
+   syinfo -n --json | jq '.'     # Network info as JSON
 
-System Monitoring (NEW!):
-
-.. code-block:: bash
-
-   syinfo -m -t 30 -i 5        # Monitor for 30 seconds, 5-second intervals
-   syinfo -mpj -t 60 -i 10     # Monitoring with JSON output
-   syinfo -mpj -t 120 -i 15 | tail -1 | jq '.summary'
-
-Log Analysis (NEW!):
+System Monitoring:
 
 .. code-block:: bash
 
-   # Query logs (24h) for sshd errors, JSON
-   syinfo --logs --text "failed" --process sshd --level ERROR --hours 24 -j
-   # Regex search
-   syinfo --logs --regex '(timeout|unauthorized)' --hours 48 -j
+   syinfo --system-monitor -t 30 -i 5          # Monitor for 30s, 5s interval
+   syinfo --system-monitor --json -t 60 -i 10  # JSON output
+   syinfo --system-monitor --json -t 120 -i 15 | tail -1 | jq '.summary'
 
-Package Inventory (NEW!):
+Process Monitoring:
+
+.. code-block:: bash
+   syinfo --process-monitor --filter python --json | jq '.data_points[0].processes'
+   syinfo --process-monitor --filter firefox -t 10 -i 1
+   
+
+Log Analysis:
+
+.. code-block:: bash
+
+   # Regex search for errors (limit results)
+   syinfo -l --pattern 'error|fail' --limit 50 --json | jq '.[0]'
+
+Package Inventory:
 
 .. code-block:: bash
 
    # List pip django* and apt python*
-   syinfo --packages --manager pip --name django -j
-   syinfo --packages --manager apt --name python -j
+   syinfo -p --name slack
+   syinfo -p --name sublime --json
+   syinfo -p --manager pip --name pandas
 
-Health & Cross Search (NEW!):
-
-.. code-block:: bash
-
-   syinfo --health
-   syinfo --search nginx -j
-
-Data Export:
+Network Scan (sudo):
 
 .. code-block:: bash
 
-   syinfo -dpj > device_info.json
-   syinfo -mpj -t 300 -i 30 | tail -1 > monitoring_data.json
+   sudo syinfo -N --json | jq 'keys | length'
+
+JSON Output & Printing:
+
+.. code-block:: bash
+
+   syinfo -d --json > device_info.json
+   syinfo --system-monitor --json -t 300 -i 30 | tail -1 > monitoring_data.json
 
 CLI Flag Reference
 ------------------
 
-========== =================== =============================================
-Flag       Long Flag           Description
-========== =================== =============================================
-``-d``     ``--device``        Show device/hardware information
-``-n``     ``--network``       Show network information and scan devices
-``-s``     ``--system``        Show combined device and network information
-``-m``     ``--monitor``       **Start system monitoring**
-``-t``     ``--time``          Duration in seconds (network scan or monitoring)
-``-i``     ``--interval``      **Monitoring interval in seconds (default: 5)**
-``-p``     ``--disable-print`` Suppress formatted output
-``-j``     ``--return-json``   Output as JSON
-``-o``     ``--disable-vendor-search`` Skip vendor lookup (faster)
-``-l``     ``--logs``          Query logs (use text/level/process/regex/hours/limit)
-``-P``     ``--packages``      List packages (use manager/name)
-``-H``     ``--health``        Quick 24h health report
-``-S``     ``--search``        Cross search term (logs + packages)
-========== =================== =============================================
+========== =========================== =============================================
+Flag       Long Flag                   Description
+========== =========================== =============================================
+``-d``     ``--device``                Show device/hardware information
+``-n``     ``--network``               Show network information
+``-s``     ``--system``                Show combined device and network information
+``-t``     ``--time``                  Duration in seconds (monitoring/network scan)
+``-i``     ``--interval``              Monitoring interval in seconds (default: 5)
+``-l``     ``--logs``                  Analyze and search logs (use --pattern, --level, --limit)
+``-p``     ``--packages``              Analyze installed packages (use --manager, --name)
+``-N``     ``--scan-network``          Scan network for devices (requires sudo)
+          ``--system-monitor``         Start real-time system monitoring
+          ``--process-monitor``        Start process-specific monitoring
+          ``--json``                   Output results as JSON
+          ``--disable-print``          Disable formatted output (JSON only)
+          ``--disable-vendor-search``  Skip vendor lookup (faster network scans)
+========== =========================== =============================================
 
 Monitoring Examples
 -------------------
@@ -129,33 +133,33 @@ Basic Monitoring:
 .. code-block:: bash
 
    # Monitor for 60 seconds with 10-second intervals
-   syinfo -m -t 60 -i 10
+   syinfo --system-monitor -t 60 -i 10
    
    # Quick 30-second system check
-   syinfo -m -t 30 -i 5
+   syinfo --system-monitor -t 30 -i 5
 
 JSON Monitoring Data:
 
 .. code-block:: bash
 
    # Get monitoring data as JSON
-   syinfo -mpj -t 120 -i 10 | tail -1 | jq '.summary'
+   syinfo --system-monitor --json -t 120 -i 10 | tail -1 | jq '.summary'
    
    # Extract CPU average
-   syinfo -mpj -t 60 -i 5 | tail -1 | jq -r '.summary.cpu_avg'
+   syinfo --system-monitor --json -t 60 -i 5 | tail -1 | jq -r '.summary.cpu_avg'
    
    # Count data points collected
-   syinfo -mpj -t 30 -i 2 | tail -1 | jq '.total_points'
+   syinfo --system-monitor --json -t 30 -i 2 | tail -1 | jq '.total_points'
 
 Performance Analysis:
 
 .. code-block:: bash
 
    # Save monitoring data to file
-   syinfo -mpj -t 300 -i 30 | tail -1 > performance_data.json
+   syinfo --system-monitor --json -t 300 -i 30 | tail -1 > performance_data.json
    
    # Monitor and alert on high CPU
-   CPU_AVG=$(syinfo -mpj -t 60 -i 10 | tail -1 | jq -r '.summary.cpu_avg')
+   CPU_AVG=$(syinfo --system-monitor --json -t 60 -i 10 | tail -1 | jq -r '.summary.cpu_avg')
    if (( $(echo "$CPU_AVG > 80" | bc -l) )); then
      echo "High CPU usage: $CPU_AVG%"
    fi
@@ -165,19 +169,52 @@ Python API
 
 .. code-block:: python
 
-   import syinfo
+   from syinfo import (
+       DeviceInfo, SystemInfo, NetworkInfo, SystemMonitor, ProcessMonitor,
+       Logger, LoggerConfig
+   )
+   from syinfo.core.search_network import search_devices_on_network
+   from syinfo.analysis.logs import LogAnalyzer, LogAnalysisConfig
+   from syinfo.analysis.packages import PackageManager, PackageManagerType
    
    # Get system information
-   info = syinfo.get_complete_info(include_network=False)
-   hardware = syinfo.get_hardware_info()
+   info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+   hardware = DeviceInfo.get_all()
    
-   # Create and use monitor
-   monitor = syinfo.create_system_monitor(interval=5)
+   # Network information and device discovery
+   network = NetworkInfo.get_all(search_period=0, search_device_vendor_too=False)
+   devices = search_devices_on_network(time=5, search_device_vendor_too=False)
+   
+   # Create and use system monitor
+   monitor = SystemMonitor(interval=5)
    monitor.start(duration=60)
    import time; time.sleep(61)
    results = monitor.stop()
-   
    print(f"CPU Average: {results['summary']['cpu_avg']:.1f}%")
+   
+   # Process monitoring
+   proc_monitor = ProcessMonitor(filters=["python"], interval=10)
+   proc_monitor.start(duration=30)
+   time.sleep(31)
+   proc_results = proc_monitor.stop()
+   
+   # Log analysis
+   log_config = LogAnalysisConfig()
+   analyzer = LogAnalyzer(log_config)
+   log_entries = analyzer.query_logs(text_filter="error", limit=10)
+   
+   # Package management
+   pm = PackageManager()
+   packages = pm.list_packages(name_filter="python", manager=PackageManagerType.APT)
+   
+   # Advanced logging
+   logger_config = LoggerConfig(
+       log_level=20,  # INFO level
+       output_to_stdout=True,
+       enable_incident_counting=True
+   )
+   logger = Logger.get_logger(logger_config)
+   logger.info("Application started with syinfo")
 
 Screenshots (optional)
 ----------------------
@@ -194,9 +231,9 @@ Advanced/Dev
 ------------
 
 - Robust GPU strategy: tries GPUtil, then nvidia-smi, then lspci; prints normalized table.
-- Exports: JSON/YAML/CSV via ``syinfo.export_system_info``.
-- Programmatic: use ``syinfo.get_complete_info(include_network=True)`` for full data.
-- Real-time monitoring: ``syinfo.create_system_monitor(interval=N)`` for system tracking.
+- Export helpers: JSON/YAML via ``syinfo.utils.export.export_data``.
+- Programmatic: use ``SystemInfo.get_all(...)`` for system data.
+- Real-time monitoring: use ``SystemMonitor(interval=N)`` for system tracking.
 - Tests & linting (if dev extras installed)::
 
  .. code-block:: bash

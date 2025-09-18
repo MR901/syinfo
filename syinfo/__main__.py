@@ -162,7 +162,7 @@ def handle_monitoring(args) -> int:
             
             # Get results
             if monitor.is_running:
-                results = monitor.stop()
+                results = monitor.stop(print_summary=not args.json)
             else:
                 results = {
                     "total_points": len(monitor.data_points),
@@ -171,7 +171,7 @@ def handle_monitoring(args) -> int:
                 
         except KeyboardInterrupt:
             warning("Monitoring interrupted by user", json_mode=args.json)
-            results = monitor.stop() if monitor.is_running else {
+            results = monitor.stop(print_summary=not args.json) if monitor.is_running else {
                 "error": "Monitoring interrupted", 
                 "data_points": monitor.data_points
             }
@@ -225,7 +225,7 @@ def handle_process_monitoring(args) -> int:
             
             # Get results
             if monitor.is_running:
-                results = monitor.stop()
+                results = monitor.stop(print_summary=not args.json)
             else:
                 results = {
                     "total_points": len(monitor.data_points),
@@ -234,7 +234,7 @@ def handle_process_monitoring(args) -> int:
                 
         except KeyboardInterrupt:
             warning("Process monitoring interrupted by user", json_mode=args.json)
-            results = monitor.stop() if monitor.is_running else {
+            results = monitor.stop(print_summary=not args.json) if monitor.is_running else {
                 "error": "Process monitoring interrupted",
                 "data_points": monitor.data_points
             }
@@ -303,11 +303,12 @@ def handle_log_analysis(args) -> int:
             info(f"Found {len(entries)} matching log entries", json_mode=args.json)
             
             # Display sample entries
-            for entry in entries[:10]:
-                timestamp = entry.timestamp.strftime("%Y-%m-%d %H:%M:%S") if entry.timestamp else "Unknown"
-                level = entry.level or "INFO"
-                message = entry.message[:80] + "..." if len(entry.message) > 80 else entry.message
-                print(f"{timestamp} | {level:8} | {message}")
+            if not args.json:  # Only show formatted output in non-JSON mode
+                for entry in entries[:10]:
+                    timestamp = entry.timestamp.strftime("%Y-%m-%d %H:%M:%S") if entry.timestamp else "Unknown"
+                    level = entry.level or "INFO"
+                    message = entry.message[:80] + "..." if len(entry.message) > 80 else entry.message
+                    print(f"{timestamp} | {level:8} | {message}")
         
         success("Log analysis completed", json_mode=args.json)
         return 0
@@ -327,12 +328,23 @@ def handle_package_analysis(args) -> int:
         pm = PackageManager()
         manager_filter = None
         
-        # Handle manager filter
+        # Handle manager filter (case-insensitive; accept enum name or value)
         if hasattr(args, 'manager') and args.manager:
+            raw = str(args.manager).strip()
+            parsed = None
             try:
-                manager_filter = PackageManagerType(args.manager.upper())
-                info(f"Filtering by package manager: {args.manager}", json_mode=args.json)
-            except ValueError:
+                # Try by enum NAME (e.g., "APT", "PIP")
+                parsed = PackageManagerType[raw.upper()]
+            except Exception:
+                try:
+                    # Try by enum VALUE (e.g., "apt", "pip")
+                    parsed = PackageManagerType(raw.lower())
+                except Exception:
+                    parsed = None
+            if parsed is not None:
+                manager_filter = parsed
+                info(f"Filtering by package manager: {parsed.value}", json_mode=args.json)
+            else:
                 warning(f"Unknown package manager: {args.manager}", json_mode=args.json)
         
         # Handle name filter
@@ -362,7 +374,7 @@ def handle_package_analysis(args) -> int:
         elif not args.disable_print:
             info(f"Found {len(packages)} packages", json_mode=args.json)
             
-            if packages:
+            if packages and not args.json:  # Only show formatted output in non-JSON mode
                 print(f"\n{'Package Name':30} {'Version':15} {'Architecture':12}")
                 print("-" * 60)
                 for pkg in packages[:20]:  # Show first 20
@@ -410,15 +422,16 @@ def handle_network_scan(args) -> int:
             else:
                 success(f"Found {len(devices_dict)} devices on network", json_mode=args.json)
                 
-                print(f"\n{'IP Address':15} {'MAC Address':18} {'Vendor':30}")
-                print("-" * 65)
-                
-                for ip, device_info in devices_dict.items():
-                    if isinstance(device_info, dict):
-                        mac = device_info.get('mac_address', 'Unknown')
-                        vendor = str(device_info.get('vendor', 'Unknown'))[:29]
-                        ip_clean = ip.split()[0] if ' ' in ip else ip  # Take first IP if multiple
-                        print(f"{ip_clean:15} {mac:18} {vendor:30}")
+                if not args.json:  # Only show formatted output in non-JSON mode
+                    print(f"\n{'IP Address':15} {'MAC Address':18} {'Vendor':30}")
+                    print("-" * 65)
+                    
+                    for ip, device_info in devices_dict.items():
+                        if isinstance(device_info, dict):
+                            mac = device_info.get('mac_address', 'Unknown')
+                            vendor = str(device_info.get('vendor', 'Unknown'))[:29]
+                            ip_clean = ip.split()[0] if ' ' in ip else ip  # Take first IP if multiple
+                            print(f"{ip_clean:15} {mac:18} {vendor:30}")
         
         success("Network scan completed", json_mode=args.json)
         return 0

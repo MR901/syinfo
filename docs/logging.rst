@@ -11,10 +11,10 @@ Basic Usage
 
 .. code-block:: python
 
-   import syinfo
+   from syinfo import Logger
    
    # Get default logger
-   logger = syinfo.Logger.get_logger()
+   logger = Logger.get_logger()
    
    # Use standard logging methods
    logger.debug("Debug information")
@@ -55,8 +55,9 @@ SyInfo's logger uses a singleton pattern, ensuring all parts of your application
 
 .. code-block:: python
 
-   logger1 = syinfo.Logger.get_logger()
-   logger2 = syinfo.Logger.get_logger()
+   from syinfo import Logger
+   logger1 = Logger.get_logger()
+   logger2 = Logger.get_logger()
    
    # Both are the same instance
    assert logger1 is logger2
@@ -68,8 +69,9 @@ Automatically numbers warnings and errors for easier tracking:
 
 .. code-block:: python
 
+   from syinfo import Logger, LoggerConfig
    config = LoggerConfig(enable_incident_counting=True)
-   logger = syinfo.Logger.get_logger(config)
+   logger = Logger.get_logger(config)
    
    logger.warning("First issue")     # (incident #1) First issue
    logger.warning("Second issue")    # (incident #2) Second issue
@@ -82,8 +84,9 @@ Beautiful, readable tracebacks with file context:
 
 .. code-block:: python
 
+   from syinfo import Logger, LoggerConfig
    config = LoggerConfig(enable_traceback=True)
-   logger = syinfo.Logger.get_logger(config)
+   logger = Logger.get_logger(config)
    
    try:
        raise ValueError("Demo error")
@@ -107,11 +110,12 @@ Support for multiple log files with automatic directory creation:
 
 .. code-block:: python
 
+   from syinfo import Logger, LoggerConfig
    config = LoggerConfig(
        log_files=["logs/app.log", "logs/errors.log"],
        truncate_log_files=True  # Clear files on startup
    )
-   logger = syinfo.Logger.get_logger(config)
+   logger = Logger.get_logger(config)
 
 System Logging (Syslog)
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,7 +191,8 @@ Change logger settings after initialization:
 .. code-block:: python
 
    # Get logger instance for advanced operations
-   logger_instance = syinfo.Logger.get_instance()
+   from syinfo import Logger
+   logger_instance = Logger.get_instance()
    
    # Change log level
    logger_instance.set_log_level("DEBUG")
@@ -209,7 +214,8 @@ Track logger usage and performance:
 
 .. code-block:: python
 
-   logger_instance = syinfo.Logger.get_instance()
+   from syinfo import Logger
+   logger_instance = Logger.get_instance()
    
    # Get statistics
    stats = logger_instance.get_stats()
@@ -229,7 +235,8 @@ Control specific handler types:
 
    import logging
    
-   logger_instance = syinfo.Logger.get_instance()
+   from syinfo import Logger
+   logger_instance = Logger.get_instance()
    
    # Remove all file handlers
    logger_instance.remove_handlers_by_type(logging.FileHandler)
@@ -248,7 +255,7 @@ When using SyInfo in your applications:
 .. code-block:: python
 
    # Configure logging early in your application
-   from syinfo import get_logger, LoggerConfig
+   from syinfo import Logger, LoggerConfig
    import logging
    
    # Set up logging before importing other modules
@@ -263,8 +270,8 @@ When using SyInfo in your applications:
    logger.info("Application starting")
    
    # Now use SyInfo functionality
-   import syinfo
-   system_info = syinfo.get_system_info()
+   from syinfo import SystemInfo
+   system_info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
 
 Production Deployment
 ~~~~~~~~~~~~~~~~~~~~~
@@ -274,7 +281,7 @@ Recommended configuration for production:
 .. code-block:: python
 
    import logging.handlers
-   from syinfo import LoggerConfig, get_logger
+   from syinfo import Logger, LoggerConfig
    
    config = LoggerConfig(
        log_level=logging.INFO,  # INFO level for production
@@ -297,7 +304,7 @@ Recommended for development and debugging:
 .. code-block:: python
 
    import logging
-   from syinfo import LoggerConfig, get_logger
+   from syinfo import LoggerConfig, Logger
    
    config = LoggerConfig(
        log_level=logging.DEBUG,  # Show all messages
@@ -318,7 +325,7 @@ With SyInfo Monitoring
 
 .. code-block:: python
 
-   from syinfo import get_logger, LoggerConfig, create_system_monitor
+   from syinfo import Logger, LoggerConfig, SystemMonitor
    import logging
    
    # Configure logger for monitoring
@@ -331,7 +338,7 @@ With SyInfo Monitoring
    
    # Start monitoring with logging
    logger.info("Starting system monitoring")
-   monitor = create_system_monitor(interval=5)
+   monitor = SystemMonitor(interval=5)
    monitor.start(duration=60)
    
    # Monitoring will generate internal log messages
@@ -346,15 +353,15 @@ With Error Handling
 
 .. code-block:: python
 
-   from syinfo import Logger, get_system_info
+   from syinfo import Logger, SystemInfo
    from syinfo.exceptions import SystemAccessError, DataCollectionError
    
    logger = Logger.get_logger()
    
    try:
        logger.info("Collecting system information")
-       info = get_system_info()
-       logger.info(f"Successfully collected info for {info.get('system_name')}")
+       info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+       logger.info(f"Successfully collected info for {info.get('dev_info', {}).get('static_hostname', 'Unknown')}")
        
    except SystemAccessError as e:
        logger.error(f"Permission denied: {e}")

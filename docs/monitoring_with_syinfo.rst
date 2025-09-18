@@ -23,17 +23,17 @@ Quick start: System monitoring
 
 .. code-block:: python
 
-   import syinfo as si
+   from syinfo import SystemMonitor
    from syinfo.resource_monitor.visualization import create_monitoring_plot
 
-   # Persist to ./monitoring as JSONL (one object per line) with rotation
-   mon = si.create_system_monitor(interval=2, output_path="./monitoring", rotate_max_lines=1000)
+   # Create system monitor with 2-second intervals
+   mon = SystemMonitor(interval=2)
    mon.start(duration=60)  # collect for 60 seconds
    import time; time.sleep(61)
-   results = mon.stop()  # also writes a summary JSON next to the JSONL file
+   results = mon.stop()  # returns monitoring data
 
-   # Visualize the JSONL after collection
-   create_monitoring_plot("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl", show=True)
+   # Visualize the collected data
+   create_monitoring_plot(results['data_points'], show=True)
 
 Process snapshots (top-N, grep)
 --------------------------------
@@ -115,7 +115,7 @@ prefer JSONL for crash safety, but CSV is simple to add:
 Visualization
 -------------
 
-- Matplotlib: ``syinfo.resource_monitor.visualization.plot_with_matplotlib(path)``
+- Matplotlib: ``syinfo.resource_monitor.visualization.create_monitoring_plot(path)``
 
 Tips & additions
 ----------------

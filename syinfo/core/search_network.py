@@ -88,41 +88,40 @@ def get_vendor(mac_address: str) -> str:
     return UNKNOWN
 
 
-def search_devices_on_network(time: int = 10, seach_device_vendor_too: bool = True) -> list:
+def search_devices_on_network(time: int = 10, seach_device_vendor_too: bool = True) -> dict:
     """Discover devices on the local network using ARP scanning.
-    
-    Performs ARP sweep of the local network segment to discover active
+
+    Performs an ARP sweep of the local network segment to discover active
     devices. Optionally performs vendor lookup for discovered MAC addresses.
-    
+
     Args:
         time: Scan timeout in seconds (default: 10)
         seach_device_vendor_too: Whether to lookup MAC vendors (default: True)
-        
+
     Returns:
-        List of dictionaries containing discovered devices:
-        - ip: IP address
-        - mac: MAC address 
-        - vendor: Device vendor/manufacturer (if lookup enabled)
-        
-    Raises:
-        SystemError: If elevated privileges are required but not available
-        
-    Note:
-        Requires root/administrator privileges on most systems due to
-        raw socket access. Returns NEED_SUDO string if privileges insufficient.
-        
+        Mapping of IP address to a dictionary with details, for example:
+        {
+          "192.168.1.10": {"mac_address": "aa:bb:cc:dd:ee:ff", "vendor": "..."}
+        }
+
+    Permission handling:
+        On POSIX systems, raw socket operations typically require root. If the
+        current process lacks sufficient privileges, this function returns
+        the sentinel value NEED_SUDO.
+
+    Notes:
         Vendor lookup makes external HTTP requests and may be rate-limited.
-        
+
     Examples:
         >>> devices = search_devices_on_network(time=5, seach_device_vendor_too=False)
-        >>> for device in devices:
-        ...     print(f"Found {device['ip']} ({device['mac']})")
+        >>> for ip, info in devices.items():
+        ...     print(f"Found {ip} ({info.get('mac_address')})")
     """
     logger.info(f"Starting network device discovery (timeout: {time}s, vendor_lookup: {seach_device_vendor_too})")
     
     # Check for required elevated privileges
     plat = platform.system()
-    if ((plat == "Linux") or (plat == "Darwin")) and (os.getuid() == 1000):
+    if ((plat == "Linux") or (plat == "Darwin")) and hasattr(os, "geteuid") and (os.geteuid() != 0):
         logger.warning("Network scanning requires elevated privileges (sudo) on Linux/macOS")
         return NEED_SUDO
 

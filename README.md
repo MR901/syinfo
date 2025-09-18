@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/syinfo.svg)](https://badge.fury.io/py/syinfo)
 [![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/)
 
-A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, real-time system monitoring, and analysis utilities (log search, package inventory, health checks).
+A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, real-time system monitoring, and analysis utilities (log search, package inventory).
 
 ## Key Features
 
@@ -31,14 +31,13 @@ A simple, well-designed Python library for gathering system information includin
 - **Performance Analytics**: Averages, peaks, and trend analysis
 - **Non-blocking**: Background monitoring with graceful interruption
 
-### Powerful CLI Interface + Analysis (New!)
-- **Flag-based Commands**: Easy scripting (`syinfo -npj -t 10 | jq '.summary'`)
+### Powerful CLI Interface + Analysis
+- **Flag-based Commands**: Easy scripting (`syinfo --system-monitor --json -t 10 | jq '.summary'`)
 - **JSON Output**: Native jq compatibility for data processing
 - **Monitoring Support**: Real-time system performance tracking
 - **Flexible Options**: Combine flags for exactly what you need
-- **Log Analysis**: `--logs` with filters (`--text`, `--level`, `--process`, `--regex`, `--hours`, `--limit`)
-- **Package Inventory**: `--packages` with `--manager` and `--name` filters
-- **Health/Search**: `--health` (24h errors/warnings), `--search "term"` (logs + packages)
+- **Log Analysis**: `-l/--logs` with filters (`--pattern`, `--level`, `--limit`)
+- **Package Inventory**: `-p/--packages` with `--manager` and `--name` filters
 
 ### Advanced Logging (New!)
 - **Production-Ready**: Sophisticated singleton logger with advanced features
@@ -51,14 +50,7 @@ A simple, well-designed Python library for gathering system information includin
 ## Installation
 
 ```bash
-# Basic installation
 pip install syinfo
-
-# With network discovery features
-pip install syinfo[network]
-
-# Full installation (all features)
-pip install syinfo[full]
 ```
 
 ### From source (local)
@@ -68,7 +60,7 @@ pip install syinfo[full]
 git clone https://github.com/MR901/syinfo.git
 cd syinfo
 python -m venv .venv && source .venv/bin/activate  # optional but recommended
-pip install -e '.[full]'   # or: pip install -e .
+pip install -e .
 
 # Alternatively, install directly from a local path
 pip install /path/to/syinfo  # installs from sdist/wheel if present
@@ -84,20 +76,20 @@ pip install dist/syinfo-*.whl
 ### Basic Usage
 
 ```python
-import syinfo
+from syinfo import DeviceInfo, SystemInfo
 
 # Get comprehensive system information
-info = syinfo.get_system_info()
-print(f"System: {info['system_name']}")
-print(f"CPU: {info['cpu_model']} ({info['cpu_cores']} cores)")
-print(f"Memory: {info['total_memory']} ({info['memory_usage_percent']:.1f}% used)")
+info = SystemInfo.get_all(search_period=0, search_device_vendor_too=False)
+print(f"Hostname: {info.get('dev_info', {}).get('static_hostname')}")
+print(f"CPU cores: {info.get('cpu_info', {}).get('cores', {}).get('total')}")
 ```
 
 ### Hardware Information
 
 ```python
 # Get detailed hardware info
-hardware = syinfo.get_hardware_info()
+from syinfo import DeviceInfo
+hardware = DeviceInfo.get_all()
 
 print("CPU Information:")
 print(f"  Model: {hardware['cpu']['model']}")
@@ -113,19 +105,19 @@ print(f"  Usage: {hardware['memory']['usage_percent']:.1f}%")
 ### Network Discovery
 
 ```python
-# Discover devices on network
-devices = syinfo.discover_network_devices(timeout=10)
-print(f"Found {len(devices)} devices:")
-
-for device in devices:
-    print(f"  {device['ip']:15} - {device['hostname']} ({device['vendor']})")
+# Discover devices on network (sudo recommended)
+from syinfo.core.search_network import search_devices_on_network
+devices = search_devices_on_network(time=10)
+for ip, dev in (devices or {}).items():
+    print(f"  {ip:15} - {dev.get('mac_address')} ({dev.get('vendor')})")
 ```
 
 ### System Monitoring
 
 ```python
 # Create a system monitor
-monitor = syinfo.create_system_monitor(interval=5, output_path="./monitoring")
+from syinfo import SystemMonitor
+monitor = SystemMonitor(interval=5)
 
 # Start monitoring for 60 seconds
 monitor.start(duration=60)
@@ -146,50 +138,50 @@ print(f"Data Points Collected: {results['total_points']}")
 syinfo -d
 
 # With JSON output
-syinfo -dj | jq '.cpu_info.model'
+syinfo -d --json | jq '.cpu_info.cores'
 ```
 
 ### Network Operations
 ```bash
 # Network information
-syinfo -n -t 10          # Scan network for 10 seconds
+syinfo -n -t 10          # Network summary (no scan without sudo)
 
 # Network with device info
-syinfo -s -t 15          # Combined system info, 15-second network scan
+syinfo -s                # Combined system info
 
 # JSON output for parsing
-syinfo -nj -t 5 | jq '.network_devices | length'
+syinfo -n --json | jq '.'
 ```
 
-### System Monitoring (New!)
+### System Monitoring
 ```bash
 # Monitor system for 30 seconds, 5-second intervals
-syinfo -m -t 30 -i 5
+syinfo --system-monitor -t 30 -i 5
 
 # JSON monitoring data
-syinfo -mpj -t 60 -i 10 | tail -1 | jq '.summary'
+syinfo --system-monitor --json -t 60 -i 10 | tail -1 | jq '.summary'
 
 # Extract specific metrics
 syinfo -mpj -t 120 -i 15 | tail -1 | jq -r '.summary.cpu_avg'
 
 # Visualize monitoring JSONL (Python)
-from syinfo.monitoring.visualization import plot_with_matplotlib
-plot_with_matplotlib("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl")
+from syinfo.resource_monitor.visualization import create_monitoring_plot
+create_monitoring_plot("./monitoring/monitor-YYYYMMDD-HHMMSS.jsonl")
 ```
 
 ### Advanced CLI Usage
 ```bash
-# Disable output, just get JSON
-syinfo -dpj > device_info.json
+# Disable formatted output, just get JSON
+syinfo -d --json > device_info.json
 
-# Network scan without vendor lookup (faster)
-syinfo -noj -t 5
+# Network scan (sudo) without vendor lookup (faster)
+sudo syinfo -N --disable-vendor-search --json | jq 'keys | length'
 
 # Monitor and process with jq
-syinfo -mpj -t 60 -i 10 | tail -1 | jq '.data_points[].cpu_percent | max'
+syinfo --system-monitor --json -t 60 -i 10 | tail -1 | jq '.data_points[].cpu_percent | max'
 
 # Complex monitoring workflows
-CPU_AVG=$(syinfo -mpj -t 30 -i 5 | tail -1 | jq -r '.summary.cpu_avg')
+CPU_AVG=$(syinfo --system-monitor --json -t 30 -i 5 | tail -1 | jq -r '.summary.cpu_avg')
 if (( $(echo "$CPU_AVG > 80" | bc -l) )); then
   echo "High CPU usage detected: $CPU_AVG%"
 fi
@@ -202,11 +194,10 @@ fi
 | `-d` | `--device` | Show device/hardware information |
 | `-n` | `--network` | Show network information and scan devices |
 | `-s` | `--system` | Show combined device and network information |
-| `-m` | `--monitor` | **Start system monitoring** |
-| `-l` | `--logs` | Query system logs (use text/level/process/regex/hours/limit) |
-| `-P` | `--packages` | List installed packages (use manager/name) |
-| `-H` | `--health` | Show 24h health report |
-| `-S` | `--search` | Cross-surface search (logs + packages) |
+|       | `--system-monitor` | Start system monitoring |
+|       | `--process-monitor` | Start process-specific monitoring |
+| `-l` | `--logs` | Query system logs (use --pattern/--level/--limit) |
+| `-p` | `--packages` | List installed packages (use --manager/--name) |
 | `-t` | `--time` | Duration in seconds (network scan or monitoring) |
 | `-i` | `--interval` | **Monitoring interval in seconds (default: 5)** |
 | `-p` | `--disable-print` | Suppress formatted output |
@@ -331,7 +322,7 @@ git clone https://github.com/MR901/syinfo.git
 cd syinfo
 python -m venv venv
 source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -e .[dev,full]
+pip install -e .[dev]
 ```
 
 ### Testing
@@ -343,7 +334,7 @@ pytest
 pytest --cov=syinfo --cov-report=html
 
 # Test monitoring functionality
-python -c "import syinfo; m=syinfo.create_system_monitor(1); m.start(5); import time; time.sleep(6); print(m.stop())"
+python -c "from syinfo import SystemMonitor; m=SystemMonitor(1); m.start(5); import time; time.sleep(6); print(m.stop())"
 ```
 
 ## Examples

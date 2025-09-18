@@ -27,10 +27,6 @@ TestPyPI
    pip install -i https://test.pypi.org/simple/ syinfo \
        --extra-index-url https://pypi.org/simple
 
-   # With extras
-   pip install -i https://test.pypi.org/simple/ 'syinfo[full]' \
-       --extra-index-url https://pypi.org/simple
-
 PyPI
 ----
 

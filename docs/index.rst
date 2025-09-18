@@ -1,7 +1,7 @@
 SyInfo Documentation
 ====================
 
-Simple, well-designed system information library with real-time monitoring and analysis capabilities (log search, package inventory, health checks).
+Simple, well-designed system information library with real-time monitoring and analysis capabilities (log search, package inventory).
 
 Technical Overview
 ------------------
@@ -27,8 +27,8 @@ Supported Platforms
 Dependencies
 ------------
 
-- Required: psutil, PyYAML, tabulate, getmac, py-cpuinfo, pydantic, rich, click
-- Optional: scapy (network discovery), GPUtil/NVIDIA tools (GPU)
+- Required: psutil, PyYAML, tabulate, getmac, py-cpuinfo
+- Optional: GPUtil/NVIDIA tools (GPU detection)
 
 Key Features
 ------------
@@ -36,7 +36,7 @@ Key Features
 - **Device Information**: Hardware details, CPU, memory, storage
 - **Network Discovery**: Scan and identify devices on your network
 - **System Monitoring**: Real-time performance tracking with JSON export
-- **Analysis**: Log queries, package inventory, health checks
+- **Analysis**: Log queries, package inventory
 - **Advanced Logging**: Production-ready logging with incident tracking and syslog support
 - **Flexible CLI**: Flag-based commands perfect for scripting and automation
 - **JSON Integration**: Native jq compatibility for data processing

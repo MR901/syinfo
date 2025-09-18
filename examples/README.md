@@ -2,7 +2,7 @@
 
 Organized, runnable examples covering the full functionality:
 
-- core/: quick-start usage (device, system, network)
+- basic/: quick-start usage (device, system, network)
 - resource_monitor/: system and process monitoring
 - analysis/: log analysis, package inventory
 - general/: export, logger demos
@@ -13,18 +13,22 @@ Organized, runnable examples covering the full functionality:
 Run from project root using module execution so imports resolve correctly:
 
 ```bash
-python -m examples.core.device
-python -m examples.core.system
-python -m examples.core.network
+python -m examples.basic.device
+python -m examples.basic.system
+python -m examples.basic.network
+python -m examples.basic.export
+python -m examples.basic.logger_demo
+python -m examples.basic.process_monitor
 
 python -m examples.resource_monitor.system_monitor
 python -m examples.resource_monitor.process_monitor
 
-python -m examples.analysis.logs_examples
-python -m examples.analysis.packages_examples
+python -m examples.analysis.logs
+python -m examples.analysis.packages
 
 python -m examples.general.export
-python -m examples.basic.logger_demo
+
+python -m examples.monitoring.simple_monitoring
 ```
 
 ## Requirements

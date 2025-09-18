@@ -103,6 +103,23 @@ JSON Output & Printing:
 CLI Flag Reference
 ------------------
 
+========== =========================== =============================================
+Flag       Long Flag                   Description
+========== =========================== =============================================
+``-d``     ``--device``                Show device/hardware information
+``-n``     ``--network``               Show network information
+``-s``     ``--system``                Show combined device and network information
+``-t``     ``--time``                  Duration in seconds (monitoring/network scan)
+``-i``     ``--interval``              Monitoring interval in seconds (default: 5)
+``-l``     ``--logs``                  Analyze and search logs (use --pattern, --level, --limit)
+``-p``     ``--packages``              Analyze installed packages (use --manager, --name)
+``-N``     ``--scan-network``          Scan network for devices (requires sudo)
+          ``--system-monitor``         Start real-time system monitoring
+          ``--process-monitor``        Start process-specific monitoring
+          ``--json``                   Output results as JSON
+          ``--disable-print``          Disable formatted output (JSON only)
+          ``--disable-vendor-search``  Skip vendor lookup (faster network scans)
+========== =========================== =============================================
 
 Monitoring Examples
 -------------------

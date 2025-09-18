@@ -538,8 +538,6 @@ def create_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="\033[96mshow network information\033[0m"
     )
-    
-    # Network scanning and monitoring time options
     parser.add_argument(
         "-s", "--system", 
         action="store_true",

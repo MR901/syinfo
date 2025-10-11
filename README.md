@@ -1,10 +1,17 @@
-# SyInfo - Simple System Information Library
+<div align="center">
+
+<h1>SyInfo - Simple System Information Library</h1>
+
+[![PyPI version](https://badge.fury.io/py/syinfo.svg)](https://badge.fury.io/py/syinfo) [![PyPI Downloads](https://static.pepy.tech/personalized-badge/syinfo?period=total&units=NONE&left_color=GRAY&right_color=BRIGHTGREEN&left_text=downloads)](https://pepy.tech/projects/mcp-plots) [![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=black) ![MacOS](https://img.shields.io/badge/macOS-000000?style=flat&logo=apple&logoColor=white)
+
 <p align="center">
-  <img src="docs/images/logo.png" alt="SyInfo logo - textual art" width="420" />
+  <img src="docs/images/logo.png" alt="SyInfo logo - textual art" width="150" />
 </p>
 
-[![PyPI version](https://badge.fury.io/py/syinfo.svg)](https://badge.fury.io/py/syinfo)
-[![Python versions](https://img.shields.io/pypi/pyversions/syinfo.svg)](https://pypi.org/project/syinfo/)
+</div>
+
+<be>
+
 
 A simple, well-designed Python library for gathering system information including hardware specifications, network configuration, real-time system monitoring, and analysis utilities (log search, package inventory).
 
@@ -45,7 +52,7 @@ A simple, well-designed Python library for gathering system information includin
 - **Enhanced Tracebacks**: Beautiful, readable error traces with file context
 - **Multiple Outputs**: Console, files, and system log (syslog) simultaneously
 - **Runtime Configuration**: Dynamic log levels, handler management, statistics
-- **Platform-Aware**: Auto-detects syslog paths for Linux, macOS, and Windows
+- **Platform-Aware**: Auto-detects syslog paths for Linux, macOS (partial support), and Windows (partial support)
 
 ## Installation
 
@@ -350,10 +357,6 @@ Run everything:
 ```bash
 python -m examples.run_all
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
